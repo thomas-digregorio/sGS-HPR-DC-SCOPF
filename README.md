@@ -82,7 +82,7 @@ bundled HiGHS dual-simplex interface, pytest, and Ruff. A project-local virtual
 environment provides the quality tooling while inheriting the audited
 scientific packages. Standalone `highspy` is not installed.
 
-The target DGX Spark remains reachable over SSH and unchanged:
+The target DGX Spark was audited and remained unchanged during Stage 2:
 
 - Ubuntu 24.04.4 LTS, aarch64;
 - NVIDIA GB10, compute capability 12.1;
@@ -92,7 +92,9 @@ The target DGX Spark remains reachable over SSH and unchanged:
 - no `nvcc` and no installed scientific Python stack.
 
 Stage 2 intentionally did not install packages or run solver code on the DGX.
-Full machine details are in `environment/environment_report.md`.
+Raw machine inventories and access details remain local and are intentionally
+excluded from the public repository. See `environment/README.md` for the
+regeneration and privacy policy.
 
 ## Reproduction fidelity
 
@@ -112,7 +114,7 @@ actually available.
 gpu-dcopf-hpr/
 |-- references/         source paper
 |-- docs/               paper specification, decisions, limits, and reports
-|-- environment/        local and DGX machine-readable audits
+|-- environment/        public package snapshot and local-audit guidance
 |-- src/                production Python package
 |-- tests/              unit, integration, and regression tests
 |-- scripts/            inspection, extraction, and run entry points
