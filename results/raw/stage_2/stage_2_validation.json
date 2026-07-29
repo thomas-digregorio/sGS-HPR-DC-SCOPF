@@ -1,0 +1,775 @@
+{
+  "all_passed": true,
+  "cases": [
+    {
+      "checks": {
+        "formula_dimensions_match": true,
+        "highs_success": true,
+        "independent_physical_validation": true,
+        "ptdf_matches_angle_flows": true,
+        "repeated_highs_solution_deterministic": true,
+        "row_metadata_complete": true,
+        "synthetic_resources_labeled": true
+      },
+      "classification": "Mathematical reproduction on an unmodified public MATPOWER network; no paper-instance claim",
+      "dimensions": {
+        "active_topology_branches": 6,
+        "buses": 5,
+        "generators": 5,
+        "m": 17,
+        "m1": 1,
+        "m2": 16,
+        "n": 15,
+        "nnz_A1": 5,
+        "nnz_A2": 46,
+        "periods": 1,
+        "renewables": 0,
+        "storage": 0,
+        "thermally_constrained_branches": 2
+      },
+      "expected_dimensions": {
+        "m": 17,
+        "m1": 1,
+        "m2": 16,
+        "n": 15
+      },
+      "highs": {
+        "iterations": 2,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 17479.89692538103,
+        "residuals": {
+          "kkt_combined_norm": 9.106319693313691e-14,
+          "paper_normalized_combined_norm": 9.83916822541461e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 7.517239359073906e-17,
+            "stationarity": 6.34825517653462e-17
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 1.1368683772161603e-13,
+            "stationarity": 3.552713678800501e-15
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 1e-07
+        },
+        "status": 0,
+        "x": [
+          40.0,
+          170.0,
+          323.4948462690514,
+          0.0,
+          466.50515373094856,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "y": [
+          39.94273632279095,
+          0.0,
+          0.0,
+          62.32204211082724,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          -2.977358823011187,
+          -1.977358823011187,
+          0.0,
+          0.057263677209050456,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "independent_validation": {
+        "all_values_finite": true,
+        "direct_total_objective": 17479.89692538103,
+        "families": [
+          {
+            "checks": 1,
+            "family": "power_balance",
+            "maximum_violation": 1.1368683772161603e-13,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 2,
+            "family": "line_flow",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 10,
+            "family": "generator_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 20,
+            "family": "reserve_bounds",
+            "maximum_violation": -0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 10,
+            "family": "reserve_headroom_footroom",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 2,
+            "family": "reserve_requirements",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 0,
+            "family": "generator_ramping",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 0,
+            "family": "renewable_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 0,
+            "family": "storage_power_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 0,
+            "family": "storage_energy_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 0,
+            "family": "storage_terminal_energy",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 1,
+            "family": "canonical_equalities",
+            "maximum_violation": 1.1368683772161603e-13,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 16,
+            "family": "canonical_inequalities",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 15,
+            "family": "canonical_box",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          }
+        ],
+        "maximum_ptdf_angle_flow_difference": 5.684341886080802e-14,
+        "objective_constant": 0.0,
+        "objective_difference": 0.0,
+        "passed": true,
+        "total_objective": 17479.89692538103,
+        "variable_objective": 17479.89692538103
+      },
+      "name": "case5_base_t1",
+      "notes": [
+        "The public case5 network and all five linear MATPOWER generation costs are used without modification.",
+        "MATPOWER supplies no paper-compatible reserve requirement or ramp profile, so the one-period base case uses zero reserve requirements and has no inter-period ramp rows.",
+        "Branches with RATE_A=0 remain in the DC topology but are not assigned invented thermal limits."
+      ],
+      "objective": {
+        "canonical_variable_part": 17479.89692538103,
+        "constant": 0.0,
+        "total": 17479.89692538103
+      },
+      "passed": true,
+      "period_results": [
+        {
+          "branch_flow_mw": [
+            249.71676504272747,
+            186.78838868822132,
+            -226.5051537309486,
+            -50.28323495727254,
+            -26.788388688221183,
+            -240.0
+          ],
+          "bus_injection_mw": [
+            210.0,
+            -300.0,
+            23.49484626905138,
+            -400.0,
+            466.50515373094856
+          ],
+          "generation_mw": [
+            40.0,
+            170.0,
+            323.4948462690514,
+            0.0,
+            466.50515373094856
+          ],
+          "load_mw": 1000.0,
+          "period": 0,
+          "renewable_mw": [],
+          "reserve_down_mw": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "reserve_up_mw": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "storage_charge_mw": [],
+          "storage_discharge_mw": []
+        }
+      ],
+      "ptdf_angle_probes": {
+        "maximum_flow_difference_mw": 2.220446049250313e-16,
+        "probes": [
+          {
+            "injection_bus": 1,
+            "maximum_flow_difference_mw": 1.1102230246251565e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 2,
+            "maximum_flow_difference_mw": 2.220446049250313e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 3,
+            "maximum_flow_difference_mw": 1.1102230246251565e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 5,
+            "maximum_flow_difference_mw": 2.220446049250313e-16,
+            "withdrawal_bus": 4
+          }
+        ]
+      },
+      "row_metadata_file": "case5_base_t1_row_metadata.jsonl.gz",
+      "row_metadata_records": 17,
+      "synthetic_extension": false
+    },
+    {
+      "checks": {
+        "formula_dimensions_match": true,
+        "highs_success": true,
+        "independent_physical_validation": true,
+        "ptdf_matches_angle_flows": true,
+        "repeated_highs_solution_deterministic": true,
+        "row_metadata_complete": true,
+        "synthetic_resources_labeled": true
+      },
+      "classification": "Clearly labeled deterministic synthetic extension for exercising the paper's multi-period reserve, ramp, renewable, and storage rows",
+      "dimensions": {
+        "active_topology_branches": 6,
+        "buses": 5,
+        "generators": 5,
+        "m": 49,
+        "m1": 3,
+        "m2": 46,
+        "n": 36,
+        "nnz_A1": 20,
+        "nnz_A2": 148,
+        "periods": 2,
+        "renewables": 1,
+        "storage": 1,
+        "thermally_constrained_branches": 2
+      },
+      "expected_dimensions": {
+        "m": 49,
+        "m1": 3,
+        "m2": 46,
+        "n": 36
+      },
+      "highs": {
+        "iterations": 15,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 16580.003335525525,
+        "residuals": {
+          "kkt_combined_norm": 1.3161926909721957e-13,
+          "paper_normalized_combined_norm": 1.118661378481903e-16,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.4396599904461206e-17,
+            "stationarity": 9.774989880252708e-17
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 1.1368683772161603e-13,
+            "stationarity": 1.0369744555336894e-14
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 1e-07
+        },
+        "status": 0,
+        "x": [
+          40.0,
+          170.0,
+          176.01418117808524,
+          -0.0,
+          466.5051537309486,
+          39.676633743742265,
+          160.0,
+          186.01418117808524,
+          10.0,
+          456.5051537309486,
+          80.0,
+          120.0,
+          0.0,
+          27.80403134722394,
+          32.51933490903385,
+          0.0,
+          0.0,
+          0.0,
+          5.0,
+          10.0,
+          10.0,
+          0.3233662562577351,
+          0.0,
+          10.0,
+          10.0,
+          9.676633743742265,
+          0.0,
+          10.0,
+          10.0,
+          0.0,
+          0.0,
+          10.0,
+          0.0,
+          0.0,
+          10.0,
+          5.0
+        ],
+        "y": [
+          32.84487508046571,
+          47.04059756511619,
+          28.962264150943398,
+          0.0,
+          0.0,
+          34.98052381034339,
+          0.0,
+          0.0,
+          0.0,
+          89.66356041131108,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.11452735441810091,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          2.735849056603783,
+          0.0,
+          7.040597565116187,
+          6.038420005973613,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          -5.954717646022377,
+          -3.9547176460223774,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -75.23479671173459,
+          -77.53412232623563,
+          5.4716981132075535,
+          0.0,
+          0.0,
+          5.471698113207555,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.11452735441810091,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "independent_validation": {
+        "all_values_finite": true,
+        "direct_total_objective": 26580.003335525525,
+        "families": [
+          {
+            "checks": 2,
+            "family": "power_balance",
+            "maximum_violation": 1.1368683772161603e-13,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 4,
+            "family": "line_flow",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 20,
+            "family": "generator_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 40,
+            "family": "reserve_bounds",
+            "maximum_violation": -0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 20,
+            "family": "reserve_headroom_footroom",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 4,
+            "family": "reserve_requirements",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 10,
+            "family": "generator_ramping",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 4,
+            "family": "renewable_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 8,
+            "family": "storage_power_bounds",
+            "maximum_violation": -0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 4,
+            "family": "storage_energy_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 1,
+            "family": "storage_terminal_energy",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 3,
+            "family": "canonical_equalities",
+            "maximum_violation": 1.1368683772161603e-13,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 46,
+            "family": "canonical_inequalities",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          },
+          {
+            "checks": 36,
+            "family": "canonical_box",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 1e-07
+          }
+        ],
+        "maximum_ptdf_angle_flow_difference": 8.526512829121202e-14,
+        "objective_constant": 10000.0,
+        "objective_difference": 3.637978807091713e-12,
+        "passed": true,
+        "total_objective": 26580.00333552553,
+        "variable_objective": 16580.00333552553
+      },
+      "name": "case5_synthetic_extension_t2",
+      "notes": [
+        "Renewable and storage placements and all two-period operating data are synthetic validation inputs, not author data.",
+        "The configuration is explicit and contains no hidden random generation.",
+        "The symmetric 10 MW generator ramp limits force a nonzero storage shift, exercising cumulative and terminal energy equations.",
+        "Its purpose is coverage of Equations 3 through 10, not benchmark equivalence."
+      ],
+      "objective": {
+        "canonical_variable_part": 16580.003335525525,
+        "constant": 10000.0,
+        "total": 26580.00333552553
+      },
+      "passed": true,
+      "period_results": [
+        {
+          "branch_flow_mw": [
+            249.71676504272747,
+            186.78838868822135,
+            -226.50515373094862,
+            59.716765042727495,
+            -66.78838868822118,
+            -240.0
+          ],
+          "bus_injection_mw": [
+            210.0,
+            -190.0,
+            -126.50515373094862,
+            -360.0,
+            466.5051537309486
+          ],
+          "generation_mw": [
+            40.0,
+            170.0,
+            176.01418117808524,
+            -0.0,
+            466.5051537309486
+          ],
+          "load_mw": 900.0,
+          "period": 0,
+          "renewable_mw": [
+            80.0
+          ],
+          "reserve_down_mw": [
+            0.0,
+            10.0,
+            10.0,
+            0.0,
+            0.0
+          ],
+          "reserve_up_mw": [
+            0.0,
+            0.0,
+            5.0,
+            10.0,
+            10.0
+          ],
+          "storage_charge_mw": [
+            32.51933490903385
+          ],
+          "storage_discharge_mw": [
+            0.0
+          ]
+        },
+        {
+          "branch_flow_mw": [
+            227.28813562857502,
+            188.89365184611606,
+            -216.50515373094865,
+            47.28813562857505,
+            -38.89365184611581,
+            -240.0
+          ],
+          "bus_injection_mw": [
+            199.67663374374226,
+            -180.0,
+            -86.18178747469082,
+            -390.0,
+            456.5051537309486
+          ],
+          "generation_mw": [
+            39.676633743742265,
+            160.0,
+            186.01418117808524,
+            10.0,
+            456.5051537309486
+          ],
+          "load_mw": 1000.0,
+          "period": 1,
+          "renewable_mw": [
+            120.0
+          ],
+          "reserve_down_mw": [
+            10.0,
+            0.0,
+            0.0,
+            10.0,
+            5.0
+          ],
+          "reserve_up_mw": [
+            0.3233662562577351,
+            0.0,
+            10.0,
+            10.0,
+            9.676633743742265
+          ],
+          "storage_charge_mw": [
+            0.0
+          ],
+          "storage_discharge_mw": [
+            27.80403134722394
+          ]
+        }
+      ],
+      "ptdf_angle_probes": {
+        "maximum_flow_difference_mw": 2.220446049250313e-16,
+        "probes": [
+          {
+            "injection_bus": 1,
+            "maximum_flow_difference_mw": 1.1102230246251565e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 2,
+            "maximum_flow_difference_mw": 2.220446049250313e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 3,
+            "maximum_flow_difference_mw": 1.1102230246251565e-16,
+            "withdrawal_bus": 4
+          },
+          {
+            "injection_bus": 5,
+            "maximum_flow_difference_mw": 2.220446049250313e-16,
+            "withdrawal_bus": 4
+          }
+        ]
+      },
+      "row_metadata_file": "case5_synthetic_extension_t2_row_metadata.jsonl.gz",
+      "row_metadata_records": 49,
+      "synthetic_extension": true
+    }
+  ],
+  "environment": {
+    "highs_interface": "scipy.optimize.linprog(method='highs-ds')",
+    "highspy_installed": false,
+    "numpy": "2.4.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "precision": "FP64",
+    "python": "3.13.5",
+    "scipy": "1.16.3"
+  },
+  "network_source": {
+    "active_generators": 5,
+    "active_topology_branches": 6,
+    "buses": 5,
+    "local_path": "data\\raw\\matpower\\case5.m",
+    "name": "case5",
+    "reference_bus": 4,
+    "sha256": "ed9072089d080debde2aa029ed8a95491c311b08ff4f45ad7bf06882d86fe279",
+    "thermally_constrained_branches": 2,
+    "upstream_blob": "b6370ab230ac5346023d23be20d973a81f09e12a",
+    "upstream_project": "MATPOWER/matpower",
+    "upstream_release": "8.1",
+    "upstream_url": "https://github.com/MATPOWER/matpower/blob/8.1/data/case5.m"
+  },
+  "stage": 2
+}

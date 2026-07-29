@@ -1,0 +1,68 @@
+Stage 2 command record
+Date: 2026-07-29
+Precision: FP64
+
+Source inspection
+-----------------
+PDF pages 3, 4, and 12 were rendered and visually checked for Equations
+(1)-(17) and the Equation (55) equality structure.
+
+The public network was fetched from the immutable MATPOWER 8.1 tag:
+https://github.com/MATPOWER/matpower/blob/8.1/data/case5.m
+Upstream blob: b6370ab230ac5346023d23be20d973a81f09e12a
+Checked-in SHA-256:
+ed9072089d080debde2aa029ed8a95491c311b08ff4f45ad7bf06882d86fe279
+
+Targeted Stage 2 tests
+----------------------
+Command:
+./.venv/Scripts/python.exe -m pytest -q tests/unit/test_network_data.py tests/unit/test_ptdf.py tests/unit/test_dcopf_model.py tests/integration/test_stage2_dcopf.py
+
+Result:
+17 passed
+
+Full Python test suite
+----------------------
+Command:
+./.venv/Scripts/python.exe -m pytest -q
+
+Result:
+59 passed
+
+Evidence generation
+-------------------
+Command:
+./.venv/Scripts/python.exe scripts/build_dcopf.py
+
+Result:
+all_passed=true
+case5_base_t1 dimensions=(15, 1, 16), total objective=17479.89692538103
+case5_synthetic_extension_t2 dimensions=(36, 3, 46), total objective=26580.00333552553
+maximum physical violation=1.1368683772161603e-13
+maximum unit-transfer PTDF/angle difference=2.220446049250313e-16 MW
+
+Stage evidence check
+--------------------
+Command:
+./.venv/Scripts/python.exe scripts/check_stage_2.py --output results/raw/stage_2/stage_2_checks.json
+
+Result:
+passed=true, 9/9 checks passed
+
+Quality checks
+--------------
+Commands:
+./.venv/Scripts/python.exe -m ruff check .
+./.venv/Scripts/python.exe -m ruff format --check .
+
+Result:
+PASS
+
+Dashboard checks
+----------------
+Commands:
+npm run build
+node --test tests/rendered-html.test.mjs
+
+Result:
+PASS

@@ -1,0 +1,244 @@
+# Reproduction limits and evidence gaps
+
+## Status
+
+This register separates what the manuscript actually specifies from what would
+have to be recovered, derived, or transparently reconstructed. It was prepared
+for Stage 0 on 2026-07-29.
+
+**Current conclusion:** an exact numerical recreation of the paper's benchmark
+tables cannot be claimed from the available information. The project can target
+a mathematical reproduction first and, if exact experimental inputs remain
+unavailable, a clearly labeled structural reconstruction.
+
+The supplied source is a 17-page accepted/prepublished manuscript. A current
+institutional record identifies the final article as IEEE Transactions on Power
+Systems, volume 41, issue 3, pages 2187-2204, May 2026, DOI
+10.1109/TPWRS.2025.3635652, and provides an accepted-manuscript copy:
+[PolyU institutional record](https://ira.lib.polyu.edu.hk/handle/10397/117738?mode=full).
+The local PDF remains the primary mathematical specification for this project.
+
+## Classification vocabulary
+
+- **Explicitly specified:** printed directly in the paper.
+- **Derivable:** follows uniquely from printed equations or tables.
+- **Referenced elsewhere:** delegated to a cited work or public project.
+- **Ambiguous:** more than one defensible interpretation remains.
+- **Missing:** needed for the intended claim but not supplied or linked.
+
+These categories describe evidence availability, not the importance of an item.
+
+## 1. What is explicitly specified
+
+| Detail | Paper evidence | Reproduction consequence |
+|---|---|---|
+| Optimization model | Eqs. (1)-(16) | The stated multi-period LP can be implemented. |
+| Algorithm order | Algorithms 1-2 and Eqs. (17)-(50) | A correctness-oriented CPU method can be built without inventing update order. |
+| Variable counts | Table I plus \(n=T(3N_G+N_{RG}+2N_{ESS})\) | Published variable dimensions are reproducible. |
+| Constraint families | Eqs. (1)-(10) | Published constraint dimensions are derivable. |
+| Test-system aggregate counts | Table I | Bus, branch, conventional-generator, RG, and ESS counts are known. |
+| Matrix dimensions and nnz | Table II | Reconstructed matrices can be compared structurally. |
+| Reported timings | Table II | Values can be preserved as paper results, not treated as independently verified measurements. |
+| GPU hardware | NVIDIA A100-SXM4-80GB | The paper platform is known and differs from the DGX Spark target. |
+| CUDA and Gurobi versions | CUDA 12.3; Gurobi 12.0.0 | Software headlines are known, but not full dependency or driver builds. |
+| CPU comparison machine | Intel i9-14900HX, 24 cores, 96 GB; Gurobi cap 80 GB | Hardware is known, but GPU and CPU runs are not from one controlled platform. |
+| Sparse/kernel choices | CSR; cuSPARSE `CUSPARSE_SPMV_CSR_ALG2`; 256 threads per block | The reported low-level direction can be benchmarked later. |
+| Preconditioning headline | 10 Ruiz iterations, Pock-Chambolle diagonal preconditioning, \(\alpha=1\) | The sequence is known; implementation details still require cited sources. |
+| \(b,c\) normalization | Divide by \(\|b\|+1\) and \(\|c\|+1\) | The manuscript supports norm-based, not elementwise, normalization. |
+| Initial penalty | Cold start, \(\sigma=1\) | A fixed-\(\sigma\) baseline is supported. |
+| Restart frequency | Check every 100 iterations | Frequency is known; criterion and state update are not. |
+| Termination | Eq. (54), \(\epsilon=5\times10^{-5}\) | The three stopping blocks can be reproduced. |
+| Time limit | 3,600 seconds | Failure/timeout classification can match the paper's cap. |
+
+## 2. What is derivable
+
+| Detail | Derivation | Validation |
+|---|---|---|
+| Variable order | Eq. (55) and objective/constraint blocks imply \((p_G,p_{RG},p^{dc},p^{ch},r^u,r^d)\). | Recorded in `paper_specification.md`. |
+| Equality rows | Eq. (1) contributes \(T\); Eq. (9) contributes \(N_{ESS}\). | \(m_1=T+N_{ESS}\). |
+| Inequality rows | Split Eqs. (2), (4)-(6), and (8) into \(\ge\) rows. | \(m_2=2TN_L+(4T-2)N_G+2TN_{ESS}+2T\). |
+| Total rows | Add \(m_1+m_2\). | \(m=2TN_L+(4T-2)N_G+(2T+1)N_{ESS}+3T\). |
+| Objective coefficient blocks | Expand Eqs. (12)-(14) and remove constants. | Absolute objective comparisons must restore dropped constants. |
+| Storage-row time structure | Eq. (8) is cumulative; Eq. (9) couples the complete horizon. | Determines lower-triangular inequality blocks and low-rank equality coupling. |
+| Box projection | Eqs. (33)-(34). | \(\bar x=\Pi_C[x+\sigma(A^Ty-c)]\). |
+| \(y_2\) diagonalization | Eqs. (47)-(50). | \(\lambda=\|A_2\|_2^2\) makes \(A_2A_2^T+\mathcal S_2=\lambda I\). |
+
+The derived dimension formulas exactly reproduce case1354 T4, case2868 T16,
+and case9241 T6 from Table II. That validates row counting, not the unpublished
+numerical inputs or matrix entries.
+
+## 3. Details referenced elsewhere
+
+### Public base-network cases
+
+The paper names three cases but gives no repository, release, commit, or file
+hash. Current MATPOWER source files exist for:
+
+- [case1354pegase](https://github.com/MATPOWER/matpower/blob/master/data/case1354pegase.m)
+- [case2868rte](https://github.com/MATPOWER/matpower/blob/master/data/case2868rte.m)
+- [case9241pegase](https://github.com/MATPOWER/matpower/blob/master/data/case9241pegase.m)
+
+These are viable public base cases for a later provenance-controlled
+reconstruction. They are not proof of which MATPOWER release or modifications
+the authors used. Stage 7 must pin a commit, record hashes, and reconcile every
+count before using them as benchmark inputs.
+
+### HPR-LP restart and penalty strategy
+
+The paper says its adaptive penalty update is similar to HPR-LP [43] and refers
+to HPR-LP and PDLP for restart details. HPR-LP is now publicly documented and
+implemented:
+
+- [official HPR-LP project page](https://www.polyu.edu.hk/ama/ior/HPR-LP.html)
+- [PolyU-IOR/HPR-LP source repository](https://github.com/PolyU-IOR/HPR-LP)
+
+This makes the cited strategy inspectable in Stage 5. It does not automatically
+prove that the DCOPF implementation used the same revision, defaults, or
+state-update details. The exact HPR-LP commit used by Wang et al. is not stated.
+
+PDLP is also available in the
+[Google OR-Tools repository](https://github.com/google/or-tools), but the
+paper does not identify an OR-Tools revision or state which PDLP restart
+variant was transferred to sGS-HPR.
+
+### Pock-Chambolle preconditioning
+
+The paper cites Pock and Chambolle [59] for diagonal preconditioning. The exact
+formula must be taken from that source and reconciled with the implemented
+matrix orientation in Stage 5. The name of the method alone is insufficient.
+
+## 4. Ambiguous or internally inconsistent details
+
+| Detail | Ambiguity | Required resolution |
+|---|---|---|
+| Equality-row count | Eq. (55), Eq. (9), and Table II imply \(T+N_{ESS}\); Appendix A claims \(T(1+N_{ESS})\). | Follow the table-consistent Eq. (55) structure and retain the discrepancy as an erratum. |
+| Proposition 5 signs | Eq. (43) is a minus rank-one update, while Eqs. (39)/(44)/(45) print a plus-update inverse pattern. | Compare every structural solve with a direct solve before acceptance. |
+| Conventional-generator box | Eq. (4) plus nonnegative reserve implies generator bounds, while compact prose says all variable bounds belong to \(C\). | Test explicit and implied-bound splits; document the selected projection. |
+| "Security-constrained" label | The model has base-case line limits but no outage or contingency index. | Reproduce it as base-case DCOPF; keep N-1 constraints out of Stages 0-9. |
+| Simultaneous ESS charge/discharge | No binary or complementarity constraint prohibits it. | Preserve the LP as written; do not add a mixed-integer restriction. |
+| Objective comparison | Eq. (15) omits constants from Eqs. (12)-(13). | Restore constants when comparing absolute objective values. |
+| Five "independent" runs | Deterministic SpMV is stated, but no random source is described. | Treat the reported average objective error as incompletely specified. |
+| Gurobi baseline | Fastest of primal simplex, dual simplex, and barrier is reported on separate hardware. | Preserve as a paper result; use a separate controlled baseline for new speedup claims. |
+
+## 5. Missing information required for exact numerical reproduction
+
+### Network and device construction
+
+| Required detail | Status | Why it matters |
+|---|---|---|
+| Exact case source, release, commit, and hashes | Missing | MATPOWER cases can change across releases and may have been modified. |
+| Renewable-generator bus locations | Missing | Changes PTDF columns, congestion, objective, and nnz patterns. |
+| ESS bus locations | Missing | Changes both line-flow and storage-coupling matrix entries. |
+| Conventional generator filtering or aggregation | Missing | Affects \(N_G\), costs, bounds, and ramp rows. |
+| Inactive branch treatment | Missing | Alters \(N_L\), connectivity, PTDF, and nnz. |
+| Inactive bus/generator treatment | Missing | Alters balance, costs, and case dimensions. |
+| Transformer taps and phase-shifter treatment | Missing | Alters DC susceptance and shift factors. |
+| Islands and reference/slack bus | Missing | Determines PTDF construction and numerical rank. |
+| PTDF sign convention and sparsification threshold | Missing | Changes matrix signs and reported nnz. |
+| Base-MVA and unit-conversion procedure | Not fully specified | Needed to reproduce physical bounds and objective scale. |
+
+### Time-series and physical parameters
+
+| Required detail | Status | Why it matters |
+|---|---|---|
+| Load profiles for every horizon | Missing | Defines \(b_1\), line-flow offsets, and congestion. |
+| Renewable availability profiles | Missing | Defines time-varying renewable bounds and curtailment. |
+| Reserve requirement series \(SRU(t),SRD(t)\) | Missing | Defines system reserve rows. |
+| Generator ramp rates used in experiments | Missing | Defines reserve bounds and inter-period constraints. |
+| ESS initial energy, lower/upper capacity | Missing | Defines cumulative-energy right-hand sides. |
+| ESS charge/discharge power limits | Missing | Defines box \(C\). |
+| ESS efficiencies | Missing | Defines equality, energy rows, and loss costs. |
+| Interval duration \(\Delta t\) | Symbolic only | Scales ramping and storage equations. |
+| Renewable and ESS penalty coefficients | Missing | Defines objective tradeoffs. |
+| Generation-cost modifications | Missing | Public case costs may not match experimental costs. |
+| Random seeds or deterministic placement rules | Missing | Prevents regeneration of added RG/ESS fleets. |
+
+### Algorithm and numerical implementation
+
+| Required detail | Status | Why it matters |
+|---|---|---|
+| Adaptive-\(\sigma\) formula and thresholds | Missing from this paper; referenced elsewhere | Materially changes iteration count and Table IV timing. |
+| Restart criterion, merit function, and restart state | Missing from this paper; referenced elsewhere | Materially changes convergence path. |
+| \(\lambda_{\max}(A_2A_2^T)\) estimation method | Missing | An underestimate may invalidate \(\mathcal S_2\succeq0\); estimator cost affects timing. |
+| Safety factor for spectral estimate | Missing | Affects both validity and step size. |
+| Floating-point precision | Missing | FP32, FP64, or mixed precision can alter residuals and throughput. |
+| Reduction order and norm implementation | Missing | Affects reproducibility near stopping thresholds. |
+| Sparse transpose storage and format details | Missing | Affects memory, kernel choice, and timing. |
+| Full dependency and driver versions | Missing | CUDA 12.3 alone is not a reproducible software environment. |
+| Exact initialization vectors | "Cold start" stated, values not printed | Needed for trajectory-level equality. |
+| Complete solver settings | Missing | Competitor defaults and preprocessing can change results. |
+
+### Timing boundary
+
+The paper does not say whether reported solving time includes:
+
+- network and matrix construction;
+- PTDF computation;
+- Ruiz scaling and Pock-Chambolle preprocessing;
+- spectral estimation;
+- CUDA context initialization;
+- JIT or kernel compilation;
+- device allocation;
+- host-to-device transfer;
+- residual checks and synchronization;
+- device-to-host transfer;
+- warm-up runs.
+
+It also does not report repetition-level times, variance, or the exact
+aggregation used for each Table II cell. Consequently, paper timing values can
+be quoted, but a new DGX Spark run cannot be labeled a timing reproduction
+unless a compatible boundary is established.
+
+## 6. Source-code availability decision
+
+The manuscript and its institutional article record do not link a
+paper-specific sGS-HPR/DCOPF source repository. Targeted searches by exact title
+and algorithm name did not locate one as of 2026-07-29. This is an
+evidence-of-search statement, not proof that private or newly released code
+does not exist.
+
+Related HPR-LP source code is public and useful for investigating the cited
+restart and penalty rules, but it is a general Julia LP solver, not the
+paper-specific DCOPF data-construction and CUDA implementation.
+
+## 7. Defensible reproduction classifications
+
+### Exact reproduction
+
+Requires the authors' complete numerical inputs, construction choices,
+algorithmic rules, precision, code revision, and a defensibly comparable
+environment. **Not currently possible from available evidence.**
+
+### Mathematical reproduction
+
+Implements the printed LP, Algorithm 2, closed-form updates, and Eq. (54);
+validates against independent LP solutions on available data. **Current primary
+target for Stages 1-6.**
+
+### Structural reproduction
+
+Uses pinned public base cases plus a published, deterministic protocol for
+placing and parameterizing RGs/ESSs and time series; compares dimensions,
+sparsity, correctness, and scaling without claiming identical instances.
+**Likely benchmark target if author data remain unavailable.**
+
+### Approximate benchmark reconstruction
+
+Attempts to approach published dimensions or timing trends with disclosed
+differences. It must never be presented as an exact timing or data
+reproduction.
+
+## 8. Locked follow-up plan
+
+1. Stage 1: validate generic LP mathematics independently of power-system data.
+2. Stage 2: pin a small public network source and make every PTDF and indexing
+   choice explicit.
+3. Stage 3: implement fixed-\(\sigma\), no-restart CPU Algorithm 2.
+4. Stage 4: resolve Proposition 5 empirically against direct solves.
+5. Stage 5: inspect pinned HPR-LP/PDLP and preconditioning sources before adding
+   any adaptive formula.
+6. Stage 7: pin public MATPOWER case commits/hashes and decide exact versus
+   structural benchmark status before running published-scale experiments.
+7. At every stage: preserve missing items as missing rather than tuning
+   synthetic values to match the paper's times.
+

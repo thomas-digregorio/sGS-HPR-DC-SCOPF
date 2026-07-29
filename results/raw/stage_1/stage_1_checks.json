@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_one_paths",
+      "passed": true
+    },
+    {
+      "detail": "True",
+      "name": "reference_comparison_passed",
+      "passed": true
+    },
+    {
+      "detail": "cases=['analytic_toy', 'box_bound_active', 'inequality_inactive', 'planted_random']",
+      "name": "four_required_reference_cases",
+      "passed": true
+    },
+    {
+      "detail": "x=[0.3999329098101237, 0.5999755506840911], objective=1.3998413703043386",
+      "name": "analytic_toy_solution",
+      "passed": true
+    },
+    {
+      "detail": "rows=74984",
+      "name": "convergence_trajectories_preserved",
+      "passed": true
+    },
+    {
+      "detail": "none present",
+      "name": "no_premature_stage_two_implementation",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "stage": 1
+}

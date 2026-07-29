@@ -1,0 +1,47 @@
+Stage 0 environment package inventory
+Collected: 2026-07-29 UTC
+Source: local_environment.json and dgx_spark_environment.json
+This is an observed inventory, not a dependency lock file.
+
+Package / component       Local Windows                       DGX Spark
+------------------------  ----------------------------------  ---------------------------
+Python                    3.13.5                              3.12.3
+pip                       25.1                                24.0
+NumPy                     2.2.6                               NOT INSTALLED
+SciPy                     1.16.3                              NOT INSTALLED
+highspy                   NOT INSTALLED                       NOT INSTALLED
+CuPy                      13.5.1 (cupy-cuda12x; GPU works)    NOT INSTALLED
+PyTorch                   2.9.1+cu128 (IMPORT FAILS)          NOT INSTALLED
+Numba                     0.61.2 (CUDA probe ImportError)     NOT INSTALLED
+JAX                       NOT INSTALLED                       NOT INSTALLED
+jaxlib                    NOT INSTALLED                       NOT INSTALLED
+Triton                    NOT INSTALLED                       NOT INSTALLED
+gurobipy                  NOT INSTALLED                       NOT INSTALLED
+pandas                    2.3.3                               NOT INSTALLED
+Polars                    NOT INSTALLED                       NOT INSTALLED
+Matplotlib                3.10.1                              NOT INSTALLED
+pytest                    8.4.2                               NOT INSTALLED
+ruff                      NOT INSTALLED                       NOT INSTALLED
+psutil                    7.0.0                               5.9.8
+pynvml / nvidia-ml-py     NOT INSTALLED                       NOT INSTALLED
+
+System tool / runtime     Local Windows                       DGX Spark
+------------------------  ----------------------------------  ---------------------------
+Git                       2.51.0.windows.1                    2.43.0
+NVIDIA driver             592.01                              580.173.02
+CUDA supported by driver  13.1                                13.0
+CUDA runtime (libcudart)  12.1                                13.0
+CUDA compiler (nvcc)      12.1                                NOT INSTALLED / NOT ON PATH
+
+Gurobi status
+-------------
+Local: gurobipy is not installed, so no license can be initialized.
+DGX:   gurobipy is not installed, so no license can be initialized.
+No license path, credential, server address, or license-error text was recorded.
+
+Local PyTorch status
+--------------------
+Package metadata reports PyTorch 2.9.1+cu128, but a clean child-process import
+exits with OpenMP error 15 because libomp.dll and libiomp5md.dll conflict. The
+unsafe KMP_DUPLICATE_LIB_OK workaround was not used. Treat PyTorch as unusable
+in this environment until it is rebuilt in a clean project environment.

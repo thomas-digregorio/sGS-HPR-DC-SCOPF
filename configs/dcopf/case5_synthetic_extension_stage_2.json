@@ -1,0 +1,69 @@
+{
+  "name": "case5_synthetic_extension_t2",
+  "classification": "Clearly labeled deterministic synthetic extension for exercising the paper's multi-period reserve, ramp, renewable, and storage rows",
+  "synthetic_extension": true,
+  "periods": 2,
+  "interval_hours": 1.0,
+  "load_multipliers": [
+    0.9,
+    1.0
+  ],
+  "reserve_up_mw": [
+    25.0,
+    30.0
+  ],
+  "reserve_down_mw": [
+    20.0,
+    25.0
+  ],
+  "generator_ramp_up_mw_per_hour": [
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0
+  ],
+  "generator_ramp_down_mw_per_hour": [
+    10.0,
+    10.0,
+    10.0,
+    10.0,
+    10.0
+  ],
+  "renewable_penalty_per_mwh": 50.0,
+  "storage_loss_penalty_per_mwh": 5.0,
+  "renewables": [
+    {
+      "id": "rg_bus_2",
+      "bus_id": 2,
+      "minimum_mw": [
+        0.0,
+        0.0
+      ],
+      "maximum_mw": [
+        80.0,
+        120.0
+      ]
+    }
+  ],
+  "storage": [
+    {
+      "id": "ess_bus_3",
+      "bus_id": 3,
+      "initial_energy_mwh": 100.0,
+      "minimum_energy_mwh": 50.0,
+      "maximum_energy_mwh": 150.0,
+      "maximum_charge_mw": 50.0,
+      "maximum_discharge_mw": 50.0,
+      "charge_efficiency": 0.95,
+      "discharge_efficiency": 0.9
+    }
+  ],
+  "cost_mode": "matpower_exact_linear",
+  "notes": [
+    "Renewable and storage placements and all two-period operating data are synthetic validation inputs, not author data.",
+    "The configuration is explicit and contains no hidden random generation.",
+    "The symmetric 10 MW generator ramp limits force a nonzero storage shift, exercising cumulative and terminal energy equations.",
+    "Its purpose is coverage of Equations 3 through 10, not benchmark equivalence."
+  ]
+}

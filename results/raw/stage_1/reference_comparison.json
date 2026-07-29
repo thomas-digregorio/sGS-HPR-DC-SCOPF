@@ -1,0 +1,522 @@
+{
+  "all_passed": true,
+  "cases": [
+    {
+      "checks": {
+        "all_values_finite": true,
+        "deterministic_repeated_run": true,
+        "highs_kkt_reference_valid": true,
+        "hpr_converged": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true
+      },
+      "comparison": {
+        "maximum_primal_violation": 9.153950578522085e-05,
+        "minimum_inequality_multiplier": 0.5000213199653659,
+        "scaled_objective_gap": 6.609570652562254e-05,
+        "solution_error_inf": 6.709018987632875e-05
+      },
+      "description": "Required analytic LP with one active inequality.",
+      "dimensions": {
+        "m1": 1,
+        "m2": 1,
+        "n": 2
+      },
+      "expected": {
+        "objective": 1.4,
+        "x": [
+          0.4,
+          0.6
+        ]
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 1.4000000000000001,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 2.748343596947334e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.748343596947334e-17,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.551115123125783e-17,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.4,
+          0.6000000000000001
+        ],
+        "y": [
+          1.5,
+          0.5
+        ],
+        "z": [
+          0.0,
+          0.0
+        ]
+      },
+      "hpr": {
+        "converged": true,
+        "iterations": 17887,
+        "objective": 1.3998413703043386,
+        "proximal_operator": {
+          "lambda_max": 2.0,
+          "margin": 2e-08,
+          "minimum_eigenvalue": 1.999999987845058e-08,
+          "tau": 2.00000002
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.00012367956174094184,
+          "paper_normalized_combined_norm": 5.464965879920296e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.999682738486528e-05,
+            "stationarity": 2.2065866362263847e-05
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.00010098378707549692,
+            "stationarity": 7.14066435307118e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "x": [
+          0.3999329098101237,
+          0.5999755506840911
+        ],
+        "y": [
+          1.5000457702244583,
+          0.5000213199653659
+        ],
+        "z": [
+          0.0,
+          0.0
+        ]
+      },
+      "name": "analytic_toy",
+      "passed": true,
+      "provenance_seed": null
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "deterministic_repeated_run": true,
+        "highs_kkt_reference_valid": true,
+        "hpr_converged": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true
+      },
+      "comparison": {
+        "maximum_primal_violation": 9.996501001219293e-05,
+        "minimum_inequality_multiplier": null,
+        "scaled_objective_gap": 0.0,
+        "solution_error_inf": 9.996501001222069e-05
+      },
+      "description": "Unique optimum on an upper box bound with no inequality rows.",
+      "dimensions": {
+        "m1": 1,
+        "m2": 0,
+        "n": 2
+      },
+      "expected": {
+        "objective": -0.75,
+        "x": [
+          0.75,
+          0.25
+        ]
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": -0.75,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 0.0,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.75,
+          0.25
+        ],
+        "y": [
+          -0.0
+        ],
+        "z": [
+          -1.0,
+          0.0
+        ]
+      },
+      "hpr": {
+        "converged": true,
+        "iterations": 2501,
+        "objective": -0.75,
+        "proximal_operator": {
+          "lambda_max": 2.0,
+          "margin": 2e-08,
+          "minimum_eigenvalue": 1.999999987845058e-08,
+          "tau": 2.00000002
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.00014137099007157844,
+          "paper_normalized_combined_norm": 7.068549503579178e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.998250500609647e-05,
+            "stationarity": 4.998188073462708e-05
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 9.996501001219293e-05,
+            "stationarity": 9.996376146925417e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "x": [
+          0.75,
+          0.24990003498998778
+        ],
+        "y": [
+          9.996376146138185e-05
+        ],
+        "z": [
+          -1.000099962506913,
+          0.0
+        ]
+      },
+      "name": "box_bound_active",
+      "passed": true,
+      "provenance_seed": null
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "deterministic_repeated_run": true,
+        "highs_kkt_reference_valid": true,
+        "hpr_converged": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true
+      },
+      "comparison": {
+        "maximum_primal_violation": 2.4999997627617176e-09,
+        "minimum_inequality_multiplier": 0.0,
+        "scaled_objective_gap": 0.0,
+        "solution_error_inf": 2.49999987378402e-09
+      },
+      "description": "The inequality has 0.3 slack and a zero multiplier at the optimum.",
+      "dimensions": {
+        "m1": 1,
+        "m2": 1,
+        "n": 2
+      },
+      "expected": {
+        "objective": 0.25,
+        "x": [
+          0.25,
+          0.75
+        ]
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 0.25,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 0.0,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.25,
+          0.75
+        ],
+        "y": [
+          -0.0,
+          0.0
+        ],
+        "z": [
+          1.0,
+          0.0
+        ]
+      },
+      "hpr": {
+        "converged": true,
+        "iterations": 4,
+        "objective": 0.25,
+        "proximal_operator": {
+          "lambda_max": 2.0,
+          "margin": 2e-08,
+          "minimum_eigenvalue": 1.999999987845058e-08,
+          "tau": 2.00000002
+        },
+        "residuals": {
+          "kkt_combined_norm": 4.677071472480679e-09,
+          "paper_normalized_combined_norm": 2.2600627947445177e-09,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 1.096190706471043e-09,
+            "stationarity": 1.976423479731739e-09
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.4999997627617176e-09,
+            "stationarity": 3.952846959463478e-09
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "x": [
+          0.25,
+          0.7500000024999999
+        ],
+        "y": [
+          1.2500000354143123e-09,
+          0.0
+        ],
+        "z": [
+          0.9999999950000001,
+          0.0
+        ]
+      },
+      "name": "inequality_inactive",
+      "passed": true,
+      "provenance_seed": null
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "deterministic_repeated_run": true,
+        "highs_kkt_reference_valid": true,
+        "hpr_converged": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true
+      },
+      "comparison": {
+        "maximum_primal_violation": 0.00019817337177285843,
+        "minimum_inequality_multiplier": 0.0,
+        "scaled_objective_gap": 0.00018716906045014917,
+        "solution_error_inf": 7.389772674598616e-05
+      },
+      "description": "Seeded feasible LP with planted active multipliers, four inequality slacks, and a full-rank active system.",
+      "dimensions": {
+        "m1": 2,
+        "m2": 4,
+        "n": 5
+      },
+      "expected": {
+        "objective": -1.8143841970570846,
+        "x": [
+          -1.0,
+          1.0,
+          0.2,
+          -0.3,
+          0.4
+        ]
+      },
+      "highs": {
+        "iterations": 5,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": -1.814384197057085,
+        "residuals": {
+          "kkt_combined_norm": 2.2887833992611187e-16,
+          "paper_normalized_combined_norm": 5.4138187484941973e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.4138187484941973e-17,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.5589376332604516e-16,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          -1.0,
+          1.0,
+          0.1999999999999986,
+          -0.3000000000000019,
+          0.39999999999999847
+        ],
+        "y": [
+          -0.2421934113292546,
+          -2.1790290101297867,
+          0.699999999999996,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          0.4000000000000026,
+          -0.49999999999999667,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "hpr": {
+        "converged": true,
+        "iterations": 54592,
+        "objective": -1.814910962702994,
+        "proximal_operator": {
+          "lambda_max": 12.128937334283899,
+          "margin": 1.21289373342839e-07,
+          "minimum_eigenvalue": 1.212893732949194e-07,
+          "tau": 12.128937455573272
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.0002460083774932465,
+          "paper_normalized_combined_norm": 5.066351861125543e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.9984139703732647e-05,
+            "stationarity": 8.269092825138857e-06
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.00023625891832748436,
+            "stationarity": 6.857000297149561e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "x": [
+          -1.0,
+          1.0,
+          0.19998857406059842,
+          -0.30001634249611137,
+          0.400073897726746
+        ],
+        "y": [
+          -0.2422004222789241,
+          -2.179012005441243,
+          0.7000592430460515,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          0.3999495344722708,
+          -0.5000334242207984,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "name": "planted_random",
+      "passed": true,
+      "provenance_seed": 20260729
+    }
+  ],
+  "configuration": {
+    "kkt_combined_target": 0.00025,
+    "max_iterations": 100000,
+    "maximum_primal_violation": 0.00025,
+    "maximum_scaled_objective_gap": 0.0002,
+    "paper_tolerance": 5e-05,
+    "precision": "float64",
+    "random_seed": 20260729,
+    "sigma": 1.0
+  },
+  "environment": {
+    "highs_interface": "scipy.optimize.linprog(method='highs-ds')",
+    "highspy_installed": false,
+    "numpy": "2.4.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "python": "3.13.5",
+    "scipy": "1.16.3"
+  },
+  "stage": 1,
+  "trajectory_file": "hpr_trajectories.jsonl.gz"
+}

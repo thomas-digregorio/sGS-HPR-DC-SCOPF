@@ -1,0 +1,56 @@
+{
+  "checks": [
+    {
+      "detail": "references\\AnEfficientGPU-basedHalpernAccelerating.pdf",
+      "name": "source_pdf_exists",
+      "passed": true
+    },
+    {
+      "detail": "7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4",
+      "name": "source_pdf_hash",
+      "passed": true
+    },
+    {
+      "detail": "17",
+      "name": "source_pdf_page_count",
+      "passed": true
+    },
+    {
+      "detail": "complete",
+      "name": "equations_1_to_55_indexed",
+      "passed": true
+    },
+    {
+      "detail": "complete",
+      "name": "algorithms_indexed",
+      "passed": true
+    },
+    {
+      "detail": "m=20192, n=4208",
+      "name": "dimension_case1354_T4",
+      "passed": true
+    },
+    {
+      "detail": "m=163823, n=37952",
+      "name": "dimension_case2868_T16",
+      "passed": true
+    },
+    {
+      "detail": "m=230376, n=37050",
+      "name": "dimension_case9241_T6",
+      "passed": true
+    },
+    {
+      "detail": "complete",
+      "name": "required_stage_zero_paths",
+      "passed": true
+    },
+    {
+      "detail": "none present",
+      "name": "no_premature_solver_implementation",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "stage": 0
+}

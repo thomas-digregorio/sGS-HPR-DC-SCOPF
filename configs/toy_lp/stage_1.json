@@ -1,0 +1,10 @@
+{
+  "sigma": 1.0,
+  "paper_tolerance": 5e-05,
+  "kkt_combined_target": 0.00025,
+  "maximum_primal_violation": 0.00025,
+  "maximum_scaled_objective_gap": 0.0002,
+  "max_iterations": 100000,
+  "random_seed": 20260729,
+  "precision": "float64"
+}

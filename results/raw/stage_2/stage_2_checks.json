@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_two_paths",
+      "passed": true
+    },
+    {
+      "detail": "True",
+      "name": "stage_two_validation_passed",
+      "passed": true
+    },
+    {
+      "detail": "cases=['case5_base_t1', 'case5_synthetic_extension_t2']",
+      "name": "base_and_synthetic_extension_present",
+      "passed": true
+    },
+    {
+      "detail": "{'case5_base_t1': {'n': 15, 'm1': 1, 'm2': 16, 'm': 17}, 'case5_synthetic_extension_t2': {'n': 36, 'm1': 3, 'm2': 46, 'm': 49}}",
+      "name": "dimension_formulas",
+      "passed": true
+    },
+    {
+      "detail": "one record per A1/A2 row",
+      "name": "row_metadata_complete",
+      "passed": true
+    },
+    {
+      "detail": "all physical families passed",
+      "name": "independent_physical_validation",
+      "passed": true
+    },
+    {
+      "detail": "maximum difference at most 1e-10 MW",
+      "name": "ptdf_matches_angle_flows",
+      "passed": true
+    },
+    {
+      "detail": "{'active_generators': 5, 'active_topology_branches': 6, 'buses': 5, 'local_path': 'data\\\\raw\\\\matpower\\\\case5.m', 'name': 'case5', 'reference_bus': 4, 'sha256': 'ed9072089d080debde2aa029ed8a95491c311b08ff4f45ad7bf06882d86fe279', 'thermally_constrained_branches': 2, 'upstream_blob': 'b6370ab230ac5346023d23be20d973a81f09e12a', 'upstream_project': 'MATPOWER/matpower', 'upstream_release': '8.1', 'upstream_url': 'https://github.com/MATPOWER/matpower/blob/8.1/data/case5.m'}",
+      "name": "public_case_provenance",
+      "passed": true
+    },
+    {
+      "detail": "none present",
+      "name": "no_premature_stage_three_implementation",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "stage": 2
+}

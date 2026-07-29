@@ -1,0 +1,51 @@
+Stage 1 command and validation log
+Date: 2026-07-29
+
+Environment
+-----------
+Python: 3.13.5
+NumPy: 2.4.1
+SciPy: 1.16.3
+HiGHS interface: scipy.optimize.linprog(method="highs-ds")
+Standalone highspy: absent
+Ruff: 0.16.0 in .venv
+Precision: FP64
+DGX execution: not performed in Stage 1
+
+Principal commands
+------------------
+python -m venv --system-site-packages .venv
+.venv\Scripts\python.exe -m pip install "ruff>=0.11"
+.venv\Scripts\python.exe -m ruff format .
+.venv\Scripts\python.exe -m ruff check --fix .
+.venv\Scripts\python.exe -m ruff check .
+.venv\Scripts\python.exe -m ruff format --check .
+.venv\Scripts\python.exe -m pytest -q
+python scripts\run_toy_lp.py
+python scripts\check_stage_1.py --output results\raw\stage_1\stage_1_checks.json
+python -m compileall -q src scripts
+npm run build
+node --test tests\rendered-html.test.mjs
+
+Final results
+-------------
+pytest: PASS, 42 passed in 17.27s
+ruff check: PASS
+ruff format --check: PASS, 28 files already formatted
+compileall: PASS
+reference comparison: PASS, 4 of 4 LPs
+exact repeated-run determinism: PASS, 4 of 4 LPs
+convergence trajectories: PASS, 74,984 JSONL rows
+Stage 1 evidence checker: PASS, 6 of 6 checks
+dashboard build: PASS
+dashboard rendered-output tests: PASS, 2 passed
+
+Recoverable events
+------------------
+The first sandboxed Ruff download could not access the package index. The
+approved retry installed Ruff only into the project-local .venv.
+
+The first dashboard build encountered a Windows file lock while the local
+development server held dist/.openai/hosting.json. The server was verified,
+stopped, and the unchanged source rebuilt successfully.
+

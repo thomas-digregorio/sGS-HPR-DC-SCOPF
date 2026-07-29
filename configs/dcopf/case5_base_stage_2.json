@@ -1,0 +1,40 @@
+{
+  "name": "case5_base_t1",
+  "classification": "Mathematical reproduction on an unmodified public MATPOWER network; no paper-instance claim",
+  "synthetic_extension": false,
+  "periods": 1,
+  "interval_hours": 1.0,
+  "load_multipliers": [
+    1.0
+  ],
+  "reserve_up_mw": [
+    0.0
+  ],
+  "reserve_down_mw": [
+    0.0
+  ],
+  "generator_ramp_up_mw_per_hour": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "generator_ramp_down_mw_per_hour": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "renewable_penalty_per_mwh": 0.0,
+  "storage_loss_penalty_per_mwh": 0.0,
+  "renewables": [],
+  "storage": [],
+  "cost_mode": "matpower_exact_linear",
+  "notes": [
+    "The public case5 network and all five linear MATPOWER generation costs are used without modification.",
+    "MATPOWER supplies no paper-compatible reserve requirement or ramp profile, so the one-period base case uses zero reserve requirements and has no inter-period ramp rows.",
+    "Branches with RATE_A=0 remain in the DC topology but are not assigned invented thermal limits."
+  ]
+}

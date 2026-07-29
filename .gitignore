@@ -1,0 +1,93 @@
+# Python environments and caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+pytest-of-*/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Numerical and benchmark artifacts
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/matpower/
+!data/raw/matpower/**
+data/processed/*
+!data/processed/.gitkeep
+data/generated/*
+!data/generated/.gitkeep
+results/raw/*
+!results/raw/.gitkeep
+!results/raw/stage_0/
+!results/raw/stage_0/**
+!results/raw/stage_1/
+!results/raw/stage_1/**
+!results/raw/stage_2/
+!results/raw/stage_2/**
+results/processed/*
+!results/processed/.gitkeep
+results/plots/*
+!results/plots/.gitkeep
+results/tables/*
+!results/tables/.gitkeep
+logs/*
+!logs/.gitkeep
+!logs/stage_0/
+!logs/stage_0/**
+!logs/stage_1/
+!logs/stage_1/**
+!logs/stage_2/
+!logs/stage_2/**
+artifacts/*
+!artifacts/.gitkeep
+
+# Large matrices and array dumps
+*.npy
+*.npz
+*.mtx
+*.parquet
+
+# Locally supplied reference papers
+references/*.pdf
+
+# CUDA and GPU caches
+.nv/
+.cuda/
+.cupy/
+*.cubin
+*.ptx
+
+# Solver and license material
+gurobi.log
+*.log
+*.lic
+
+# Dashboard build/runtime output
+dashboard/node_modules/
+dashboard/.next/
+dashboard/dist/
+dashboard/.wrangler/
+dashboard/.sites-dev*.log
+
+# Public-repository privacy boundary
+environment/*_environment.json
+environment/environment_report.md
+logs/stage_0/*
+!logs/stage_0/README.md
+dashboard/.openai/hosting.json
