@@ -46,17 +46,17 @@ Only one stage is executed at a time:
 | 10 | Optional N-1 SCOPF research extension |
 
 Every stage ends with tests, a report, preserved evidence, and an acceptance
-decision. To start Stage 5 after reviewing Stage 4, send exactly:
+decision. To start Stage 6 after reviewing Stage 5, send exactly:
 
 ```text
-APPROVE STAGE 4 AND RUN STAGE 5
+APPROVE STAGE 5 AND RUN STAGE 6
 ```
 
 Casual phrases such as "continue" or "looks good" are not stage approval.
 
 ## Current status
 
-Stage 4 is complete and the project is stopped at the Stage 5 gate.
+Stage 5 is complete and the project is stopped at the Stage 6 gate.
 
 Validated capabilities now include:
 
@@ -80,17 +80,26 @@ Validated capabilities now include:
 - cancellation-resistant treatment of near-degenerate storage structure;
 - measured synthetic structural speedups and a disclosed empirical complexity
   study;
+- a reversible sparse preprocessing pipeline with 10 simultaneous Ruiz
+  iterations, one Pock-Chambolle step at alpha 1, and post-diagonal
+  normalization of the complete `b` and `c` vectors;
+- exact scaled/original state, LP-data, residual, and objective identities;
+- a sourced HPR-LP restart policy with a forced first restart and policy checks
+  every 100 iterations;
+- an adaptive penalty update evaluated in the general sGS metric;
+- fixed/adaptive and restart/no-restart control ablations;
+- unscaled, normalization-only, Ruiz, and full-preconditioning ablations;
 - three-way spectral cross-checks for the projected inequality update;
 - Equation (54) checks on every intermediate iterate;
 - HiGHS, KKT, objective, and physical comparisons on six cases;
 - deterministic repeated trajectories with explicit timing boundaries.
 
 See `docs/project_state.md` for the authoritative gate state and
-`docs/stage_reports/stage_4_report.md` for acceptance evidence.
+`docs/stage_reports/stage_5_report.md` for acceptance evidence.
 
 ## Environment snapshot
 
-Stage 4 ran locally with Python 3.13.5, NumPy 2.4.1, SciPy 1.16.3, SciPy's
+Stage 5 ran locally with Python 3.13.5, NumPy 2.4.1, SciPy 1.16.3, SciPy's
 bundled HiGHS dual-simplex interface, pytest, and Ruff. A project-local virtual
 environment provides the quality tooling while inheriting the audited
 scientific packages. Standalone `highspy` is not installed.
@@ -104,7 +113,7 @@ The target DGX Spark was audited and remained unchanged during Stage 3:
 - CPython 3.12.3;
 - no `nvcc` and no installed scientific Python stack.
 
-Stage 4 intentionally did not install packages or run solver code on the DGX.
+Stage 5 intentionally did not install packages or run solver code on the DGX.
 Raw machine inventories and access details remain local and are intentionally
 excluded from the public repository. See `environment/README.md` for the
 regeneration and privacy policy.
@@ -113,8 +122,10 @@ regeneration and privacy policy.
 
 Exact paper data are not yet known to be available. In particular, the
 manuscript does not fully identify device placements, time series, several
-physical parameters, adaptive penalty and restart formulas, numerical
-precision, or timing boundaries.
+physical parameters, the exact adaptive-penalty and restart implementation,
+numerical precision, or timing boundaries. Stage 5 therefore pins the
+published HPR-LP v0.1.0 policy as a sourced reconstruction and does not claim
+that it is identical to the authors' unpublished DCOPF code.
 
 Until the required inputs are recovered, this project will not claim exact
 numerical reproduction. Results will be labeled as exact, mathematical,
@@ -142,7 +153,7 @@ gpu-dcopf-hpr/
 Production solver logic belongs in `src/gpu_dcopf_hpr/`, not only in notebooks.
 Raw validation outputs are preserved under `results/raw/stage_N/`.
 
-## Stage 4 checks
+## Stage 5 checks
 
 From this directory:
 
@@ -150,8 +161,7 @@ From this directory:
 ./.venv/Scripts/python.exe -m pytest -q
 ./.venv/Scripts/ruff.exe check .
 ./.venv/Scripts/ruff.exe format --check .
-./.venv/Scripts/python.exe scripts/run_stage_4.py
-./.venv/Scripts/python.exe scripts/check_stage_4.py --output results/raw/stage_4/stage_4_checks.json
+./.venv/Scripts/python.exe scripts/run_stage_5.py
 ```
 
 The dashboard has its own production build and rendered-output test:
@@ -162,8 +172,8 @@ npm run build
 node --test tests/rendered-html.test.mjs
 ```
 
-These commands reproduce the local Stage 4 evidence; they do not begin Stage 5
-or Stage 6.
+These commands reproduce the local Stage 5 CPU evidence; they do not begin
+Stage 6 or execute code on the DGX Spark.
 
 ## Research rules in one minute
 

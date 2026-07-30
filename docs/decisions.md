@@ -368,3 +368,101 @@ its original rationale should remain reviewable.
   dispatch, allocation, cache, and memory-bandwidth effects. The failed
   solve-only fits remain in the Stage 4 log and report; they are not relabeled
   as proof of linear wall time.
+
+## D-0034 - Pin the published HPR-LP policy boundary
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Reconstruct restart behavior from HPR-LP v0.1.0 at commit
+  `1941fbcfbf2dae14e4a439b22f0ea1e1c05f4a29` and reconstruct adaptive sigma
+  from the published HPR-LP Eqs. (15)-(18). Audit the current HPR-LP commit
+  separately for source drift, but do not adopt its later extra heuristics.
+- **Reason:** The DCOPF manuscript delegates these details and does not publish
+  its implementation. A fixed historical source plus published equations is
+  reproducible; silently following a moving repository is not.
+
+## D-0035 - Use simultaneous diagonal steps in the printed order
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Apply 10 simultaneous Ruiz row/column infinity-norm steps, one
+  simultaneous Pock-Chambolle row/column L1 step with alpha 1, and then
+  normalize the complete diagonally scaled `b` and `c` vectors by
+  `1 + norm(vector)`. Give zero rows and columns a neutral denominator of one.
+- **Reason:** This order matches the manuscript's numerical settings and the
+  sourced implementations. Computing a column denominator after mutating the
+  rows would be a different sequential algorithm.
+
+## D-0036 - Make preprocessing exactly reversible
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Retain cumulative row, column, `b`, and `c` factors; expose
+  forward and inverse LP/state maps; and make all stopping, KKT, objective, and
+  physical acceptance decisions in recovered original coordinates.
+- **Reason:** Scaled residuals are useful solver diagnostics but are not
+  physical MW/MWh statements. Exact recovery identities prevent favorable
+  scaled conditioning from hiding an incorrect change of problem.
+
+## D-0037 - Preserve the forced first restart and 100-iteration cadence
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Force the first restart at iteration 100 as in the pinned
+  HPR-LP v0.1.0 source. At later 100-iteration checkpoints, evaluate the
+  HPR-LP sufficient-decay, necessary-decay/no-progress, and long-inner-loop
+  rules with parameters `0.2`, `0.6`, and `0.2`. Restart from the proximal
+  state and reset the inner Halpern counter and merit reference.
+- **Reason:** The manuscript prints the cadence but not the criterion or state
+  transition. The pinned source supplies a testable rule, including an
+  easy-to-miss first-check special case.
+
+## D-0038 - Evaluate adaptive sigma in the general sGS metric
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Generalize the published HPR-LP movement ratio by evaluating
+  multiplier movement in `A A^T + T1`, using the verified equality solve and
+  the safeguarded inequality spectral value. Retain the published movement and
+  infeasibility-ratio guards and reset sigma to 1 when a guard fails.
+- **Reason:** The diagonal HPR-LP special case is not the metric used by
+  Algorithm 2. The general quadratic is the sourced mathematical transfer
+  appropriate to sGS-HPR.
+
+## D-0039 - Keep the raw structural baseline after scaling is added
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Preserve the unscaled Stage 4 structural backend as an
+  ablation. Use the direct equality backend after normalization, Ruiz, or
+  Pock-Chambolle scaling, and reject attempts to reuse the raw Equation (55)
+  descriptor on a generally scaled matrix.
+- **Reason:** General diagonal scaling changes the Gram structure on which the
+  Stage 4 formula depends. Refusal is safer than presenting an unproved scaled
+  structural solve as exact.
+
+## D-0040 - Treat fixed-horizon component isolation as non-gating
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Run all four preprocessing variants for the same 5,000
+  iterations and run adaptive-without-restart for the same fixed horizon.
+  Require finite deterministic completion, correct event cadence, and
+  preserved identities, but do not require convergence of those diagnostic
+  runs. Require convergence for fixed/no-restart, fixed/restart,
+  adaptive/restart, and the two adaptive initial-sigma sensitivity runs.
+- **Reason:** A fixed horizon makes component effects comparable. In
+  particular, adaptive-without-restart is a deliberately non-paper control;
+  its non-convergence should remain visible without invalidating the sourced
+  coupled policy.
+
+## D-0041 - Stop Stage 5 before GPU execution
+
+- **Status:** accepted
+- **Stage:** 5
+- **Decision:** Keep all Stage 5 implementation and evidence in local CPU FP64.
+  Do not install a numerical stack or execute solver code on the DGX Spark
+  until Stage 6 receives explicit approval.
+- **Reason:** The preprocessing and control logic must pass independent CPU
+  checks before device residence, sparse GPU kernels, and timing boundaries
+  are introduced.

@@ -1220,6 +1220,52 @@ Both independently reproduce the case9241 T6 row of Table II.
 - Gurobi `OptimalityTol`, `FeasibilityTol`, and `BarConvTol` are each set to
   \(5\times10^{-5}\).
 
+#### Stage 5 sourced reconstruction
+
+The manuscript specifies the preprocessing sequence and the 100-iteration
+policy cadence, but not enough detail to recreate the control policy by itself.
+Stage 5 therefore separates printed facts from the sourced reconstruction:
+
+| Item | Implemented rule | Provenance |
+|---|---|---|
+| Ruiz scaling | 10 simultaneous row/column infinity-norm steps | DCOPF manuscript; formulas cross-checked against PDLP and HPR-LP |
+| Pock-Chambolle | one simultaneous row/column L1 step, alpha = 1 | DCOPF manuscript, PDLP, and Pock-Chambolle |
+| Vector normalization | after diagonal scaling, divide the complete scaled `b` and `c` vectors by `1 + norm(vector)` | DCOPF manuscript and HPR-LP |
+| Restart | HPR-LP Eqs. (10)-(12), including the v0.1.0 forced first restart | HPR-LP v0.1.0, pinned at commit `1941fbcfbf2dae14e4a439b22f0ea1e1c05f4a29` |
+| Policy cadence | inspect at iterations 100, 200, 300, and so on | DCOPF manuscript |
+| Adaptive penalty | HPR-LP Eqs. (15)-(18), generalized to the sGS metric | published HPR-LP article |
+
+The HPR-LP restart parameters are:
+
+```text
+sufficient-decay threshold   0.2
+necessary-decay threshold    0.6
+long-inner-loop fraction     0.2
+```
+
+Let `Qy(Δy)` denote the squared multiplier movement in the sGS metric. The
+implemented adaptive update is:
+
+```text
+sigma_new = norm(Δx) / sqrt(Qy(Δy))
+```
+
+It is accepted only when both movement norms are strictly between `1e-16` and
+`1e12`, and the normalized dual/primal infeasibility ratio is strictly between
+`1e-8` and `1e8`. A failed guard resets sigma to 1, as specified by the
+published HPR-LP rule.
+
+The repository commit inspected for source drift,
+`0f8f1501bcc7013b53fec6822e8da91929a39d2e`, postdates the published article
+and contains additional penalty heuristics. Stage 5 deliberately implements
+the published equations and the pinned v0.1.0 first-restart behavior instead
+of silently adopting those later additions.
+
+This is a sourced HPR-LP transfer with the DCOPF manuscript's 100-iteration
+cadence. It is not claimed to be byte-for-byte equivalent to the unpublished
+author implementation. The adaptive-without-restart case is a controlled
+fixed-horizon ablation, not a paper algorithm.
+
 ### 5.3 Test systems
 
 | Case | Buses | Branches \(N_L\) | Conventional \(N_G\) | RGs \(N_{RG}\) | ESSs \(N_{ESS}\) |
@@ -1298,7 +1344,8 @@ These points are part of the specification because they prevent an unsupported
    parameters, cost modifications, or construction scripts needed to recreate
    Table II matrices.
 2. It gives neither the adaptive-\(\sigma\) formula nor the restart criterion;
-   both are delegated to references [29] and [43].
+   both are delegated to references [29] and [43]. Stage 5 reconstructs a
+   sourced HPR-LP policy, but the exact DCOPF author code remains unavailable.
 3. It does not state how \(\lambda_1(A_2A_2^*)\) is estimated, whether it is
    conservatively overestimated, or whether matrices and kernels use FP64,
    FP32, or mixed precision.
@@ -1327,8 +1374,9 @@ These points are part of the specification because they prevent an unsupported
 11. The paper describes a "security-constrained" model, but Eqs. (1)-(10)
     contain no N-1 contingency constraints. Any contingency extension is new
     research, not paper reproduction.
-12. No public source-code URL or archived implementation revision is supplied
-    in the manuscript.
+12. No public source-code URL or archived DCOPF implementation revision is
+    supplied in the manuscript. The related HPR-LP source is public, but its
+    exact revision in the authors' DCOPF runs is not identified.
 
 Until these inputs and ambiguities are resolved, the defensible target is a
 mathematical or structural reproduction, not an exact numerical recreation of

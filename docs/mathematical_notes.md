@@ -610,3 +610,156 @@ paper's broader equality-update count is proportional to
 Equations (39), (44), and (45) print the inverse pattern for a plus rank-one
 update. Stage 4 retains that text as a manuscript discrepancy and uses direct
 Cholesky as the numerical oracle for the corrected expression.
+
+## 26. Stage 5 scaling is an invertible change of coordinates
+
+Stage 5 uses positive row denominators `r`, positive column denominators `d`,
+and two positive scalar normalization factors:
+
+```text
+B = 1 + norm(b after diagonal row scaling)
+C = 1 + norm(c after diagonal column scaling)
+```
+
+Write `R = diag(r)` and `D = diag(d)`. The scaled LP data are:
+
+```text
+A_scaled = R^-1 A D^-1
+b_scaled = R^-1 b / B
+c_scaled = D^-1 c / C
+lower_scaled = D lower / B
+upper_scaled = D upper / B
+```
+
+The order matters. Stage 5 first performs 10 simultaneous Ruiz steps, then one
+simultaneous Pock-Chambolle step with alpha 1, and only then computes `B` and
+`C` from the complete diagonally scaled vectors.
+
+A simultaneous Ruiz step computes both denominators from the same current
+matrix:
+
+```text
+row step[i] = sqrt(max absolute entry in row i)
+col step[j] = sqrt(max absolute entry in column j)
+```
+
+The Pock-Chambolle step replaces each maximum by an L1 sum. A zero row or
+column gets a neutral denominator of one. All steps preserve the sparse
+nonzero pattern.
+
+The exact state recovery is:
+
+```text
+x = B D^-1 x_scaled
+y = C R^-1 y_scaled
+z = C D z_scaled
+```
+
+The inverse map is used for an original-space cold start. The variable
+objective obeys:
+
+```text
+c dot x = B C (c_scaled dot x_scaled)
+```
+
+These maps also explain why original-space validation is mandatory. A small
+scaled residual by itself is not a physical MW/MWh guarantee. Stage 5 recovers
+`x`, `y`, and `z` every iteration and applies Equation (54), the raw KKT test,
+the HiGHS comparison, and all power-system checks to that recovered state.
+
+Dense and sparse component fixtures verified LP-data recovery, state
+round-trips, primal-residual identities, stationarity identities, and the
+objective identity. The largest reported component discrepancy was
+`2.45e-16`, far below the declared `5e-12` identity tolerance.
+
+## 27. The adaptive penalty uses the full sGS metric
+
+The HPR-LP update compares primal and multiplier movement. The scalar
+`norm(Δy)` from a diagonal HPR metric is not valid for Algorithm 2's sGS
+metric, so Stage 5 evaluates the general quadratic directly.
+
+Split `Δy` into equality and inequality blocks. Define:
+
+```text
+v  = A1^T Δy1 + A2^T Δy2
+r1 = A1 v
+
+Qy(Δy) =
+  r1 dot solve(A1 A1^T, r1)
+  + lambda * (Δy2 dot Δy2)
+```
+
+This is the squared multiplier movement in `A A^T + T1`. The equality solve
+uses whichever verified backend prepared the workspace. The inequality term
+uses the safeguarded `lambda` already validated in Stage 3.
+
+The sourced HPR-LP adaptive rule becomes:
+
+```text
+delta_x = norm(x_candidate - x_reference)
+delta_y = sqrt(Qy(y_candidate - y_reference))
+sigma_new = delta_x / delta_y
+```
+
+The update is accepted only when both movement values and the normalized
+dual/primal infeasibility ratio pass the explicit guards. Otherwise sigma is
+reset to 1. This transfers the published HPR-LP equations to the paper's sGS
+metric without pretending that a diagonal special case applies.
+
+## 28. Restart merit, cadence, and state reset
+
+For `Δx` and `Δy` between the current and reflected states, the restart merit
+is:
+
+```text
+merit^2 =
+  norm(Δx)^2 / sigma
+  + 2 (A Δx) dot Δy
+  + sigma Qy(Δy)
+```
+
+The policy is inspected exactly every 100 global iterations. Following the
+pinned HPR-LP v0.1.0 source, the first checkpoint forces a restart. Later
+checkpoints can restart for any of three published reasons:
+
+```text
+sufficient decay:
+  current merit <= 0.2 * reference merit
+
+necessary decay without local progress:
+  current merit <= 0.6 * reference merit
+  and current merit > previous checkpoint merit
+
+long inner loop:
+  inner iterations >= 0.2 * total iterations
+```
+
+On a restart, the proximal state becomes both the new anchor and the new
+current state. The inner Halpern counter returns to zero, the merit reference
+is cleared, and an enabled adaptive-sigma update uses movement from the
+outgoing anchor to the accepted proximal state. Every checkpoint records its
+iteration, merit, reasons, restart count, and penalty decision.
+
+The adaptive-without-restart combination updates from the previous policy
+checkpoint. That combination was included only to isolate the adaptive
+component. It is not claimed to reproduce a paper algorithm, and its lack of
+convergence during the declared 5,000-iteration horizon is non-gating.
+
+## 29. Why scaled runs use the direct equality backend
+
+The Stage 4 structural inverse is exact for the raw Equation (55) equality
+matrix. General row and column scaling changes the equality Gram matrix and
+therefore invalidates that descriptor. Stage 5 refuses to pair the raw
+structural solver with a preconditioned LP.
+
+The comparison boundary is explicit:
+
+- unscaled runs retain the Stage 4 structural backend;
+- normalization, Ruiz, and full-preconditioning runs use direct Cholesky
+  equality solves on the transformed matrix;
+- every transformed result is recovered and judged in original coordinates.
+
+This preserves the structural oracle instead of quietly applying a fast
+formula to a matrix for which it was not derived. A generalized scaled
+structural solve is possible future work, but it was not needed to validate
+Stage 5 and is not part of the current reproduction claim.

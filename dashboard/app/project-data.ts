@@ -98,20 +98,25 @@ export const stages: ResearchStage[] = [
       { id: "4.3", title: "Cross-check against direct solves", status: "complete" },
       { id: "4.4", title: "Full-solver trajectory cross-check", status: "complete" },
       { id: "4.5", title: "Empirical complexity check", status: "complete" },
+      { id: "4.6", title: "Stage 4 acceptance approved", status: "complete" },
     ],
   },
   {
     id: 5,
     title: "Preconditioning, restart, and penalty management",
     purpose: "Add paper-supported acceleration features one at a time and preserve the fixed-sigma baseline.",
-    status: "locked",
+    status: "complete",
     tasks: [
-      locked("5.1", "Ruiz scaling"),
-      locked("5.2", "Pock-Chambolle diagonal preconditioning"),
-      locked("5.3", "b and c normalization"),
-      locked("5.4", "Sourced adaptive sigma"),
-      locked("5.5", "Sourced restart criterion"),
-      locked("5.6", "Controlled ablation"),
+      { id: "5.1", title: "Ten reversible Ruiz scaling passes", status: "complete" },
+      {
+        id: "5.2",
+        title: "Pock-Chambolle diagonal preconditioning with alpha one",
+        status: "complete",
+      },
+      { id: "5.3", title: "Full-vector b and c normalization", status: "complete" },
+      { id: "5.4", title: "Sourced adaptive penalty policy", status: "complete" },
+      { id: "5.5", title: "Sourced restart policy at 100-step checks", status: "complete" },
+      { id: "5.6", title: "Four-way controls and preprocessing ablations", status: "complete" },
     ],
   },
   {
@@ -252,6 +257,24 @@ export const learningNotes = [
       "The paper's complexity claim includes forming the right-hand side with sparse A1 products. That full boundary scaled near-linearly; the shorter solve-only timing remains a disclosed diagnostic.",
   },
   {
+    label: "Stage 5 preprocessing",
+    title: "Scale for the solver, judge in original units",
+    body:
+      "Ruiz and Pock-Chambolle scaling make rows and columns numerically comparable. Every candidate is mapped back before KKT, objective, and power-system checks, so easier arithmetic cannot weaken the scientific acceptance test.",
+  },
+  {
+    label: "Stage 5 controls",
+    title: "Ablation separates the causes",
+    body:
+      "Fixed or adaptive penalty and restart on or off form four controlled runs. Comparing them shows which mechanism changes behavior instead of crediting the whole acceleration bundle at once.",
+  },
+  {
+    label: "Source boundary",
+    title: "A sourced proxy is not author identity",
+    body:
+      "The paper names HPR-LP-style penalty and restart management but does not publish its exact DCOPF policy code. This stage transfers the published HPR-LP equations, uses the paper's 100-step interval, and labels that limit explicitly.",
+  },
+  {
     label: "Stage 2 finding",
     title: "A PTDF may need an offset",
     body:
@@ -275,17 +298,20 @@ export const artifacts = [
   { label: "Primary source", name: "references/AnEfficientGPU-basedHalpernAccelerating.pdf" },
   { label: "Specification", name: "docs/paper_specification.md" },
   { label: "Public network", name: "data/raw/matpower/case5.m" },
-  { label: "Stage evidence", name: "docs/stage_reports/stage_4_report.md" },
-  { label: "Validation results", name: "results/raw/stage_4/stage_4_validation.json" },
+  { label: "Stage evidence", name: "docs/stage_reports/stage_5_report.md" },
+  { label: "Validation results", name: "results/raw/stage_5/stage_5_validation.json" },
   {
-    label: "Solver trajectories",
-    name: "results/raw/stage_4/solver_trajectories.jsonl.gz",
+    label: "Trajectories and policy events",
+    name: "results/raw/stage_5/stage_5_trajectories.jsonl.gz",
   },
   {
-    label: "RHS cross-checks",
-    name: "results/raw/stage_4/structural_crosschecks.jsonl.gz",
+    label: "Independent checker",
+    name: "results/raw/stage_5/stage_5_checks.json",
   },
-  { label: "Solver settings", name: "configs/sgs_hpr/stage_4_structural.json" },
+  {
+    label: "Solver settings",
+    name: "configs/sgs_hpr/stage_5_preconditioning_controls.json",
+  },
   {
     label: "Base row map",
     name: "results/raw/stage_2/case5_base_t1_row_metadata.jsonl.gz",

@@ -1,0 +1,129 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_five_paths",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "configuration_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "validation_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "exact match and Stage 5 constants preserved",
+      "name": "embedded_configuration_matches_versioned_config",
+      "passed": true
+    },
+    {
+      "detail": "reconstruction_pin=1941fbcfbf2dae14e4a439b22f0ea1e1c05f4a29, audited_commit=0f8f1501bcc7013b53fec6822e8da91929a39d2e",
+      "name": "primary_sources_and_hpr_lp_pin_preserved",
+      "passed": true
+    },
+    {
+      "detail": "published HPR-LP equations are distinguished from unavailable DCOPF author code",
+      "name": "published_formula_transfer_boundary_is_explicit",
+      "passed": true
+    },
+    {
+      "detail": "sha256=7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4",
+      "name": "local_dcopf_manuscript_fingerprint_recorded",
+      "passed": true
+    },
+    {
+      "detail": "cases=['dense_analytic', 'sparse_planted_random']",
+      "name": "dense_and_sparse_component_fixtures_present",
+      "passed": true
+    },
+    {
+      "detail": "dense_analytic:roundtrip=7.021666937153402e-17, identity=5.861691602801164e-17; sparse_planted_random:roundtrip=2.447602941925814e-16, identity=2.370322243059873e-16",
+      "name": "component_roundtrips_and_algebraic_identities_within_tolerance",
+      "passed": true
+    },
+    {
+      "detail": "Ruiz 1..10 (infinity norm), then Pock-Chambolle alpha=1 (L1), then normalization",
+      "name": "exact_ten_ruiz_then_one_pock_chambolle_order",
+      "passed": true
+    },
+    {
+      "detail": "cases=['case5_base_t1', 'case5_synthetic_extension_t2']",
+      "name": "both_t1_and_t2_dcopf_cases_present",
+      "passed": true
+    },
+    {
+      "detail": "both DCOPF cases preserve ten Ruiz steps, one PC step, and norm scaling",
+      "name": "dcopf_full_preconditioners_have_exact_order",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1:kkt=0.005618456235003658, physical=0.004230909254147264, objective_gap=3.308742744723518e-06; case5_synthetic_extension_t2:kkt=0.008948422296844392, physical=0.006059167103927621, objective_gap=1.0220035355908389e-05",
+      "name": "dcopf_original_space_stopping_kkt_objective_and_physics",
+      "passed": true
+    },
+    {
+      "detail": "both main runs contain accepted sigma updates and restarts",
+      "name": "adaptive_sigma_and_restart_exercised_on_both_dcopf_cases",
+      "passed": true
+    },
+    {
+      "detail": "labels=['10 Ruiz + Pock-Chambolle alpha=1 + norm', '10 Ruiz + norm', 'norm b/c only', 'unscaled Stage 4 structural baseline']",
+      "name": "preprocessing_ablation_covers_unscaled_norm_ruiz_and_full",
+      "passed": true
+    },
+    {
+      "detail": "controls=[(False, False), (False, True), (True, False), (True, True)]",
+      "name": "all_four_control_combinations_present",
+      "passed": true
+    },
+    {
+      "detail": "Controlled decoupling at the 100-iteration policy cadence; non-convergence is informative and non-gating.",
+      "name": "adaptive_without_restart_is_explicitly_nonpaper_and_nongating",
+      "passed": true
+    },
+    {
+      "detail": "matrix_checks={'adaptive_no_restart_policy_exercised': True, 'adaptive_restart_converges': True, 'all_fixed_horizon_runs_complete': True, 'fixed_no_restart_converges': True, 'fixed_restart_converges': True, 'four_control_combinations_present': True, 'initial_sigma_sensitivity_converges': True, 'unscaled_ruiz_and_full_present': True, 'unscaled_structural_baseline_preserved': True}",
+      "name": "recorded_ablation_matrix_checks_pass",
+      "passed": true
+    },
+    {
+      "detail": "initial_sigmas=[0.1, 10.0]",
+      "name": "initial_sigma_sensitivity_coverage_and_acceptance",
+      "passed": true
+    },
+    {
+      "detail": "rows=459, trajectory_groups=11, event_groups=6",
+      "name": "trajectory_gzip_is_valid_and_covers_every_recorded_run",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1/full_adaptive_restart/convergence:trajectory=6, events=4; case5_synthetic_extension_t2/full_adaptive_restart/convergence:trajectory=12, events=10; case5_base_t1/unscaled_fixed_no_restart/fixed_horizon_preprocessing_ablation:trajectory=11, events=0; case5_base_t1/normalized_fixed_no_restart/fixed_horizon_preprocessing_ablation:trajectory=11, events=0; case5_base_t1/ruiz_fixed_no_restart/fixed_horizon_preprocessing_ablation:trajectory=11, events=0; case5_base_t1/full_fixed_no_restart/fixed_horizon_preprocessing_ablation:trajectory=11, events=0; case5_base_t1/full_fixed_no_restart/convergence_control_ablation:trajectory=248, events=0; case5_base_t1/full_adaptive_no_restart/fixed_horizon_control_ablation:trajectory=51, events=50; case5_base_t1/full_fixed_restart/convergence_control_ablation:trajectory=7, events=5; case5_base_t1/full_adaptive_restart_sigma_0.1/initial_sigma_sensitivity:trajectory=6, events=4; case5_base_t1/full_adaptive_restart_sigma_10/initial_sigma_sensitivity:trajectory=7, events=5",
+      "name": "trajectory_rows_match_json_summaries_and_sampling_grid",
+      "passed": true
+    },
+    {
+      "detail": "policy_rows=78",
+      "name": "policy_events_match_json_counts_values_and_100_iteration_cadence",
+      "passed": true
+    },
+    {
+      "detail": "Stage 5 complete; Stage 6, GPU code, and DGX execution false",
+      "name": "stage_six_gpu_and_dgx_boundaries_remain_closed",
+      "passed": true
+    }
+  ],
+  "configuration": "configs/sgs_hpr/stage_5_preconditioning_controls.json",
+  "evidence": "results/raw/stage_5/stage_5_validation.json",
+  "evidence_files": {
+    "trajectories_and_policy_events": "results/raw/stage_5/stage_5_trajectories.jsonl.gz"
+  },
+  "passed": true,
+  "stage": 5,
+  "summary": {
+    "passed": 23
+  }
+}

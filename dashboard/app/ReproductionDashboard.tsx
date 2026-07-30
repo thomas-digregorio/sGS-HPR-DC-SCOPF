@@ -123,19 +123,19 @@ export function ReproductionDashboard() {
             <div className="metric-note">Stage gates prevent unsupported shortcuts.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">CPU reference</div>
-            <div className="metric-value">Direct + structural</div>
-            <div className="metric-note">Corrected Proposition 5 matches the Cholesky oracle.</div>
+            <div className="metric-label">Main Stage 5 runs</div>
+            <div className="metric-value">410 / 1,032</div>
+            <div className="metric-note">Iterations for the public T1 case and labeled T2 extension.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">DCOPF agreement</div>
-            <div className="metric-value">Same iterations</div>
-            <div className="metric-note">T1 and T2 objective differences stay below 5e-14.</div>
+            <div className="metric-label">Original-space validation</div>
+            <div className="metric-value">All gates PASS</div>
+            <div className="metric-note">KKT below 0.01; objective gap below 0.0002; physical error below 0.01.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Reproduction claim</div>
-            <div className="metric-value">Mathematical</div>
-            <div className="metric-note">Public DCOPF model validated; exact author inputs remain unavailable.</div>
+            <div className="metric-label">Control provenance</div>
+            <div className="metric-value">Sourced proxy</div>
+            <div className="metric-note">Published HPR-LP equations transferred; exact author DCOPF policy remains unavailable.</div>
           </div>
         </div>
       </section>
@@ -214,34 +214,70 @@ export function ReproductionDashboard() {
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">
-              The next stage remains locked until Stage 4 passes every acceptance criterion
-              and you send the exact approval phrase.
+              Stage 4 is approved and Stage 5 passed every acceptance criterion.
+              Stage 6 remains locked until you send the exact approval phrase.
             </p>
-            <div className="gate-command">APPROVE STAGE 4 AND RUN STAGE 5</div>
+            <div className="gate-command">APPROVE STAGE 5 AND RUN STAGE 6</div>
           </section>
 
-          <section className="rail-card" aria-labelledby="stage-four-title">
-            <h2 className="rail-title" id="stage-four-title">Stage 4 evidence brief</h2>
+          <section className="rail-card" aria-labelledby="stage-five-title">
+            <h2 className="rail-title" id="stage-five-title">Stage 5 evidence brief</h2>
             <div className="machine-list">
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Corrected equality solve</span>
+                  <span className="machine-name">Preprocessing pipeline</span>
                   <span className="machine-state">PASS</span>
                 </div>
                 <div className="machine-detail">
-                  336 deterministic right-hand sides; maximum relative error 1.53e-14.
+                  Ten Ruiz passes, Pock-Chambolle alpha one, then full-vector b and c normalization.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Synthetic T=1024</span>
-                  <span className="machine-state">19.68x</span>
+                  <span className="machine-name">Recovered candidates</span>
+                  <span className="machine-state">PASS</span>
                 </div>
                 <div className="machine-detail">
-                  Solve-only speedup; RHS-plus-solve speedup measured at 7.61x.
+                  Worst main-run KKT 0.00895, objective gap 0.0000103, and physical error 0.00606.
                 </div>
               </div>
             </div>
+            <div className="ablation-panel" aria-label="T1 control ablation">
+              <div className="ablation-heading">Four control combinations / public T1 case</div>
+              <div className="ablation-grid">
+                <div className="ablation-cell">
+                  <span>Fixed / no restart</span>
+                  <strong>123,328 to gate</strong>
+                </div>
+                <div className="ablation-cell">
+                  <span>Adaptive / no restart</span>
+                  <strong>5,000-step diagnostic</strong>
+                </div>
+                <div className="ablation-cell">
+                  <span>Fixed / restart</span>
+                  <strong>524 to gate</strong>
+                </div>
+                <div className="ablation-cell">
+                  <span>Adaptive / restart</span>
+                  <strong>410 to gate</strong>
+                </div>
+              </div>
+              <p className="ablation-note">
+                The adaptive-only run exercises the policy on a fixed horizon; it is not
+                reported as converged.
+              </p>
+            </div>
+          </section>
+
+          <section className="rail-card source-boundary" aria-labelledby="source-boundary-title">
+            <div className="chip">Source limitation</div>
+            <h2 className="rail-title" id="source-boundary-title">HPR-LP policy transfer</h2>
+            <p className="rail-copy">
+              The exact author DCOPF policy code is unavailable. Stage 5 uses the
+              published HPR-LP penalty and restart equations with the DCOPF paper&apos;s
+              100-step check interval, so this is a sourced proxy rather than an
+              author-identical implementation.
+            </p>
           </section>
 
           <section className="rail-card" aria-labelledby="rules-title">
@@ -263,7 +299,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Windows / local CPU; 104 FP64 validation tests passing.
+                  Windows / local CPU; Stage 5 preprocessing and control validation passed.
                 </div>
               </div>
               <div className="machine">
@@ -272,7 +308,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Audited and reachable; deliberately untouched during the CPU-only Stage 4.
+                  Audited and reachable; deliberately untouched through the CPU-only Stage 5.
                 </div>
               </div>
             </div>

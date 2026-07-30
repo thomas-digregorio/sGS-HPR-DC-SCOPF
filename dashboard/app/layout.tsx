@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol =
     requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
-  const imageUrl = new URL("/og.png", metadataBase).toString();
+  const imageUrl = new URL("/og-stage5.png", metadataBase).toString();
 
   return {
     metadataBase,

@@ -695,6 +695,69 @@ a {
   margin-top: 5px;
 }
 
+.ablation-panel {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 17px;
+}
+
+.ablation-heading {
+  color: var(--ink-soft);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.ablation-grid {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 11px;
+}
+
+.ablation-cell {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  min-height: 76px;
+  padding: 10px;
+}
+
+.ablation-cell span,
+.ablation-cell strong {
+  display: block;
+  line-height: 1.35;
+}
+
+.ablation-cell span {
+  color: var(--ink-soft);
+  font-size: 10px;
+}
+
+.ablation-cell strong {
+  color: var(--green);
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.ablation-note {
+  color: var(--ink-soft);
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 10px 0 0;
+}
+
+.source-boundary {
+  border-color: #e0c59f;
+}
+
+.source-boundary .rail-title {
+  margin-top: 10px;
+}
+
 .evidence-grid {
   display: grid;
   gap: 10px;
@@ -903,4 +966,3 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
-
