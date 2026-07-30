@@ -1,0 +1,1521 @@
+{
+  "all_passed": true,
+  "cases": [
+    {
+      "checks": {
+        "all_values_finite": true,
+        "converged": true,
+        "deterministic_repeated_run": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "unit-scale mathematical reference LP",
+      "comparison": {
+        "expected_solution_error_inf": 6.746183209460632e-05,
+        "maximum_primal_violation": 9.08781098499789e-05,
+        "scaled_objective_gap": 0.00011309995853192588
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "m1": 1,
+        "m2": 1,
+        "n": 2
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 1.4000000000000001,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 2.748343596947334e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.748343596947334e-17,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.551115123125783e-17,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.4,
+          0.6000000000000001
+        ],
+        "y": [
+          1.5,
+          0.5
+        ],
+        "z": [
+          0.0,
+          0.0
+        ]
+      },
+      "name": "analytic_toy",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 1.0,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 2.0,
+          "minimum_eigenvalue": 2.0,
+          "positive_definite": true,
+          "rank": 1,
+          "rows": 1,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": {
+          "dense_eigendecomposition": 2.0,
+          "lambda_used": 2.0000000002000005,
+          "maximum_estimate_difference": 0.0,
+          "power_converged": true,
+          "power_iteration": 2.0,
+          "power_iterations": 2,
+          "power_residual": 0.0,
+          "rows": 1,
+          "s2_minimum_eigenvalue": 2.0000046063728405e-10,
+          "safety_margin": 2.0000046063728405e-10,
+          "sparse_eigsh": 2.0
+        },
+        "iterations": 17606,
+        "maximum_equality_solve_infinity_residual": 8.881784197001252e-16,
+        "maximum_equality_solve_relative_residual": 2.2203955914479208e-16,
+        "maximum_z_x_identity_error": 0.0,
+        "minimum_inequality_multiplier": 0.5000220227379953,
+        "objective": {
+          "canonical_variable": 1.3998416600580554,
+          "constant": 0.0,
+          "total": 1.3998416600580554
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.00012368613143554351,
+          "paper_normalized_combined_norm": 5.4652606955071324e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.99995641556103e-05,
+            "stationarity": 2.2066966969534353e-05
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.00010098931481572857,
+            "stationarity": 7.141020517065572e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 3.3700548999913735,
+          "preparation": 0.0028429999947547913,
+          "total": 3.3731276000034995
+        },
+        "x": [
+          0.3999325381679054,
+          0.5999765837222446
+        ],
+        "y": [
+          1.5000454390549247,
+          0.5000220227379953
+        ],
+        "z": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "converged": true,
+        "deterministic_repeated_run": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "unit-scale mathematical reference LP",
+      "comparison": {
+        "expected_solution_error_inf": 9.996001599429927e-05,
+        "maximum_primal_violation": 9.996001599432702e-05,
+        "scaled_objective_gap": 0.0
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "m1": 1,
+        "m2": 0,
+        "n": 2
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": -0.75,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 0.0,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.75,
+          0.25
+        ],
+        "y": [
+          -0.0
+        ],
+        "z": [
+          -1.0,
+          0.0
+        ]
+      },
+      "name": "box_bound_active",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 1.0,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 2.0,
+          "minimum_eigenvalue": 2.0,
+          "positive_definite": true,
+          "rank": 1,
+          "rows": 1,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": null,
+        "iterations": 2501,
+        "maximum_equality_solve_infinity_residual": 1.1102230246251565e-16,
+        "maximum_equality_solve_relative_residual": 7.401486830834377e-17,
+        "maximum_z_x_identity_error": 2.220446049250313e-16,
+        "minimum_inequality_multiplier": null,
+        "objective": {
+          "canonical_variable": -0.75,
+          "constant": 0.0,
+          "total": -0.75
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.00014136481031452278,
+          "paper_normalized_combined_norm": 7.068240515726139e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.998000799716351e-05,
+            "stationarity": 4.998000799738554e-05
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 9.996001599432702e-05,
+            "stationarity": 9.996001599477108e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 0.409026499997708,
+          "preparation": 0.0004861999914282933,
+          "total": 0.40973379999923054
+        },
+        "x": [
+          0.75,
+          0.2499000399840057
+        ],
+        "y": [
+          9.996001599477108e-05
+        ],
+        "z": [
+          -1.0000999600159952,
+          0.0
+        ]
+      }
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "converged": true,
+        "deterministic_repeated_run": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "unit-scale mathematical reference LP",
+      "comparison": {
+        "expected_solution_error_inf": 2.220446049250313e-16,
+        "maximum_primal_violation": 2.220446049250313e-16,
+        "scaled_objective_gap": 0.0
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "m1": 1,
+        "m2": 1,
+        "n": 2
+      },
+      "highs": {
+        "iterations": 0,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 0.25,
+        "residuals": {
+          "kkt_combined_norm": 0.0,
+          "paper_normalized_combined_norm": 0.0,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          0.25,
+          0.75
+        ],
+        "y": [
+          -0.0,
+          0.0
+        ],
+        "z": [
+          1.0,
+          0.0
+        ]
+      },
+      "name": "inequality_inactive",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 1.0,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 2.0,
+          "minimum_eigenvalue": 2.0,
+          "positive_definite": true,
+          "rank": 1,
+          "rows": 1,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": {
+          "dense_eigendecomposition": 2.0,
+          "lambda_used": 2.0000000002000005,
+          "maximum_estimate_difference": 0.0,
+          "power_converged": true,
+          "power_iteration": 2.0,
+          "power_iterations": 2,
+          "power_residual": 0.0,
+          "rows": 1,
+          "s2_minimum_eigenvalue": 2.0000046063728405e-10,
+          "safety_margin": 2.0000046063728405e-10,
+          "sparse_eigsh": 2.0
+        },
+        "iterations": 4,
+        "maximum_equality_solve_infinity_residual": 1.1102230246251565e-16,
+        "maximum_equality_solve_relative_residual": 7.401486830834377e-17,
+        "maximum_z_x_identity_error": 1.1102230246251565e-16,
+        "minimum_inequality_multiplier": 0.0,
+        "objective": {
+          "canonical_variable": 0.25,
+          "constant": 0.0,
+          "total": 0.25
+        },
+        "residuals": {
+          "kkt_combined_norm": 3.1401849173675503e-16,
+          "paper_normalized_combined_norm": 1.4766575366476148e-16,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 9.736130217547272e-17,
+            "stationarity": 1.1102230246251563e-16
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.220446049250313e-16,
+            "stationarity": 2.2204460492503126e-16
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 0.0009139000030700117,
+          "preparation": 0.0005505999870365486,
+          "total": 0.0015986999933375046
+        },
+        "x": [
+          0.25,
+          0.7499999999999998
+        ],
+        "y": [
+          2.2204460492503126e-16,
+          0.0
+        ],
+        "z": [
+          0.9999999999999998,
+          0.0
+        ]
+      }
+    },
+    {
+      "checks": {
+        "all_values_finite": true,
+        "converged": true,
+        "deterministic_repeated_run": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "primal_feasible": true,
+        "solution_matches_expected": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "unit-scale mathematical reference LP",
+      "comparison": {
+        "expected_solution_error_inf": 8.258240038500064e-05,
+        "maximum_primal_violation": 0.0001907728823829502,
+        "scaled_objective_gap": 0.00028459119183260487
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "m1": 2,
+        "m2": 4,
+        "n": 5
+      },
+      "highs": {
+        "iterations": 5,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": -1.814384197057085,
+        "residuals": {
+          "kkt_combined_norm": 2.2887833992611187e-16,
+          "paper_normalized_combined_norm": 5.4138187484941973e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.4138187484941973e-17,
+            "stationarity": 0.0
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 2.5589376332604516e-16,
+            "stationarity": 0.0
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "x": [
+          -1.0,
+          1.0,
+          0.1999999999999986,
+          -0.3000000000000019,
+          0.39999999999999847
+        ],
+        "y": [
+          -0.2421934113292546,
+          -2.1790290101297867,
+          0.699999999999996,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          0.4000000000000026,
+          -0.49999999999999667,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "name": "planted_random",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 2.9219209401296973,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 7.919671026930407,
+          "minimum_eigenvalue": 2.7104330299158854,
+          "positive_definite": true,
+          "rank": 2,
+          "rows": 2,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": {
+          "dense_eigendecomposition": 10.061847161920358,
+          "lambda_used": 10.061847162926552,
+          "maximum_estimate_difference": 7.105427357601002e-15,
+          "power_converged": true,
+          "power_iteration": 10.061847161920365,
+          "power_iterations": 38,
+          "power_residual": 8.0684123773816e-11,
+          "rows": 4,
+          "s2_minimum_eigenvalue": 1.0061942390393597e-09,
+          "safety_margin": 1.006187133612002e-09,
+          "sparse_eigsh": 10.061847161920362
+        },
+        "iterations": 32615,
+        "maximum_equality_solve_infinity_residual": 7.105427357601002e-15,
+        "maximum_equality_solve_relative_residual": 3.9537299715450703e-16,
+        "maximum_z_x_identity_error": 4.440892098500626e-16,
+        "minimum_inequality_multiplier": 0.0,
+        "objective": {
+          "canonical_variable": -1.8149005548181678,
+          "constant": 0.0,
+          "total": -1.8149005548181678
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.0002469833597444083,
+          "paper_normalized_combined_norm": 5.056979596927123e-05,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 4.973937861179784e-05,
+            "stationarity": 9.12680007921442e-06
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 0.0002351020115332107,
+            "stationarity": 7.56823900500198e-05
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 6.429490099995746,
+          "preparation": 0.0018331000028410926,
+          "total": 6.431474700002582
+        },
+        "x": [
+          -1.0,
+          1.0,
+          0.19992919658546474,
+          -0.300082582400385,
+          0.40001423437295386
+        ],
+        "y": [
+          -0.24220451528125034,
+          -2.179013768811208,
+          0.7000556922966411,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          0.39993658844797064,
+          -0.5000277808617317,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "approximate_candidate_validation": {
+        "all_values_finite": true,
+        "direct_total_objective": 17479.707724263008,
+        "families": [
+          {
+            "checks": 1,
+            "family": "power_balance",
+            "maximum_violation": 0.004979971818784179,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 2,
+            "family": "line_flow",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 10,
+            "family": "generator_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 20,
+            "family": "reserve_bounds",
+            "maximum_violation": -0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 10,
+            "family": "reserve_headroom_footroom",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 2,
+            "family": "reserve_requirements",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 0,
+            "family": "generator_ramping",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 0,
+            "family": "renewable_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 0,
+            "family": "storage_power_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 0,
+            "family": "storage_energy_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 0,
+            "family": "storage_terminal_energy",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 1,
+            "family": "canonical_equalities",
+            "maximum_violation": 0.004979971818784179,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 16,
+            "family": "canonical_inequalities",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 15,
+            "family": "canonical_box",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          }
+        ],
+        "maximum_ptdf_angle_flow_difference": 5.684341886080802e-14,
+        "mode": "approximate_first_order_candidate",
+        "objective_constant": 0.0,
+        "objective_difference": 3.637978807091713e-12,
+        "passed": true,
+        "reference_slack_adjustments_mw": [
+          0.004979971818670492
+        ],
+        "total_objective": 17479.707724263004,
+        "variable_objective": 17479.707724263004
+      },
+      "checks": {
+        "all_values_finite": true,
+        "approximate_physical_candidate_validation": true,
+        "canonical_primal_violation": true,
+        "converged": true,
+        "dense_sparse_power_estimates_agree": true,
+        "deterministic_repeated_run": true,
+        "equality_block_full_row_rank": true,
+        "equality_gram_positive_definite": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "lambda_is_conservative": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "Mathematical reproduction on an unmodified public MATPOWER network; no paper-instance claim",
+      "comparison": {
+        "maximum_canonical_primal_violation": 0.004979971818784179,
+        "maximum_physical_violation": 0.004979971818784179,
+        "scaled_objective_gap": 1.082392641284027e-05
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "active_topology_branches": 6,
+        "buses": 5,
+        "generators": 5,
+        "m": 17,
+        "m1": 1,
+        "m2": 16,
+        "n": 15,
+        "nnz_A1": 5,
+        "nnz_A2": 46,
+        "periods": 1,
+        "renewables": 0,
+        "storage": 0,
+        "thermally_constrained_branches": 2
+      },
+      "highs": {
+        "iterations": 2,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 17479.89692538103,
+        "residuals": {
+          "kkt_combined_norm": 9.106319693313691e-14,
+          "paper_normalized_combined_norm": 9.83916822541461e-17,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 7.517239359073906e-17,
+            "stationarity": 6.34825517653462e-17
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 1.1368683772161603e-13,
+            "stationarity": 3.552713678800501e-15
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "total_objective": 17479.89692538103,
+        "x": [
+          40.0,
+          170.0,
+          323.4948462690514,
+          0.0,
+          466.50515373094856,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "y": [
+          39.94273632279095,
+          0.0,
+          0.0,
+          62.32204211082724,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          -2.977358823011187,
+          -1.977358823011187,
+          0.0,
+          0.057263677209050456,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "name": "case5_base_t1",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 1.0,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 5.0,
+          "minimum_eigenvalue": 5.0,
+          "positive_definite": true,
+          "rank": 1,
+          "rows": 1,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": {
+          "dense_eigendecomposition": 6.541815375382555,
+          "lambda_used": 6.541815376036739,
+          "maximum_estimate_difference": 1.7763568394002505e-15,
+          "power_converged": true,
+          "power_iteration": 6.541815375382557,
+          "power_iterations": 266,
+          "power_residual": 6.109216942173264e-11,
+          "rows": 16,
+          "s2_minimum_eigenvalue": 6.541842623164484e-10,
+          "safety_margin": 6.54182485959609e-10,
+          "sparse_eigsh": 6.541815375382557
+        },
+        "iterations": 108134,
+        "maximum_equality_solve_infinity_residual": 2.2737367544323206e-13,
+        "maximum_equality_solve_relative_residual": 2.8434215877797395e-16,
+        "maximum_z_x_identity_error": 3.5561831257524545e-15,
+        "minimum_inequality_multiplier": 0.0,
+        "objective": {
+          "canonical_variable": 17479.707724263004,
+          "constant": 0.0,
+          "total": 17479.707724263004
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.005771147339994624,
+          "paper_normalized_combined_norm": 5.000384744571873e-05,
+          "paper_normalized_norms": {
+            "box": 4.327575965479683e-18,
+            "primal_feasibility": 3.292873732217939e-06,
+            "stationarity": 4.989530781504791e-05
+          },
+          "paper_raw_norms": {
+            "box": 2.59015899006787e-15,
+            "primal_feasibility": 0.004979971818784179,
+            "stationarity": 0.0027923222626228266
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 51.99701530000311,
+          "preparation": 0.005244999993010424,
+          "total": 52.00263280000945
+        },
+        "x": [
+          39.999849366532416,
+          169.99918071731173,
+          323.48811114642524,
+          2.59015899006787e-15,
+          466.5078787979119,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "y": [
+          39.94459870266882,
+          0.0,
+          0.0,
+          62.32201117262557,
+          0.0,
+          2.978985385457937,
+          0.0,
+          1.9784048280314006,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          0.0,
+          0.0,
+          0.0,
+          0.055561715809337185,
+          0.0,
+          2.978978229753598,
+          1.9783942116508324,
+          0.0,
+          4.8832065576140346e-05,
+          0.0,
+          -0.00010727022287311265,
+          0.0,
+          0.0,
+          -5.617211353329612e-06,
+          0.0
+        ]
+      },
+      "synthetic_extension": false
+    },
+    {
+      "approximate_candidate_validation": {
+        "all_values_finite": true,
+        "direct_total_objective": 26579.00431574851,
+        "families": [
+          {
+            "checks": 2,
+            "family": "power_balance",
+            "maximum_violation": 0.007577258668789,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 4,
+            "family": "line_flow",
+            "maximum_violation": 0.0046402654441806135,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 20,
+            "family": "generator_bounds",
+            "maximum_violation": 1.9639238152402427e-15,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 40,
+            "family": "reserve_bounds",
+            "maximum_violation": -0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 20,
+            "family": "reserve_headroom_footroom",
+            "maximum_violation": 0.0001424793235465159,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 4,
+            "family": "reserve_requirements",
+            "maximum_violation": 0.00032876646523405384,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 10,
+            "family": "generator_ramping",
+            "maximum_violation": 0.0004437236824053059,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 4,
+            "family": "renewable_bounds",
+            "maximum_violation": 1.4210854715202004e-14,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 8,
+            "family": "storage_power_bounds",
+            "maximum_violation": 2.109531910856937e-17,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 4,
+            "family": "storage_energy_bounds",
+            "maximum_violation": 0.0,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 1,
+            "family": "storage_terminal_energy",
+            "maximum_violation": 2.1140242651540575e-05,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 3,
+            "family": "canonical_equalities",
+            "maximum_violation": 0.007577258668789,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 46,
+            "family": "canonical_inequalities",
+            "maximum_violation": 0.004640265444152192,
+            "passed": true,
+            "tolerance": 0.01
+          },
+          {
+            "checks": 36,
+            "family": "canonical_box",
+            "maximum_violation": 1.4210854715202004e-14,
+            "passed": true,
+            "tolerance": 0.01
+          }
+        ],
+        "maximum_ptdf_angle_flow_difference": 1.9895196601282805e-13,
+        "mode": "approximate_first_order_candidate",
+        "objective_constant": 10000.0,
+        "objective_difference": 0.0,
+        "passed": true,
+        "reference_slack_adjustments_mw": [
+          0.006859708340130055,
+          0.007577258668902687
+        ],
+        "total_objective": 26579.00431574851,
+        "variable_objective": 16579.00431574851
+      },
+      "checks": {
+        "all_values_finite": true,
+        "approximate_physical_candidate_validation": true,
+        "canonical_primal_violation": true,
+        "converged": true,
+        "dense_sparse_power_estimates_agree": true,
+        "deterministic_repeated_run": true,
+        "equality_block_full_row_rank": true,
+        "equality_gram_positive_definite": true,
+        "equality_solves_accurate": true,
+        "fixed_sigma": true,
+        "inequality_multipliers_nonnegative": true,
+        "kkt_target_satisfied": true,
+        "lambda_is_conservative": true,
+        "no_restart": true,
+        "objective_matches_highs": true,
+        "paper_stopping_satisfied": true,
+        "z_x_identity_accurate": true
+      },
+      "classification": "Clearly labeled deterministic synthetic extension for exercising the paper's multi-period reserve, ramp, renewable, and storage rows",
+      "comparison": {
+        "maximum_canonical_primal_violation": 0.007577258668789,
+        "maximum_physical_violation": 0.007577258668789,
+        "scaled_objective_gap": 3.758538945271889e-05
+      },
+      "deterministic_repeat": true,
+      "dimensions": {
+        "active_topology_branches": 6,
+        "buses": 5,
+        "generators": 5,
+        "m": 49,
+        "m1": 3,
+        "m2": 46,
+        "n": 36,
+        "nnz_A1": 20,
+        "nnz_A2": 148,
+        "periods": 2,
+        "renewables": 1,
+        "storage": 1,
+        "thermally_constrained_branches": 2
+      },
+      "highs": {
+        "iterations": 15,
+        "message": "Optimization terminated successfully. (HiGHS Status 7: Optimal)",
+        "objective": 16580.003335525525,
+        "residuals": {
+          "kkt_combined_norm": 1.3161926909721957e-13,
+          "paper_normalized_combined_norm": 1.118661378481903e-16,
+          "paper_normalized_norms": {
+            "box": 0.0,
+            "primal_feasibility": 5.4396599904461206e-17,
+            "stationarity": 9.774989880252708e-17
+          },
+          "paper_raw_norms": {
+            "box": 0.0,
+            "primal_feasibility": 1.1368683772161603e-13,
+            "stationarity": 1.0369744555336894e-14
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "status": 0,
+        "total_objective": 26580.00333552553,
+        "x": [
+          40.0,
+          170.0,
+          176.01418117808524,
+          -0.0,
+          466.5051537309486,
+          39.676633743742265,
+          160.0,
+          186.01418117808524,
+          10.0,
+          456.5051537309486,
+          80.0,
+          120.0,
+          0.0,
+          27.80403134722394,
+          32.51933490903385,
+          0.0,
+          0.0,
+          0.0,
+          5.0,
+          10.0,
+          10.0,
+          0.3233662562577351,
+          0.0,
+          10.0,
+          10.0,
+          9.676633743742265,
+          0.0,
+          10.0,
+          10.0,
+          0.0,
+          0.0,
+          10.0,
+          0.0,
+          0.0,
+          10.0,
+          5.0
+        ],
+        "y": [
+          32.84487508046571,
+          47.04059756511619,
+          28.962264150943398,
+          0.0,
+          0.0,
+          34.98052381034339,
+          0.0,
+          0.0,
+          0.0,
+          89.66356041131108,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.11452735441810091,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          2.735849056603783,
+          0.0,
+          7.040597565116187,
+          6.038420005973613,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          -5.954717646022377,
+          -3.9547176460223774,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -75.23479671173459,
+          -77.53412232623563,
+          5.4716981132075535,
+          0.0,
+          0.0,
+          5.471698113207555,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.11452735441810091,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "name": "case5_synthetic_extension_t2",
+      "passed": true,
+      "sgs_hpr": {
+        "converged": true,
+        "equality_system": {
+          "condition_number": 3.5837481543455176,
+          "full_row_rank": true,
+          "maximum_eigenvalue": 9.596384890078165,
+          "minimum_eigenvalue": 2.67775091239097,
+          "positive_definite": true,
+          "rank": 3,
+          "rows": 3,
+          "symmetry_error": 0.0
+        },
+        "history_interval": 250,
+        "inequality_spectrum": {
+          "dense_eigendecomposition": 11.825678984059746,
+          "lambda_used": 11.825678985242323,
+          "maximum_estimate_difference": 7.105427357601002e-15,
+          "power_converged": true,
+          "power_iteration": 11.825678984059753,
+          "power_iterations": 61,
+          "power_residual": 1.0811448771105726e-10,
+          "rows": 46,
+          "s2_minimum_eigenvalue": 1.1825775914076075e-09,
+          "safety_margin": 1.18257048598025e-09,
+          "sparse_eigsh": 11.825678984059747
+        },
+        "iterations": 74933,
+        "maximum_equality_solve_infinity_residual": 2.2737367544323206e-13,
+        "maximum_equality_solve_relative_residual": 5.081088727802824e-16,
+        "maximum_z_x_identity_error": 2.842170943040401e-14,
+        "minimum_inequality_multiplier": 0.0,
+        "objective": {
+          "canonical_variable": 16579.00431574851,
+          "constant": 10000.0,
+          "total": 26579.00431574851
+        },
+        "residuals": {
+          "kkt_combined_norm": 0.012493636198712015,
+          "paper_normalized_combined_norm": 5.028118175776976e-05,
+          "paper_normalized_norms": {
+            "box": 2.3317020834289444e-17,
+            "primal_feasibility": 5.379831165080125e-06,
+            "stationarity": 4.999254600031e-05
+          },
+          "paper_raw_norms": {
+            "box": 2.0198496343875738e-14,
+            "primal_feasibility": 0.011243643788552242,
+            "stationarity": 0.005303431901668033
+          },
+          "paper_stopping": {
+            "all_satisfied": true,
+            "box": true,
+            "primal_feasibility": true,
+            "stationarity": true
+          },
+          "tolerance": 5e-05
+        },
+        "restart_count": 0,
+        "sigma": 1.0,
+        "timing_seconds": {
+          "iteration_loop": 46.15315730001021,
+          "preparation": 0.004295899998396635,
+          "total": 46.15771489999315
+        },
+        "x": [
+          40.0,
+          169.9989712766895,
+          175.9915295740897,
+          -1.9639238152402427e-15,
+          466.50969433928105,
+          39.698540582158515,
+          159.9989478725752,
+          185.9909179719709,
+          10.000443723682404,
+          456.51002162659336,
+          79.99999999999999,
+          120.00000000000001,
+          4.42524618127521e-16,
+          27.79355096435072,
+          32.50705489840041,
+          -2.109531910856937e-17,
+          0.0,
+          1.7088381491087157e-16,
+          8.333301184700515,
+          8.333301184700515,
+          8.333301184700515,
+          0.3010646672071609,
+          7.3964335504518655,
+          7.434095866907621,
+          7.434095866907621,
+          7.434095866907621,
+          4.999935095723469,
+          4.999935095723469,
+          4.999935095723469,
+          0.00014247932354455198,
+          4.999935095723469,
+          5.000353133050549,
+          5.000353133050549,
+          5.000353133050549,
+          4.998258701332571,
+          5.000353133050549
+        ],
+        "y": [
+          32.84344146868288,
+          47.04339602143193,
+          28.96370980870204,
+          0.0,
+          0.0,
+          34.96424184029416,
+          0.0,
+          0.0,
+          0.0,
+          89.66994616080297,
+          0.0,
+          5.217828466047288,
+          0.0,
+          3.957331266958639,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          3.7701195565491356e-05,
+          0.0,
+          0.0,
+          7.472684136266129e-05,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          3.0012274328948816e-06,
+          4.33094755338148e-05,
+          5.868628561049256e-05,
+          4.075628450929462e-05,
+          0.0,
+          0.0,
+          1.000719485176602,
+          0.0,
+          0.0,
+          2.7361334153575525,
+          0.0,
+          7.043081301821652,
+          6.04171189090065,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "z": [
+          -0.7410949400997708,
+          0.0,
+          0.0,
+          0.11363182321877671,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -75.23593146776477,
+          -77.53475595756305,
+          5.471904305782248,
+          0.0,
+          0.0,
+          5.471843937037742,
+          5.217812913479329,
+          3.9572408420879968,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "synthetic_extension": true
+    }
+  ],
+  "configuration": {
+    "algorithm": "Paper Algorithm 2, direct CPU equality solves",
+    "backend": "NumPy and SciPy CPU",
+    "dcopf_kkt_combined_target": 0.02,
+    "dcopf_maximum_scaled_objective_gap": 0.0002,
+    "dcopf_physical_tolerance": 0.01,
+    "history_interval": 250,
+    "initial_state": "w0=(y,z,x)=all-zero FP64 vectors",
+    "maximum_equality_infinity_residual": 2e-12,
+    "maximum_iterations": 150000,
+    "maximum_z_x_identity_error": 1e-12,
+    "paper_tolerance": 5e-05,
+    "power_iteration_seed": 20260729,
+    "precision": "FP64",
+    "sigma": 1.0,
+    "stage": 3,
+    "timing_boundary": {
+      "history": "iteration loop through the recorded residual evaluation",
+      "preparation": "CSR conversion, direct equality factorization, and spectral cross-check",
+      "total": "preparation, initialization, iteration loop, and final result assembly"
+    },
+    "toy_kkt_combined_target": 0.00025,
+    "toy_maximum_primal_violation": 0.00025,
+    "toy_maximum_scaled_objective_gap": 0.0005,
+    "unsupported_features": {
+      "adaptive_sigma": false,
+      "gpu": false,
+      "restart": false,
+      "scaling": false,
+      "structural_y1": false
+    }
+  },
+  "environment": {
+    "execution_device": "local CPU",
+    "highs_interface": "scipy.optimize.linprog(method='highs-ds')",
+    "highspy_installed": false,
+    "numpy": "2.4.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "precision": "FP64",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.13.5",
+    "repository_parent_commit": "5773c068ed6a6453c12feb6ce2bd19ef402cc517",
+    "scipy": "1.16.3"
+  },
+  "reproduction_boundary": {
+    "adaptive_sigma_used": false,
+    "classification": "mathematical reproduction and structural validation",
+    "dgx_spark_touched": false,
+    "gpu_code_used": false,
+    "restart_used": false,
+    "scaling_used": false,
+    "structural_y1_used": false
+  },
+  "stage": 3,
+  "trajectory_file": "sgs_hpr_trajectories.jsonl.gz"
+}

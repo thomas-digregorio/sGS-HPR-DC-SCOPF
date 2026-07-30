@@ -4,15 +4,15 @@ Last updated: 2026-07-29
 
 ## Stage gate
 
-- Completed stage: **Stage 2 - CPU DCOPF model construction**
+- Completed stage: **Stage 3 - CPU sGS-HPR reference implementation**
 - Gate result: **PASS**
-- Current state: **stopped at the Stage 3 approval gate**
-- Next proposed stage: **Stage 3 - CPU sGS-HPR reference implementation**
-- Required approval: `APPROVE STAGE 2 AND RUN STAGE 3`
+- Current state: **stopped at the Stage 4 approval gate**
+- Next proposed stage: **Stage 4 - paper-specific structural equality solve**
+- Required approval: `APPROVE STAGE 3 AND RUN STAGE 4`
 - Dashboard: private, owner-only Sites deployment; its URL and project
   identifier are intentionally omitted from the public repository.
 
-No Stage 3 sGS-HPR iteration or structural equality solver has been created.
+No Stage 4 structural equality solver has been created.
 
 ## Current implementation status
 
@@ -29,7 +29,12 @@ The FP64 CPU package now provides:
 - sparse construction of every printed DCOPF constraint family;
 - per-row physical metadata tied to the original paper equation;
 - objective constants separated from the canonical variable coefficient;
-- a HiGHS reference solve and formula-based physical validation.
+- a HiGHS reference solve and formula-based physical validation;
+- the paper's complete Algorithm 2 update sequence in FP64 on CPU;
+- trusted direct solves for both equality-multiplier sweeps;
+- dense, sparse, and power-iteration spectral cross-checks;
+- exact per-iteration Equation (54) checks with sparse trajectory storage;
+- separate strict-solution and approximate-candidate DCOPF validators.
 
 ## Validated capabilities
 
@@ -50,45 +55,41 @@ The FP64 CPU package now provides:
 - Direct physical validation passes for balance, line flows, generator bounds,
   reserve bounds and totals, ramping, renewable limits, storage power and
   energy, terminal energy, and objective reconstruction.
-- Test suite: 59 passed.
+- CPU sGS-HPR converges on all four deterministic Stage 1 LPs.
+- CPU sGS-HPR converges on the public T=1 and synthetic T=2 DCOPF models.
+- The DCOPF scaled objective gaps to HiGHS are `1.08e-5` and `3.76e-5`.
+- The largest candidate physical violations are `0.004980 MW` and
+  `0.007577 MW/MWh`, below the stated `0.01` target.
+- Both direct equality sweeps remain below `2.28e-13` infinity-norm residual.
+- Repeated full runs reproduce iteration counts, states, and non-timing
+  trajectory fields exactly.
+- Test suite: 76 passed.
 - Ruff lint and formatting checks pass.
 
 ## Numerical validation summary
 
-| Case | Classification | Total objective | HiGHS iterations | Largest physical violation |
-|---|---|---:|---:|---:|
-| case5 base, T=1 | public mathematical reproduction | 17,479.8969253810 | 2 | 1.14e-13 |
-| case5 synthetic extension, T=2 | deterministic coverage fixture | 26,580.0033355255 | 15 | 1.14e-13 |
+| Case | Iterations | sGS-HPR total objective | HiGHS total objective | Raw Eq. (28) | Max physical violation |
+|---|---:|---:|---:|---:|---:|
+| case5 base, T=1 | 108,134 | 17,479.7077242630 | 17,479.8969253810 | 0.00577 | 0.004980 MW |
+| synthetic extension, T=2 | 74,933 | 26,579.0043157485 | 26,580.0033355255 | 0.01249 | 0.007577 MW/MWh |
 
-The public base dispatch is:
-
-```text
-generation = (40.0000, 170.0000, 323.494846, 0.0000, 466.505154) MW
-```
-
-The synthetic extension forces the storage device to:
-
-```text
-period 1: charge    32.519335 MW
-period 2: discharge 27.804031 MW
-```
-
-With charge efficiency `0.95` and discharge efficiency `0.90`, the terminal
-energy returns exactly to its initial value within FP64 solver tolerance.
+Both cases satisfy all three separately normalized Equation (54) tests at
+`5e-5`, the raw DCOPF Equation (28) target of `0.02`, the physical target of
+`0.01 MW/MWh`, and the scaled objective-gap target of `2e-4`.
 
 ## Environment status
 
-Stage 2 ran locally on:
+Stage 3 ran locally on:
 
 - Windows 11;
 - Python 3.13.5;
 - NumPy 2.4.1;
-- SciPy 1.16.3 with `linprog(method="highs-ds")`;
+- SciPy 1.16.3 with `linprog(method="highs-ds")` and direct Cholesky;
 - FP64 arrays;
 - pytest and Ruff 0.16.0 in the project-local virtual environment.
 
-The DGX Spark remains audited and reachable but unchanged. Stage 2 installed
-nothing and ran no solver there.
+The DGX Spark remains audited and reachable but unchanged. Stage 3 installed
+nothing and ran no solver there. GPU execution remains locked until Stage 6.
 
 ## Known limitations
 
@@ -101,8 +102,14 @@ nothing and ran no solver there.
   renewable placements, and storage placements remain unavailable.
 - The two-period resource case is synthetic validation data, not an author
   benchmark.
-- Stage 2 constructs and solves the LP with HiGHS only. It does not yet run
-  Algorithm 2.
+- Stage 3 uses dense correctness cross-checks for the small spectral problems;
+  this is not yet a large-case spectral strategy.
+- The all-zero cold-start vectors are a disclosed local choice because the
+  paper does not print them.
+- The fixed-sigma method is a correctness baseline and requires tens of
+  thousands of iterations on these unscaled cases.
+- Approximate first-order candidates are not relabeled as strict Stage 2 power
+  flows; their balance errors remain explicit.
 
 ## Unresolved paper ambiguities
 
@@ -113,8 +120,9 @@ nothing and ran no solver there.
 3. Exact author preprocessing for reference buses, transformers, inactive
    branches, and thermal ratings is unavailable.
 4. Adaptive penalty and restart formulas remain incomplete.
-5. Precision, eigenvalue estimation, sparse storage, initialization, and
-   timing boundaries remain incomplete.
+5. The paper's precision, eigenvalue estimator, initialization vectors, and
+   timing boundaries remain incomplete. Stage 3 records its own choices rather
+   than attributing them to the authors.
 
 ## Reproduction classification
 
@@ -125,12 +133,13 @@ reproduction.
 
 ## Next proposed stage
 
-Stage 3 will implement fixed-penalty CPU Algorithm 2:
+Stage 4 will replace the direct equality sweep with the paper's structural
+formula:
 
-1. preserve the printed z, x, y1-half, y2, y1 update order;
-2. use trusted direct solves for both equality-multiplier sweeps;
-3. implement the projected inequality-multiplier update;
-4. retain the fixed Halpern anchor and Eq. (54) stopping rules;
-5. compare the complete CPU iteration with HiGHS on the Stage 2 models.
+1. derive the implemented `A1` block structure in the exact variable order;
+2. implement diagonal and low-rank operations without large dense matrices;
+3. cross-check many right-hand sides against the Stage 3 Cholesky oracle;
+4. compare complete direct and structural solver trajectories;
+5. measure, but not overclaim, the observed complexity trend.
 
-The Proposition 5 structural inverse remains locked until Stage 4.
+The direct Stage 3 path remains available as the correctness reference.

@@ -228,3 +228,72 @@ its original rationale should remain reviewable.
 - **Reason:** The paper does not publish the required device placements or time
   series. A labeled validation fixture tests the mathematics without implying
   that invented data came from the authors.
+
+## D-0023 - Use direct Cholesky solves as the Stage 3 equality oracle
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** Factor the verified FP64 matrix `A1 A1^T` once and use the
+  factor for both printed equality-multiplier sweeps.
+- **Reason:** This is a trusted correctness baseline for Algorithm 2. The
+  manuscript's disputed Proposition 5 signs remain locked until Stage 4 can
+  compare the structural formula against this oracle.
+
+## D-0024 - Cross-check lambda and use a conservative overestimate
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** On correctness-scale cases, compute the largest eigenvalue of
+  `A2 A2^T` with dense symmetric eigendecomposition, sparse `eigsh`, and seeded
+  power iteration. Use the largest estimate plus a positive FP64 margin.
+- **Reason:** An underestimate can invalidate the positive-semidefinite
+  proximal block. The dense result is affordable and authoritative at this
+  stage; the other two methods expose estimator mistakes before larger cases.
+
+## D-0025 - Check Equation (54) every iteration and store sparse history
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** Evaluate all three Equation (54) tests on the intermediate
+  state every iteration. Persist iteration 1, every 250th iteration, and the
+  exact stopping iteration.
+- **Reason:** The residual trajectory oscillates, so checking only at storage
+  intervals changes the first accepted iterate. Sparse storage preserves the
+  trajectory without turning the evidence file into an unnecessarily large
+  artifact.
+
+## D-0026 - Validate first-order DCOPF candidates without weakening the strict oracle
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** Keep the Stage 2 strict physical validator unchanged. Add a
+  separately named approximate-candidate validator with a `0.01 MW/MWh`
+  physical threshold. Report the original balance error, and adjust only the
+  temporary flow-check injection at the reference bus.
+- **Reason:** An Equation (54)-tolerant first-order iterate is not balanced to
+  the `1e-9` level required by the strict PTDF oracle. The separate path tests,
+  rather than hides, that imbalance while still allowing independent PTDF and
+  angle-flow comparison under the model's reference-slack convention.
+
+## D-0027 - State separate raw KKT and objective targets for DCOPF
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** In addition to the paper's separately normalized `5e-5`
+  stopping tests, require raw Equation (28) combined norm at most `0.02`,
+  scaled objective gap to HiGHS at most `2e-4`, and raw physical violation at
+  most `0.01 MW/MWh`.
+- **Reason:** Raw residual magnitudes scale with the MW right-hand sides and
+  cost vector. These explicit validation targets prevent a normalized stop
+  from being mistaken for an unscaled `5e-5` KKT guarantee.
+
+## D-0028 - Decompose CPU timing boundaries
+
+- **Status:** accepted
+- **Stage:** 3
+- **Decision:** Record preparation, iteration-loop, and total elapsed time
+  separately. Preparation includes sparse conversion, spectral cross-checks,
+  and the Cholesky factorization.
+- **Reason:** The paper does not define its timing boundary. A named
+  decomposition prevents preprocessing costs from disappearing into an
+  ambiguous "solver time" and prepares the project for fair CPU/GPU timing.

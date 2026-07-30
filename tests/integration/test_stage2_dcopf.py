@@ -16,7 +16,11 @@ from gpu_dcopf_hpr.network_data import (
     NetworkCase,
     load_matpower_case,
 )
-from gpu_dcopf_hpr.validation import solve_with_highs, validate_dcopf_solution
+from gpu_dcopf_hpr.validation import (
+    solve_with_highs,
+    validate_dcopf_candidate,
+    validate_dcopf_solution,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CASE = PROJECT_ROOT / "data" / "raw" / "matpower" / "case5.m"
@@ -40,6 +44,27 @@ def test_highs_solution_passes_independent_physical_validation(config_path: Path
     assert validation.maximum_ptdf_angle_flow_difference <= 1e-10
     assert validation.objective_difference <= 1e-10
     assert all(family.passed for family in validation.families)
+
+
+def test_approximate_candidate_validator_reports_reference_slack_adjustment() -> None:
+    network = load_matpower_case(CASE)
+    config = load_dcopf_config(CONFIGS[0], network)
+    model = build_dcopf_model(network, config)
+    solution = solve_with_highs(model.lp, tolerance=1e-7)
+    candidate = solution.state.x.copy()
+    candidate[model.variables.index("p_g", 0, "gen_2")] += 0.005
+
+    with pytest.raises(ValueError, match="balanced bus-injection"):
+        validate_dcopf_solution(model, candidate)
+
+    validation = validate_dcopf_candidate(model, candidate, tolerance=0.01)
+    families = {family.family: family for family in validation.families}
+
+    assert validation.passed
+    assert validation.mode == "approximate_first_order_candidate"
+    assert validation.reference_slack_adjustments_mw == pytest.approx((-0.005,), abs=1e-10)
+    assert families["power_balance"].maximum_violation == pytest.approx(0.005, abs=1e-10)
+    assert families["power_balance"].passed
 
 
 def analytic_two_bus_case() -> tuple[NetworkCase, DCOPFConfig]:

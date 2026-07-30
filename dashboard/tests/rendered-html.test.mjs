@@ -23,9 +23,10 @@ test("server-renders the research dashboard", async () => {
   assert.match(html, /<title>HPR Reproduction Control Room<\/title>/i);
   assert.match(html, /From paper to verified GPU solver/);
   assert.match(html, /Research roadmap/);
-  assert.match(html, /APPROVE STAGE 2 AND RUN STAGE 3/);
-  assert.match(html, /Public DCOPF model validated/);
-  assert.match(html, /Stage 2 passed \/ Stage 3 awaits approval/);
+  assert.match(html, /APPROVE STAGE 3 AND RUN STAGE 4/);
+  assert.match(html, /Fixed-sigma FP64 baseline passed all six cases/);
+  assert.match(html, /Stage 3 passed \/ Stage 4 awaits approval/);
+  assert.match(html, /76 FP64 validation tests passing/);
   assert.match(html, /DGX Spark/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Starter Project/i);
 });

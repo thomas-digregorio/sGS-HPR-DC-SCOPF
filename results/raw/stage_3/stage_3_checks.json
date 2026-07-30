@@ -1,0 +1,70 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_three_paths",
+      "passed": true
+    },
+    {
+      "detail": "True",
+      "name": "stage_three_validation_passed",
+      "passed": true
+    },
+    {
+      "detail": "sigma=1, FP64, no restart/adaptation/scaling/structural/GPU path",
+      "name": "fixed_sigma_cpu_fp64_baseline",
+      "passed": true
+    },
+    {
+      "detail": "cases=['analytic_toy', 'box_bound_active', 'case5_base_t1', 'case5_synthetic_extension_t2', 'inequality_inactive', 'planted_random']",
+      "name": "all_reference_cases_present",
+      "passed": true
+    },
+    {
+      "detail": "6 cases",
+      "name": "all_case_checks_pass",
+      "passed": true
+    },
+    {
+      "detail": "all six cases satisfy both tests",
+      "name": "equation_54_and_stated_kkt_targets",
+      "passed": true
+    },
+    {
+      "detail": "iteration counts, states, and non-timing histories match exactly",
+      "name": "full_repeated_runs_deterministic",
+      "passed": true
+    },
+    {
+      "detail": "5 inequality-bearing cases",
+      "name": "spectral_estimators_cross_checked",
+      "passed": true
+    },
+    {
+      "detail": "rank, SPD, and infinity-norm residual checks passed",
+      "name": "direct_equality_solves_accurate",
+      "passed": true
+    },
+    {
+      "detail": "public T=1 and labeled synthetic T=2 candidates",
+      "name": "t1_t2_dcopf_objective_and_physics",
+      "passed": true
+    },
+    {
+      "detail": "last_iterations={'analytic_toy': 17606, 'box_bound_active': 2501, 'inequality_inactive': 4, 'planted_random': 32615, 'case5_base_t1': 108134, 'case5_synthetic_extension_t2': 74933}",
+      "name": "sampled_trajectories_complete",
+      "passed": true
+    },
+    {
+      "detail": "no Stage 4, 5, or 6 implementation or DGX execution",
+      "name": "later_stage_boundaries_preserved",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "stage": 3,
+  "summary": {
+    "failed": 0,
+    "passed": 12
+  }
+}

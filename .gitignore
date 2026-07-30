@@ -40,6 +40,8 @@ results/raw/*
 !results/raw/stage_1/**
 !results/raw/stage_2/
 !results/raw/stage_2/**
+!results/raw/stage_3/
+!results/raw/stage_3/**
 results/processed/*
 !results/processed/.gitkeep
 results/plots/*
@@ -54,6 +56,8 @@ logs/*
 !logs/stage_1/**
 !logs/stage_2/
 !logs/stage_2/**
+!logs/stage_3/
+!logs/stage_3/**
 artifacts/*
 !artifacts/.gitkeep
 

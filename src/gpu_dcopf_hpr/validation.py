@@ -143,6 +143,8 @@ class DCOPFValidation:
     objective_difference: float
     all_values_finite: bool
     maximum_ptdf_angle_flow_difference: float
+    mode: str
+    reference_slack_adjustments_mw: tuple[float, ...]
 
     @property
     def passed(self) -> bool:
@@ -163,6 +165,8 @@ class DCOPFValidation:
             "direct_total_objective": self.direct_total_objective,
             "objective_difference": self.objective_difference,
             "maximum_ptdf_angle_flow_difference": self.maximum_ptdf_angle_flow_difference,
+            "mode": self.mode,
+            "reference_slack_adjustments_mw": list(self.reference_slack_adjustments_mw),
             "families": [family.summary() for family in self.families],
         }
 
@@ -171,14 +175,14 @@ def _maximum(values: list[float]) -> float:
     return max(values, default=0.0)
 
 
-def validate_dcopf_solution(
+def _validate_dcopf_vector(
     model: DCOPFModel,
     x: np.ndarray,
     *,
-    tolerance: float = 1e-7,
+    tolerance: float,
+    use_reference_slack_for_flow_checks: bool,
+    mode: str,
 ) -> DCOPFValidation:
-    """Recalculate every printed physical constraint family from semantics."""
-
     vector = np.asarray(x, dtype=np.float64)
     if vector.shape != (model.lp.n,):
         raise ValueError(f"x has shape {vector.shape}; expected {(model.lp.n,)}.")
@@ -187,6 +191,7 @@ def validate_dcopf_solution(
     families: list[ConstraintFamilyValidation] = []
 
     balance_violations: list[float] = []
+    reference_slack_adjustments: list[float] = []
     line_violations: list[float] = []
     ptdf_angle_differences: list[float] = []
     constrained_positions = {
@@ -200,10 +205,17 @@ def validate_dcopf_solution(
             + float(np.sum(blocks["p_ess_dc"][period]))
             - float(np.sum(blocks["p_ess_ch"][period]))
         )
-        balance_violations.append(abs(supply - float(np.sum(model.load_mw[period]))))
+        imbalance = supply - float(np.sum(model.load_mw[period]))
+        balance_violations.append(abs(imbalance))
         injection = model.bus_injections(vector, period)
-        ptdf_flows = model.ptdf.flows_from_injections(injection)
-        _, angle_flows = model.ptdf.angles_and_flows(injection)
+        flow_injection = injection
+        if use_reference_slack_for_flow_checks:
+            flow_injection = injection.copy()
+            adjustment = -float(np.sum(flow_injection))
+            flow_injection[model.ptdf.reference_position] += adjustment
+            reference_slack_adjustments.append(adjustment)
+        ptdf_flows = model.ptdf.flows_from_injections(flow_injection)
+        _, angle_flows = model.ptdf.angles_and_flows(flow_injection)
         ptdf_angle_differences.append(float(np.max(np.abs(ptdf_flows - angle_flows), initial=0.0)))
         for branch in model.constrained_branches:
             line_violations.append(
@@ -480,4 +492,52 @@ def validate_dcopf_solution(
         objective_difference=abs(total_objective - float(direct_objective)),
         all_values_finite=bool(np.all(np.isfinite(vector))),
         maximum_ptdf_angle_flow_difference=_maximum(ptdf_angle_differences),
+        mode=mode,
+        reference_slack_adjustments_mw=tuple(reference_slack_adjustments),
+    )
+
+
+def validate_dcopf_solution(
+    model: DCOPFModel,
+    x: np.ndarray,
+    *,
+    tolerance: float = 1e-7,
+) -> DCOPFValidation:
+    """Strictly recalculate every physical constraint on a solved vector.
+
+    Branch-flow evaluation requires the candidate itself to satisfy power
+    balance to the PTDF's numerical tolerance. This remains the Stage 2 oracle.
+    """
+
+    return _validate_dcopf_vector(
+        model,
+        x,
+        tolerance=tolerance,
+        use_reference_slack_for_flow_checks=False,
+        mode="strict_solution",
+    )
+
+
+def validate_dcopf_candidate(
+    model: DCOPFModel,
+    x: np.ndarray,
+    *,
+    tolerance: float = 0.01,
+) -> DCOPFValidation:
+    """Validate an approximate first-order iterate without hiding imbalance.
+
+    The original power-balance error is reported and tested as its own physical
+    family. Only the temporary injection used for angle/PTDF flow checks is
+    balanced at the reference bus. This matches the reference-slack convention
+    of the shift-factor model while leaving the candidate vector unchanged.
+    """
+
+    if not np.isfinite(tolerance) or tolerance <= 0.0:
+        raise ValueError("tolerance must be a positive finite scalar.")
+    return _validate_dcopf_vector(
+        model,
+        x,
+        tolerance=tolerance,
+        use_reference_slack_for_flow_checks=True,
+        mode="approximate_first_order_candidate",
     )

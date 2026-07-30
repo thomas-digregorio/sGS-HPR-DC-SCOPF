@@ -76,15 +76,15 @@ export const stages: ResearchStage[] = [
     id: 3,
     title: "CPU sGS-HPR reference implementation",
     purpose: "Implement Algorithm 2 conservatively before applying any GPU-specific shortcuts.",
-    status: "locked",
+    status: "complete",
     tasks: [
-      locked("3.1", "Paper update order"),
-      locked("3.2", "z and x update identity"),
-      locked("3.3", "Trusted direct y1 solve"),
-      locked("3.4", "Projected y2 update"),
-      locked("3.5", "Residuals and stopping"),
-      locked("3.6", "Fixed sigma baseline"),
-      locked("3.7", "Comparison against HiGHS"),
+      { id: "3.1", title: "Paper update order", status: "complete" },
+      { id: "3.2", title: "z and x update identity", status: "complete" },
+      { id: "3.3", title: "Trusted direct y1 solve", status: "complete" },
+      { id: "3.4", title: "Projected y2 update", status: "complete" },
+      { id: "3.5", title: "Residuals and stopping", status: "complete" },
+      { id: "3.6", title: "Fixed sigma baseline", status: "complete" },
+      { id: "3.7", title: "Comparison against HiGHS", status: "complete" },
     ],
   },
   {
@@ -222,6 +222,30 @@ export const learningNotes = [
       "The KKT mapping also tests multiplier complementarity; the paper's first stopping block checks primal feasibility only. Both are now computed and preserved.",
   },
   {
+    label: "Stage 3 finding",
+    title: "Check every iteration, store sparsely",
+    body:
+      "Equation 54 residuals oscillate. The solver therefore tests the stopping rule every iteration while writing only periodic trajectory samples plus the exact stopping point.",
+  },
+  {
+    label: "Linear algebra",
+    title: "Three estimates, one safe lambda",
+    body:
+      "Dense eigendecomposition is the small-case authority. Sparse eigsh and seeded power iteration cross-check it, then a positive margin keeps the projected y2 step valid.",
+  },
+  {
+    label: "Physical validation",
+    title: "An iterate is not an exact power flow",
+    body:
+      "First-order candidates retain a small balance error. That error is tested explicitly; only a temporary reference-bus adjustment is used to compare PTDF and angle flows.",
+  },
+  {
+    label: "Stage boundary",
+    title: "The direct solve stays the oracle",
+    body:
+      "Both y1 sweeps use a trusted Cholesky solve in Stage 3. The disputed low-rank Proposition 5 shortcut remains locked until Stage 4 can compare it against this baseline.",
+  },
+  {
     label: "Stage 2 finding",
     title: "A PTDF may need an offset",
     body:
@@ -245,8 +269,13 @@ export const artifacts = [
   { label: "Primary source", name: "references/AnEfficientGPU-basedHalpernAccelerating.pdf" },
   { label: "Specification", name: "docs/paper_specification.md" },
   { label: "Public network", name: "data/raw/matpower/case5.m" },
-  { label: "Stage evidence", name: "docs/stage_reports/stage_2_report.md" },
-  { label: "Validation results", name: "results/raw/stage_2/stage_2_validation.json" },
+  { label: "Stage evidence", name: "docs/stage_reports/stage_3_report.md" },
+  { label: "Validation results", name: "results/raw/stage_3/stage_3_validation.json" },
+  {
+    label: "CPU trajectories",
+    name: "results/raw/stage_3/sgs_hpr_trajectories.jsonl.gz",
+  },
+  { label: "Solver settings", name: "configs/sgs_hpr/stage_3_fixed_sigma.json" },
   {
     label: "Base row map",
     name: "results/raw/stage_2/case5_base_t1_row_metadata.jsonl.gz",

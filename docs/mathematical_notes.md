@@ -391,3 +391,121 @@ The two-period extension is explicitly synthetic. Its 10 MW generator ramp
 limits force storage to charge in period 1 and discharge in period 2. That
 nonzero trajectory tests the cumulative energy rows and terminal equality,
 while its label prevents confusion with the authors' unavailable inputs.
+
+## 19. Stage 3 implements the printed Algorithm 2 order
+
+The CPU reference keeps four states distinct:
+
+- `w0`: the fixed all-zero Halpern anchor;
+- `wk`: the current iterate;
+- `w_bar`: the intermediate proximal point used for stopping;
+- `w_hat = 2 w_bar - wk`: the reflected point.
+
+For `y = (y1, y2)` and fixed `sigma = 1`, one iteration performs:
+
+```text
+1. z_bar
+2. x_bar
+3. y1_half       first direct equality solve
+4. y2_bar        nonnegative projected update
+5. y1_bar        second direct equality solve
+6. w_hat         reflection
+7. w_next        fixed-anchor Halpern average
+```
+
+The first two equations are evaluated as:
+
+```text
+q     = x + sigma (A^T y - c)
+z_bar = (project_box(q) - q) / sigma
+x_bar = x + sigma (A^T y + z_bar - c)
+```
+
+The implementation independently checks that `x_bar = project_box(q)`. This
+coding order mirrors Equations (33) and (34) instead of merely producing an
+algebraically equivalent final vector.
+
+## 20. Why there are two equality solves
+
+Let `G1 = A1 A1^T`. For an inequality multiplier vector `v`, define:
+
+```text
+rhs1(v) =
+  [b1 - A1 {x_bar + sigma (A2^T v + z_bar - c)}] / sigma
+```
+
+Algorithm 2 first solves:
+
+```text
+G1 y1_half = rhs1(y2_current)
+```
+
+It then updates `y2`, and solves again:
+
+```text
+G1 y1_bar = rhs1(y2_bar)
+```
+
+The second solve is not redundant: the projected inequality multiplier has
+changed. Stage 3 verifies that `A1` has full row rank, checks the raw Gram
+matrix's symmetry, confirms positive definiteness, factors it with Cholesky,
+and records both absolute infinity-norm and relative solve residuals.
+
+## 21. The projected y2 step and spectral safeguard
+
+With:
+
+```text
+lambda = largest eigenvalue of A2 A2^T = ||A2||_2^2
+Ry = x_bar / sigma
+     + A1^T y1_half
+     + A2^T y2_current
+     + z_bar - c
+```
+
+Equation (50) becomes:
+
+```text
+y2_bar = project_nonnegative(
+  y2_current + [b2 / sigma - A2 Ry] / lambda
+)
+```
+
+The code never constructs `S2 = lambda I - A2 A2^T`. On the six Stage 3
+correctness cases, dense eigendecomposition, sparse `eigsh`, and deterministic
+power iteration agree. The value actually used is the largest estimate plus a
+small positive FP64 margin, so `S2` remains positive semidefinite even at the
+top eigenvalue.
+
+## 22. Paper stopping and validation targets are different tests
+
+The paper stops when each separately normalized Equation (54) block is at most
+`5e-5`. Stage 3 evaluates those blocks on `w_bar` every iteration.
+
+The project also reports the raw Equation (28) KKT mapping. For unit-scale toy
+LPs the target remains `2.5e-4`. For the MW-scaled DCOPF cases, the stated raw
+combined target is `0.02`; the physical candidate threshold is `0.01 MW/MWh`;
+and the scaled objective gap to HiGHS must be no more than `2e-4`.
+
+These are additional validation thresholds, not alternative paper settings.
+In particular, the normalized paper tolerance should not be read as a raw
+`5e-5 MW` requirement.
+
+## 23. How approximate DCOPF candidates are checked physically
+
+The strict Stage 2 validator requires power balance to near machine precision
+before evaluating branch flows. A finite-tolerance first-order candidate
+cannot satisfy that precondition at its first valid Equation (54) iterate.
+
+Stage 3 therefore uses a separately labeled candidate validator:
+
+1. compute and retain the candidate's original power-balance error;
+2. test that error against `0.01 MW`;
+3. leave the candidate decision vector unchanged;
+4. for PTDF-versus-angle flow comparison only, absorb the measured imbalance
+   at the reference bus;
+5. independently test every other physical family on the original vector.
+
+This does not convert the iterate into a strict power-flow solution. It makes
+the reference-slack convention explicit while keeping the actual imbalance in
+the acceptance record.

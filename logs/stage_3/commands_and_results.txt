@@ -1,0 +1,103 @@
+Stage 3 command record
+Date: 2026-07-29
+Precision: FP64
+Execution device: local CPU
+DGX Spark touched: no
+
+Source inspection
+-----------------
+The manuscript pages containing Algorithm 2, Equations (31)-(50), and
+Equation (54) were rendered and visually inspected. The implementation was
+cross-checked against the printed update order and sign conventions.
+
+Evidence generation
+-------------------
+Command:
+./.venv/Scripts/python.exe scripts/run_cpu_solver.py
+
+Result:
+all_passed=true
+
+analytic_toy:
+  iterations=17606
+  scaled_objective_gap=1.1309995853192588e-04
+
+box_bound_active:
+  iterations=2501
+  scaled_objective_gap=0
+
+inequality_inactive:
+  iterations=4
+  scaled_objective_gap=0
+
+planted_random:
+  iterations=32615
+  scaled_objective_gap=2.8459119183260487e-04
+
+case5_base_t1:
+  iterations=108134
+  total_objective=17479.707724263004
+  highs_total_objective=17479.89692538103
+  scaled_objective_gap=1.082392641284027e-05
+  raw_equation_28_norm=0.005771147339994624
+  maximum_physical_violation=0.004979971818784179 MW
+
+case5_synthetic_extension_t2:
+  iterations=74933
+  canonical_variable_objective=16579.00431574851
+  objective_constant=10000.0
+  total_objective=26579.00431574851
+  highs_total_objective=26580.00333552553
+  scaled_objective_gap=3.758538945271889e-05
+  raw_equation_28_norm=0.012493636198712015
+  maximum_physical_violation=0.007577258668789 MW/MWh
+
+All six complete repeated runs reproduced the iteration count, final state,
+and every non-timing history field exactly.
+
+Full Python test suite
+----------------------
+Command:
+./.venv/Scripts/python.exe -m pytest -q
+
+Result:
+76 passed in 79.19 seconds
+
+Quality checks
+--------------
+Commands:
+./.venv/Scripts/ruff.exe check .
+./.venv/Scripts/ruff.exe format --check .
+
+Result:
+PASS
+47 files already formatted
+
+Stage evidence check
+--------------------
+Command:
+./.venv/Scripts/python.exe scripts/check_stage_3.py --output results/raw/stage_3/stage_3_checks.json
+
+Result:
+PASS
+
+Dashboard checks
+----------------
+Commands:
+npm run build
+node --test tests/rendered-html.test.mjs
+
+Result:
+production build PASS
+2 rendered-output tests PASS
+
+Stage boundary
+--------------
+sigma=1
+initial_state=all-zero w0
+restart_count=0
+adaptive_sigma=false
+scaling=false
+structural_y1=false
+gpu=false
+dgx_execution=false

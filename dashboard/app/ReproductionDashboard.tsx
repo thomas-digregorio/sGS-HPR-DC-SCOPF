@@ -123,14 +123,14 @@ export function ReproductionDashboard() {
             <div className="metric-note">Stage gates prevent unsupported shortcuts.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Paper integrity</div>
-            <div className="metric-value">SHA-256</div>
-            <div className="metric-note">9.16 MB source fingerprinted and preserved.</div>
+            <div className="metric-label">CPU reference</div>
+            <div className="metric-value">Algorithm 2</div>
+            <div className="metric-note">Fixed-sigma FP64 baseline passed all six cases.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Compute target</div>
-            <div className="metric-value">DGX Spark</div>
-            <div className="metric-note">GB10 / CC 12.1 / CUDA 13.0 audited.</div>
+            <div className="metric-label">DCOPF agreement</div>
+            <div className="metric-value">T1 + T2</div>
+            <div className="metric-note">Physical error below 0.01 MW/MWh; HiGHS gap below 0.004%.</div>
           </div>
           <div className="metric-card">
             <div className="metric-label">Reproduction claim</div>
@@ -214,10 +214,10 @@ export function ReproductionDashboard() {
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">
-              The next stage remains locked until Stage 2 passes every acceptance criterion
+              The next stage remains locked until Stage 3 passes every acceptance criterion
               and you send the exact approval phrase.
             </p>
-            <div className="gate-command">APPROVE STAGE 2 AND RUN STAGE 3</div>
+            <div className="gate-command">APPROVE STAGE 3 AND RUN STAGE 4</div>
           </section>
 
           <section className="rail-card" aria-labelledby="rules-title">
@@ -239,7 +239,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Windows / RTX 5080 Laptop; 59 FP64 CPU validation tests passing.
+                  Windows / local CPU; 76 FP64 validation tests passing.
                 </div>
               </div>
               <div className="machine">
@@ -248,7 +248,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Ubuntu 24.04 / GB10 CC 12.1 / CUDA 13.0 / 121.7 GiB ATS memory.
+                  Audited and reachable; deliberately untouched during the CPU-only Stage 3.
                 </div>
               </div>
             </div>

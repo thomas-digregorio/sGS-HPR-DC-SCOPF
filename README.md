@@ -46,17 +46,17 @@ Only one stage is executed at a time:
 | 10 | Optional N-1 SCOPF research extension |
 
 Every stage ends with tests, a report, preserved evidence, and an acceptance
-decision. To start Stage 3 after reviewing Stage 2, send exactly:
+decision. To start Stage 4 after reviewing Stage 3, send exactly:
 
 ```text
-APPROVE STAGE 2 AND RUN STAGE 3
+APPROVE STAGE 3 AND RUN STAGE 4
 ```
 
 Casual phrases such as "continue" or "looks good" are not stage approval.
 
 ## Current status
 
-Stage 2 is complete and the project is stopped at the Stage 3 gate.
+Stage 3 is complete and the project is stopped at the Stage 4 gate.
 
 Validated capabilities now include:
 
@@ -70,19 +70,25 @@ Validated capabilities now include:
 - affine PTDF construction validated against angle-based DC flow;
 - deterministic variable indexing and traceable sparse DCOPF rows;
 - a public one-period case5 model and a labeled two-period synthetic extension;
-- independent physical validation of every printed constraint family.
+- independent physical validation of every printed constraint family;
+- a fixed-sigma FP64 CPU implementation of the paper's Algorithm 2;
+- accurate direct solves for both equality-multiplier sweeps;
+- three-way spectral cross-checks for the projected inequality update;
+- Equation (54) checks on every intermediate iterate;
+- HiGHS, KKT, objective, and physical comparisons on six cases;
+- deterministic repeated trajectories with explicit timing boundaries.
 
 See `docs/project_state.md` for the authoritative gate state and
-`docs/stage_reports/stage_2_report.md` for acceptance evidence.
+`docs/stage_reports/stage_3_report.md` for acceptance evidence.
 
 ## Environment snapshot
 
-Stage 2 ran locally with Python 3.13.5, NumPy 2.4.1, SciPy 1.16.3, SciPy's
+Stage 3 ran locally with Python 3.13.5, NumPy 2.4.1, SciPy 1.16.3, SciPy's
 bundled HiGHS dual-simplex interface, pytest, and Ruff. A project-local virtual
 environment provides the quality tooling while inheriting the audited
 scientific packages. Standalone `highspy` is not installed.
 
-The target DGX Spark was audited and remained unchanged during Stage 2:
+The target DGX Spark was audited and remained unchanged during Stage 3:
 
 - Ubuntu 24.04.4 LTS, aarch64;
 - NVIDIA GB10, compute capability 12.1;
@@ -91,7 +97,7 @@ The target DGX Spark was audited and remained unchanged during Stage 2:
 - CPython 3.12.3;
 - no `nvcc` and no installed scientific Python stack.
 
-Stage 2 intentionally did not install packages or run solver code on the DGX.
+Stage 3 intentionally did not install packages or run solver code on the DGX.
 Raw machine inventories and access details remain local and are intentionally
 excluded from the public repository. See `environment/README.md` for the
 regeneration and privacy policy.
@@ -129,16 +135,16 @@ gpu-dcopf-hpr/
 Production solver logic belongs in `src/gpu_dcopf_hpr/`, not only in notebooks.
 Raw validation outputs are preserved under `results/raw/stage_N/`.
 
-## Stage 2 checks
+## Stage 3 checks
 
 From this directory:
 
 ```powershell
 ./.venv/Scripts/python.exe -m pytest -q
-./.venv/Scripts/python.exe -m ruff check .
-./.venv/Scripts/python.exe -m ruff format --check .
-./.venv/Scripts/python.exe scripts/build_dcopf.py
-./.venv/Scripts/python.exe scripts/check_stage_2.py --output results/raw/stage_2/stage_2_checks.json
+./.venv/Scripts/ruff.exe check .
+./.venv/Scripts/ruff.exe format --check .
+./.venv/Scripts/python.exe scripts/run_cpu_solver.py
+./.venv/Scripts/python.exe scripts/check_stage_3.py --output results/raw/stage_3/stage_3_checks.json
 ```
 
 The dashboard has its own production build and rendered-output test:
@@ -149,7 +155,7 @@ npm run build
 node --test tests/rendered-html.test.mjs
 ```
 
-These commands reproduce the local Stage 2 evidence; they do not begin Stage 3.
+These commands reproduce the local Stage 3 evidence; they do not begin Stage 4.
 
 ## Research rules in one minute
 
