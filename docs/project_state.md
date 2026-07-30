@@ -1,18 +1,19 @@
 # Project state
 
-Last updated: 2026-07-29
+Last updated: 2026-07-30
 
 ## Stage gate
 
-- Completed stage: **Stage 3 - CPU sGS-HPR reference implementation**
+- Completed stage: **Stage 4 - paper-specific structural equality solve**
 - Gate result: **PASS**
-- Current state: **stopped at the Stage 4 approval gate**
-- Next proposed stage: **Stage 4 - paper-specific structural equality solve**
-- Required approval: `APPROVE STAGE 3 AND RUN STAGE 4`
+- Current state: **stopped at the Stage 5 approval gate**
+- Next proposed stage: **Stage 5 - preconditioning, restart, and penalty management**
+- Required approval: `APPROVE STAGE 4 AND RUN STAGE 5`
 - Dashboard: private, owner-only Sites deployment; its URL and project
   identifier are intentionally omitted from the public repository.
 
-No Stage 4 structural equality solver has been created.
+No Stage 5 scaling, restart, or adaptive-penalty feature has been created.
+No Stage 6 GPU code has been created or run on the DGX Spark.
 
 ## Current implementation status
 
@@ -32,6 +33,10 @@ The FP64 CPU package now provides:
 - a HiGHS reference solve and formula-based physical validation;
 - the paper's complete Algorithm 2 update sequence in FP64 on CPU;
 - trusted direct solves for both equality-multiplier sweeps;
+- an exact Equation (55) compatibility descriptor;
+- a matrix-free corrected Proposition 5 equality backend;
+- stable mean and zero-mean rank-one evaluation;
+- explicit direct-versus-structural backend selection;
 - dense, sparse, and power-iteration spectral cross-checks;
 - exact per-iteration Equation (54) checks with sparse trajectory storage;
 - separate strict-solution and approximate-candidate DCOPF validators.
@@ -61,17 +66,32 @@ The FP64 CPU package now provides:
 - The largest candidate physical violations are `0.004980 MW` and
   `0.007577 MW/MWh`, below the stated `0.01` target.
 - Both direct equality sweeps remain below `2.28e-13` infinity-norm residual.
-- Repeated full runs reproduce iteration counts, states, and non-timing
+- Seven structural fixtures and 336 scaled deterministic right-hand sides
+  match the direct oracle.
+- The largest relative structural/direct equality-solve error is `1.53e-14`;
+  the largest normalized residual is `2.93e-14`.
+- The corrected Proposition 5 sign has maximum relative error `3.03e-16` on
+  the sign fixture; the printed sign has median relative error `0.206`.
+- Direct and structural full solves stop at exactly the same iterations on
+  both DCOPF cases.
+- Their scaled final objective differences are `2.83e-14` and `4.90e-14`.
+- Repeated structural runs reproduce iteration counts, states, and non-timing
   trajectory fields exactly.
-- Test suite: 76 passed.
+- At synthetic `T=1024`, the measured solve-only and RHS-plus-solve speedups
+  are `19.68x` and `7.61x`.
+- The paper-relevant empirical fit has slope `1.158`, R-squared `0.995`, and
+  normalized time-per-work spread `1.723`.
+- Test suite: 104 passed.
 - Ruff lint and formatting checks pass.
 
 ## Numerical validation summary
 
-| Case | Iterations | sGS-HPR total objective | HiGHS total objective | Raw Eq. (28) | Max physical violation |
-|---|---:|---:|---:|---:|---:|
-| case5 base, T=1 | 108,134 | 17,479.7077242630 | 17,479.8969253810 | 0.00577 | 0.004980 MW |
-| synthetic extension, T=2 | 74,933 | 26,579.0043157485 | 26,580.0033355255 | 0.01249 | 0.007577 MW/MWh |
+| Case | Backend | Iterations | Total objective | Raw Eq. (28) | Max physical violation |
+|---|---|---:|---:|---:|---:|
+| case5 base, T=1 | Direct | 108,134 | 17,479.7077242630 | 0.00577 | 0.004980 MW |
+| case5 base, T=1 | Structural | 108,134 | 17,479.7077242625 | 0.00577 | 0.004980 MW |
+| synthetic extension, T=2 | Direct | 74,933 | 26,579.0043157485 | 0.01249 | 0.007577 MW/MWh |
+| synthetic extension, T=2 | Structural | 74,933 | 26,579.0043157498 | 0.01249 | 0.007577 MW/MWh |
 
 Both cases satisfy all three separately normalized Equation (54) tests at
 `5e-5`, the raw DCOPF Equation (28) target of `0.02`, the physical target of
@@ -79,16 +99,17 @@ Both cases satisfy all three separately normalized Equation (54) tests at
 
 ## Environment status
 
-Stage 3 ran locally on:
+Stage 4 ran locally on:
 
 - Windows 11;
 - Python 3.13.5;
 - NumPy 2.4.1;
-- SciPy 1.16.3 with `linprog(method="highs-ds")` and direct Cholesky;
+- SciPy 1.16.3 with `linprog(method="highs-ds")`, direct Cholesky, and the
+  matrix-free structural backend;
 - FP64 arrays;
 - pytest and Ruff 0.16.0 in the project-local virtual environment.
 
-The DGX Spark remains audited and reachable but unchanged. Stage 3 installed
+The DGX Spark remains audited and reachable but unchanged. Stage 4 installed
 nothing and ran no solver there. GPU execution remains locked until Stage 6.
 
 ## Known limitations
@@ -102,7 +123,14 @@ nothing and ran no solver there. GPU execution remains locked until Stage 6.
   renewable placements, and storage placements remain unavailable.
 - The two-period resource case is synthetic validation data, not an author
   benchmark.
-- Stage 3 uses dense correctness cross-checks for the small spectral problems;
+- The direct oracle and small spectral correctness checks materialize dense
+  matrices; the structural backend does not.
+- The structural descriptor assumes the raw, unscaled Equation (55) row and
+  column families, one constant interval length, and the validated block order.
+- Two disclosed solve-only timing fits failed because short NumPy kernels
+  crossed dispatch and memory regimes. That fit is non-gating; the
+  paper-relevant RHS-plus-solve boundary passed unchanged thresholds.
+- Stage 4 uses dense correctness cross-checks for the small spectral problems;
   this is not yet a large-case spectral strategy.
 - The all-zero cold-start vectors are a disclosed local choice because the
   paper does not print them.
@@ -115,14 +143,16 @@ nothing and ran no solver there. GPU execution remains locked until Stage 6.
 
 1. Equation (55) and Table II imply `m1 = T + N_ESS`, while Appendix A prints
    `T(1 + N_ESS)`.
-2. Equation (43) and Equations (39), (44), and (45) disagree on rank-one
-   inverse signs.
-3. Exact author preprocessing for reference buses, transformers, inactive
+2. Exact author preprocessing for reference buses, transformers, inactive
    branches, and thermal ratings is unavailable.
-4. Adaptive penalty and restart formulas remain incomplete.
-5. The paper's precision, eigenvalue estimator, initialization vectors, and
-   timing boundaries remain incomplete. Stage 3 records its own choices rather
+3. Adaptive penalty and restart formulas remain incomplete.
+4. The paper's precision, eigenvalue estimator, initialization vectors, and
+   timing boundaries remain incomplete. Stage 4 records its own choices rather
    than attributing them to the authors.
+
+The rank-one sign is resolved for the implemented model: Equation (43)'s minus
+Schur complement is correct, while Equations (39), (44), and (45) print the
+opposite inverse pattern.
 
 ## Reproduction classification
 
@@ -133,13 +163,14 @@ reproduction.
 
 ## Next proposed stage
 
-Stage 4 will replace the direct equality sweep with the paper's structural
-formula:
+Stage 5 may begin only after the exact approval command. It will add and
+ablate:
 
-1. derive the implemented `A1` block structure in the exact variable order;
-2. implement diagonal and low-rank operations without large dense matrices;
-3. cross-check many right-hand sides against the Stage 3 Cholesky oracle;
-4. compare complete direct and structural solver trajectories;
-5. measure, but not overclaim, the observed complexity trend.
+1. ten iterations of Ruiz row and column equilibration;
+2. a sourced restart rule;
+3. a sourced adaptive-penalty rule;
+4. scaled-to-original solution recovery checks;
+5. direct and structural fixed-sigma baselines for comparison.
 
-The direct Stage 3 path remains available as the correctness reference.
+The Stage 3 direct backend and Stage 4 structural backend remain preserved as
+correctness references. Stage 6 GPU work remains separately gated.

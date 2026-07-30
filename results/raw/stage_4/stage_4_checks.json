@@ -1,0 +1,115 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_four_paths",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "configuration_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "validation_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "{'full_solver_crosschecks': True, 'performance_and_complexity': True, 'structural_crosschecks': True}",
+      "name": "stage_four_validation_sections_passed",
+      "passed": true
+    },
+    {
+      "detail": "exact match",
+      "name": "embedded_configuration_matches_versioned_config",
+      "passed": true
+    },
+    {
+      "detail": "cases=['extreme_efficiency_t32', 'heterogeneous_storage_t5', 'ideal_storage_t1', 'many_ideal_storage_t16', 'no_storage_t1', 'no_storage_t17', 'one_storage_t2']",
+      "name": "seven_structural_cases_present",
+      "passed": true
+    },
+    {
+      "detail": "no_storage_t1:pass, no_storage_t17:pass, ideal_storage_t1:pass, one_storage_t2:pass, extreme_efficiency_t32:pass, heterogeneous_storage_t5:pass, many_ideal_storage_t16:pass",
+      "name": "structural_oracle_tolerances_and_eq55_pattern",
+      "passed": true
+    },
+    {
+      "detail": "rows=336, counts={'extreme_efficiency_t32': 48, 'heterogeneous_storage_t5': 48, 'ideal_storage_t1': 48, 'many_ideal_storage_t16': 48, 'no_storage_t1': 48, 'no_storage_t17': 48, 'one_storage_t2': 48}",
+      "name": "structural_crosscheck_gzip_complete",
+      "passed": true
+    },
+    {
+      "detail": "corrected_max=3.027e-16, printed_median=2.055e-01",
+      "name": "gzip_confirms_corrected_rank_one_sign",
+      "passed": true
+    },
+    {
+      "detail": "corrected=3.0273094154301446e-16, printed=0.20554911963875575, sign=positive correction for a minus rank-one update",
+      "name": "proposition_five_sign_discrepancy_resolved",
+      "passed": true
+    },
+    {
+      "detail": "cases=['case5_base_t1', 'case5_synthetic_extension_t2']; direct, structural, and HiGHS required",
+      "name": "two_full_solver_cases_and_backends",
+      "passed": true
+    },
+    {
+      "detail": "both backends satisfy the configured HiGHS, KKT, and physical gates",
+      "name": "full_solver_highs_objective_kkt_and_physics",
+      "passed": true
+    },
+    {
+      "detail": "lockstep trajectories and converged structural repeat checked",
+      "name": "full_solver_trajectory_parity_and_determinism",
+      "passed": true
+    },
+    {
+      "detail": "rows=2289, last_iterations={'case5_base_t1/lockstep_5000/direct': 5000, 'case5_base_t1/lockstep_5000/structural': 5000, 'case5_base_t1/convergence/direct': 108134, 'case5_base_t1/convergence/structural': 108134, 'case5_base_t1/convergence/structural_repeat': 108134, 'case5_synthetic_extension_t2/lockstep_5000/direct': 5000, 'case5_synthetic_extension_t2/lockstep_5000/structural': 5000, 'case5_synthetic_extension_t2/convergence/direct': 74933, 'case5_synthetic_extension_t2/convergence/structural': 74933, 'case5_synthetic_extension_t2/convergence/structural_repeat': 74933}",
+      "name": "solver_trajectory_gzip_complete",
+      "passed": true
+    },
+    {
+      "detail": "23 structural workspaces checked",
+      "name": "no_dense_structural_gram_or_kronecker",
+      "passed": true
+    },
+    {
+      "detail": "periods=1024, speedups={'rhs_and_solve': 7.6101070973232705, 'solve_only': 19.683633633788496}",
+      "name": "largest_synthetic_structural_speed_advantage",
+      "passed": true
+    },
+    {
+      "detail": "gating_fit={'intercept': -20.756806403724582, 'normalized_time_per_work_spread': 1.7227524383080122, 'r_squared': 0.9948031299971869, 'slope': 1.1582716253937648}, non_gating_solve_only_fit={'intercept': -20.27582403724916, 'normalized_time_per_work_spread': 1.8302645073956534, 'r_squared': 0.9715996892286042, 'slope': 0.9427525288834435}",
+      "name": "both_empirical_fits_reported_and_paper_boundary_fit_passes",
+      "passed": true
+    },
+    {
+      "detail": "D-0033 plus both failed fit records required in report and log",
+      "name": "two_failed_solve_only_fits_preserved_and_disclosed",
+      "passed": true
+    },
+    {
+      "detail": "documented_limits=4",
+      "name": "numerical_stability_limits_documented_and_exercised",
+      "passed": true
+    },
+    {
+      "detail": "fixed sigma CPU/FP64; no scaling, adaptation, restart, GPU, or DGX",
+      "name": "stage_five_and_six_boundaries_preserved",
+      "passed": true
+    }
+  ],
+  "evidence": "results/raw/stage_4/stage_4_validation.json",
+  "evidence_files": {
+    "solver_trajectories": "results/raw/stage_4/solver_trajectories.jsonl.gz",
+    "structural_crosschecks": "results/raw/stage_4/structural_crosschecks.jsonl.gz"
+  },
+  "passed": true,
+  "stage": 4,
+  "summary": {
+    "failed": 0,
+    "passed": 20
+  }
+}

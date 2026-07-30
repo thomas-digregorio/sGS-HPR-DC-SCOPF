@@ -124,13 +124,13 @@ export function ReproductionDashboard() {
           </div>
           <div className="metric-card">
             <div className="metric-label">CPU reference</div>
-            <div className="metric-value">Algorithm 2</div>
-            <div className="metric-note">Fixed-sigma FP64 baseline passed all six cases.</div>
+            <div className="metric-value">Direct + structural</div>
+            <div className="metric-note">Corrected Proposition 5 matches the Cholesky oracle.</div>
           </div>
           <div className="metric-card">
             <div className="metric-label">DCOPF agreement</div>
-            <div className="metric-value">T1 + T2</div>
-            <div className="metric-note">Physical error below 0.01 MW/MWh; HiGHS gap below 0.004%.</div>
+            <div className="metric-value">Same iterations</div>
+            <div className="metric-note">T1 and T2 objective differences stay below 5e-14.</div>
           </div>
           <div className="metric-card">
             <div className="metric-label">Reproduction claim</div>
@@ -214,10 +214,34 @@ export function ReproductionDashboard() {
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">
-              The next stage remains locked until Stage 3 passes every acceptance criterion
+              The next stage remains locked until Stage 4 passes every acceptance criterion
               and you send the exact approval phrase.
             </p>
-            <div className="gate-command">APPROVE STAGE 3 AND RUN STAGE 4</div>
+            <div className="gate-command">APPROVE STAGE 4 AND RUN STAGE 5</div>
+          </section>
+
+          <section className="rail-card" aria-labelledby="stage-four-title">
+            <h2 className="rail-title" id="stage-four-title">Stage 4 evidence brief</h2>
+            <div className="machine-list">
+              <div className="machine">
+                <div className="machine-head">
+                  <span className="machine-name">Corrected equality solve</span>
+                  <span className="machine-state">PASS</span>
+                </div>
+                <div className="machine-detail">
+                  336 deterministic right-hand sides; maximum relative error 1.53e-14.
+                </div>
+              </div>
+              <div className="machine">
+                <div className="machine-head">
+                  <span className="machine-name">Synthetic T=1024</span>
+                  <span className="machine-state">19.68x</span>
+                </div>
+                <div className="machine-detail">
+                  Solve-only speedup; RHS-plus-solve speedup measured at 7.61x.
+                </div>
+              </div>
+            </div>
           </section>
 
           <section className="rail-card" aria-labelledby="rules-title">
@@ -239,7 +263,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Windows / local CPU; 76 FP64 validation tests passing.
+                  Windows / local CPU; 104 FP64 validation tests passing.
                 </div>
               </div>
               <div className="machine">
@@ -248,7 +272,7 @@ export function ReproductionDashboard() {
                   <span className="machine-state">Audited</span>
                 </div>
                 <div className="machine-detail">
-                  Audited and reachable; deliberately untouched during the CPU-only Stage 3.
+                  Audited and reachable; deliberately untouched during the CPU-only Stage 4.
                 </div>
               </div>
             </div>

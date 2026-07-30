@@ -1,0 +1,42 @@
+{
+  "algorithm": "Paper Algorithm 2 with corrected Proposition 5 structural equality solves",
+  "backend": "NumPy and SciPy CPU",
+  "dcopf_maximum_scaled_objective_gap": 0.0002,
+  "dcopf_kkt_combined_target": 0.02,
+  "dcopf_physical_tolerance": 0.01,
+  "direct_structural_iteration_fraction": 0.001,
+  "direct_structural_maximum_scaled_objective_difference": 1e-08,
+  "direct_structural_maximum_solution_relative_difference": 2e-05,
+  "fixed_trajectory_iterations": 5000,
+  "history_interval": 250,
+  "initial_state": "w0=(y,z,x)=all-zero FP64 vectors",
+  "maximum_equality_infinity_residual": 5e-12,
+  "maximum_iterations": 150000,
+  "maximum_z_x_identity_error": 1e-12,
+  "paper_tolerance": 5e-05,
+  "precision": "FP64",
+  "random_seed": 20260730,
+  "rhs_scales": [
+    1e-06,
+    1.0,
+    1000000.0
+  ],
+  "rhs_vectors_per_scale": 16,
+  "sigma": 1.0,
+  "stage": 4,
+  "structural_maximum_normalized_error": 5e-12,
+  "structural_stress_maximum_normalized_error": 5e-11,
+  "timing_boundary": {
+    "direct_solve_only": "precomputed dense Cholesky factor plus cho_solve",
+    "rhs_plus_structural_solve": "two sparse A1 products used to form one deterministic right-hand side plus the matrix-free structural solve",
+    "structural_solve_only": "precomputed diagonal and vector terms plus StructuralY1Solver.solve",
+    "total_solver": "preparation, initialization, Algorithm 2 iteration loop, residual checks, and result assembly"
+  },
+  "unsupported_features": {
+    "adaptive_sigma": false,
+    "dgx_execution": false,
+    "gpu": false,
+    "restart": false,
+    "scaling": false
+  }
+}

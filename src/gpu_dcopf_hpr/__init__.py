@@ -13,6 +13,13 @@ from .sgs_hpr import (
     sgs_hpr_step,
     solve_sgs_hpr,
 )
+from .structural_y1 import (
+    DCOPFEqualityStructure,
+    StructuralY1Diagnostics,
+    StructuralY1Solver,
+    prepare_dcopf_structural_y1,
+    prepare_structural_y1,
+)
 from .validation import validate_dcopf_candidate
 
 __version__ = "0.0.0"
@@ -20,6 +27,7 @@ __version__ = "0.0.0"
 __all__ = [
     "CanonicalLP",
     "DCOPFConfig",
+    "DCOPFEqualityStructure",
     "DCOPFModel",
     "HPRResult",
     "HPRState",
@@ -28,12 +36,16 @@ __all__ = [
     "ResidualEvaluation",
     "SGSHPRResult",
     "SGSHPRWorkspace",
+    "StructuralY1Diagnostics",
+    "StructuralY1Solver",
     "build_dcopf_model",
     "build_ptdf",
     "evaluate_residuals",
     "load_dcopf_config",
     "load_matpower_case",
     "prepare_sgs_hpr",
+    "prepare_dcopf_structural_y1",
+    "prepare_structural_y1",
     "sgs_hpr_step",
     "solve_hpr",
     "solve_sgs_hpr",

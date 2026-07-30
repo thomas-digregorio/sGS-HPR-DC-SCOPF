@@ -297,3 +297,74 @@ its original rationale should remain reviewable.
 - **Reason:** The paper does not define its timing boundary. A named
   decomposition prevents preprocessing costs from disappearing into an
   ambiguous "solver time" and prepares the project for fair CPU/GPU timing.
+
+## D-0029 - Resolve Proposition 5 from the Schur complement
+
+- **Status:** accepted; resolves D-0007
+- **Stage:** 4
+- **Decision:** Retain Eq. (43)'s minus rank-one Schur complement and use the
+  corresponding positive Sherman-Morrison correction. Do not implement the
+  negative correction and plus denominator printed in Eqs. (39), (44), and
+  (45).
+- **Reason:** The implemented Eq. (55) matrix produces the minus update
+  exactly. The corrected expression matches direct Cholesky solves to FP64
+  accuracy on deterministic no-, one-, and multiple-storage cases. The printed
+  expression leaves a material linear-system residual.
+
+## D-0030 - Require an exact structural compatibility check
+
+- **Status:** accepted
+- **Stage:** 4
+- **Decision:** Enable the structural backend only through a descriptor that
+  validates dimensions, block order, sparse row patterns, coefficients,
+  storage diagonals, and a positive Schur complement against the same
+  `CanonicalLP` instance.
+- **Reason:** Proposition 5 is valid because of the implemented Eq. (55)
+  structure, not for an arbitrary equality matrix. Refusing an incompatible
+  LP prevents a fast but mathematically unrelated solve.
+
+## D-0031 - Use the mean and zero-mean Schur decomposition
+
+- **Status:** accepted
+- **Stage:** 4
+- **Decision:** Evaluate
+  \((aI-\alpha\mathbf1\mathbf1^T)^{-1}\) by splitting the reduced right-hand
+  side into its mean and zero-mean components. Compute the all-ones eigenvalue
+  with the cancellation-resistant identity
+  \[
+  a-\alpha T=N_G+N_{RG}+
+  \sum_s\frac{(\eta_s^{ch}-1/\eta_s^{dc})^2}
+  {(\eta_s^{ch})^2+(1/\eta_s^{dc})^2}.
+  \]
+- **Reason:** This is algebraically equivalent to the corrected
+  Sherman-Morrison formula but avoids subtracting nearly equal terms when many
+  ideal-efficiency storage devices are present.
+
+## D-0032 - Separate small-fixture timing from structural scaling evidence
+
+- **Status:** accepted
+- **Stage:** 4
+- **Decision:** Report direct and structural runtimes on the two validation
+  DCOPF cases without requiring a speedup. Measure the performance advantage
+  on warmed synthetic Eq. (55) systems large enough that Python call overhead
+  does not dominate, and label the result as local empirical evidence.
+- **Reason:** A precomputed library Cholesky call can be faster than several
+  NumPy vector operations on a three-row system. That fact does not contradict
+  the structural method's linear storage and arithmetic scaling.
+
+## D-0033 - Gate complexity on the paper-relevant equality-update boundary
+
+- **Status:** accepted after two disclosed timing-protocol failures
+- **Stage:** 4
+- **Decision:** Use the measured right-hand-side formation plus structural
+  solve as the empirical complexity gate. Preserve the solve-only log-log fit
+  as a non-gating diagnostic, while retaining its exact \(O(T+N_{ESS})\)
+  operation count.
+- **Reason:** Corollary 1 explicitly combines the Proposition 5 formulas with
+  the expression for \(R_1\), so sparse \(A_1\) products belong to the claimed
+  \(O(T(N_G+N_{RG}+N_{ESS}))\) boundary. Two full runs showed that the required
+  boundary passed the unchanged slope, \(R^2\), and normalized-spread limits,
+  while the much shorter NumPy solve-only kernel was distorted by fixed
+  dispatch, allocation, cache, and memory-bandwidth effects. The failed
+  solve-only fits remain in the Stage 4 log and report; they are not relabeled
+  as proof of linear wall time.

@@ -509,3 +509,104 @@ Stage 3 therefore uses a separately labeled candidate validator:
 This does not convert the iterate into a strict power-flow solution. It makes
 the reference-slack convention explicit while keeping the actual imbalance in
 the acceptance record.
+
+## 24. The implemented Equation (55) equality structure
+
+The variable order is
+
+```text
+(p_G, p_RG, p_ESS_dc, p_ESS_ch, r_up, r_down),
+```
+
+with period-major entries inside every block. Let
+
+```text
+T = number of periods
+G = number of conventional generators
+R = number of renewable resources
+S = number of storage devices
+h = interval length
+```
+
+The first \(T\) rows of \(A_1\) are power balance. In each period they place
+\(+1\) on generation, renewable output, and storage discharge; \(-1\) on
+storage charge; and zero on reserve variables. The next \(S\) rows enforce
+terminal storage energy. Storage \(s\) has coefficient
+\(-h/\eta_s^{dc}\) on every discharge entry and
+\(h\eta_s^{ch}\) on every charge entry.
+
+Consequently,
+
+\[
+A_1A_1^T=
+\begin{bmatrix}
+aI_T&\mathbf1_Td^T\\
+d\mathbf1_T^T&D_2
+\end{bmatrix},
+\]
+
+where
+
+\[
+\begin{aligned}
+a&=G+R+2S,\\
+d_s&=-h\left(\eta_s^{ch}+1/\eta_s^{dc}\right),\\
+[D_2]_{ss}
+&=Th^2\left((\eta_s^{ch})^2+(1/\eta_s^{dc})^2\right).
+\end{aligned}
+\]
+
+Thus \(D_1=aI_T\), the cross block is the repeated vector
+\(\mathbf1_T\otimes d^T\), and no explicit Kronecker matrix is necessary.
+
+## 25. The corrected and stable Proposition 5 solve
+
+Split a right-hand side as \(r=(r_{11},r_{12})\), define
+
+\[
+\alpha=d^TD_2^{-1}d,\qquad
+\widetilde r=r_{11}-\mathbf1_T(d^TD_2^{-1}r_{12}),
+\]
+
+and set
+
+\[
+\gamma=a-\alpha T.
+\]
+
+Eliminating \(y_{12}\) gives
+
+\[
+(aI_T-\alpha\mathbf1_T\mathbf1_T^T)y_{11}=\widetilde r.
+\]
+
+This is a **minus** rank-one update, so its Sherman-Morrison correction has a
+positive sign. If \(\mu=\operatorname{mean}(\widetilde r)\), the numerically
+safer equivalent is
+
+\[
+y_{11}=\frac{\widetilde r-\mu\mathbf1_T}{a}
+       +\frac{\mu\mathbf1_T}{\gamma},
+\qquad
+y_{12}=D_2^{-1}\left(r_{12}-d\,\mathbf1_T^Ty_{11}\right).
+\]
+
+The code computes \(\gamma\) without the cancellation-prone subtraction:
+
+\[
+\gamma=G+R+
+\sum_s
+\frac{(\eta_s^{ch}-1/\eta_s^{dc})^2}
+{(\eta_s^{ch})^2+(1/\eta_s^{dc})^2}.
+\]
+
+With no storage, the branch reduces to \(y_{11}=r_{11}/(G+R)\). The solver
+stores only diagonal vectors and scalars, so one prepared solve is
+\(O(T+S)\). Within Algorithm 2, forming the right-hand side and checking the
+system residual still requires sparse \(A_1\) products, which is why the
+paper's broader equality-update count is proportional to
+\(T(G+R+S)\).
+
+Equations (39), (44), and (45) print the inverse pattern for a plus rank-one
+update. Stage 4 retains that text as a manuscript discrepancy and uses direct
+Cholesky as the numerical oracle for the corrected expression.

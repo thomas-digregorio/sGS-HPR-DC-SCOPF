@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from time import perf_counter
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 from numpy.typing import NDArray
@@ -15,6 +15,7 @@ from .canonical_lp import CanonicalLP
 from .hpr_generic import HPRState, halpern_update, reflect_state
 from .projections import project_box, project_nonnegative
 from .residuals import ResidualEvaluation, evaluate_residuals
+from .structural_y1 import StructuralY1Solver
 
 FloatVector = NDArray[np.float64]
 FloatMatrix = NDArray[np.float64]
@@ -54,14 +55,15 @@ def _validate_state(lp: CanonicalLP, state: HPRState, *, name: str) -> None:
 
 @dataclass(frozen=True, slots=True)
 class EqualitySystemDiagnostics:
-    """Numerical checks for the direct ``A1 A1^T`` reference solve."""
+    """Numerical or structural checks that establish a valid equality solve."""
 
     rows: int
     rank: int
     symmetry_error: float
     minimum_eigenvalue: float | None
     maximum_eigenvalue: float | None
-    condition_number: float
+    condition_number: float | None
+    positive_definite_by_construction: bool = False
 
     @property
     def full_row_rank(self) -> bool:
@@ -69,8 +71,10 @@ class EqualitySystemDiagnostics:
 
     @property
     def positive_definite(self) -> bool:
-        return self.rows == 0 or (
-            self.minimum_eigenvalue is not None and self.minimum_eigenvalue > 0.0
+        return (
+            self.rows == 0
+            or self.positive_definite_by_construction
+            or (self.minimum_eigenvalue is not None and self.minimum_eigenvalue > 0.0)
         )
 
     def summary(self) -> dict[str, Any]:
@@ -83,6 +87,7 @@ class EqualitySystemDiagnostics:
             "maximum_eigenvalue": self.maximum_eigenvalue,
             "condition_number": self.condition_number,
             "positive_definite": self.positive_definite,
+            "positive_definite_by_construction": self.positive_definite_by_construction,
         }
 
 
@@ -128,15 +133,17 @@ class SpectralEstimateDiagnostics:
 
 @dataclass(frozen=True, slots=True)
 class SGSHPRWorkspace:
-    """Prepared sparse operators and trusted direct-solve factors."""
+    """Prepared sparse operators and one explicitly selected equality backend."""
 
     source_lp: CanonicalLP
     A1: sparse.csr_matrix
     A1_transpose: sparse.csr_matrix
     A2: sparse.csr_matrix
     A2_transpose: sparse.csr_matrix
-    equality_gram: FloatMatrix
+    equality_backend: Literal["direct", "structural"]
+    equality_gram: FloatMatrix | None
     equality_cholesky: tuple[FloatMatrix, bool] | None
+    structural_y1: StructuralY1Solver | None
     equality: EqualitySystemDiagnostics
     spectral: SpectralEstimateDiagnostics | None
 
@@ -211,7 +218,7 @@ class SGSHPRHistoryEntry:
 
 @dataclass(frozen=True, slots=True)
 class SGSHPRResult:
-    """Complete Stage 3 solver result and numerical evidence."""
+    """Complete fixed-penalty CPU solver result and numerical evidence."""
 
     solution: HPRState
     current_state: HPRState
@@ -340,54 +347,79 @@ def estimate_inequality_spectrum(
     )
 
 
-def prepare_sgs_hpr(lp: CanonicalLP) -> SGSHPRWorkspace:
-    """Prepare Stage 3 reference linear algebra and verify paper assumptions."""
+def prepare_sgs_hpr(
+    lp: CanonicalLP,
+    *,
+    structural_y1: StructuralY1Solver | None = None,
+) -> SGSHPRWorkspace:
+    """Prepare sparse operators and a direct or structural equality backend."""
 
     A1 = _csr(lp.A1, rows=lp.m1, columns=lp.n, name="A1")
     A2 = _csr(lp.A2, rows=lp.m2, columns=lp.n, name="A2")
     A1_transpose = A1.T.tocsr()
     A2_transpose = A2.T.tocsr()
+    if structural_y1 is not None and structural_y1.source_lp is not lp:
+        raise ValueError("structural_y1 must be prepared from the same CanonicalLP instance.")
 
     if lp.m1:
-        raw_equality_gram = np.asarray((A1 @ A1_transpose).toarray(), dtype=np.float64)
-        symmetry_error = float(np.linalg.norm(raw_equality_gram - raw_equality_gram.T, ord=np.inf))
-        symmetry_scale = max(1.0, float(np.linalg.norm(raw_equality_gram, ord=np.inf)))
-        symmetry_tolerance = 100.0 * np.finfo(np.float64).eps * symmetry_scale
-        if symmetry_error > symmetry_tolerance:
-            raise ValueError(
-                "A1 A1^T must be numerically symmetric; "
-                f"infinity-norm error {symmetry_error} exceeds {symmetry_tolerance}."
+        if structural_y1 is not None:
+            equality_gram = None
+            equality_cholesky = None
+            equality = EqualitySystemDiagnostics(
+                rows=lp.m1,
+                rank=lp.m1,
+                symmetry_error=0.0,
+                minimum_eigenvalue=None,
+                maximum_eigenvalue=None,
+                condition_number=None,
+                positive_definite_by_construction=True,
             )
-        equality_gram = raw_equality_gram
-        equality_gram = 0.5 * (equality_gram + equality_gram.T)
-        singular_values = np.linalg.svd(np.asarray(A1.toarray()), compute_uv=False)
-        singular_tolerance = max(A1.shape) * np.finfo(np.float64).eps * float(singular_values[0])
-        rank = int(np.count_nonzero(singular_values > singular_tolerance))
-        eigenvalues = np.linalg.eigvalsh(equality_gram)
-        minimum_eigenvalue = float(eigenvalues[0])
-        maximum_eigenvalue = float(eigenvalues[-1])
-        condition_number = float(np.linalg.cond(equality_gram))
-        equality = EqualitySystemDiagnostics(
-            rows=lp.m1,
-            rank=rank,
-            symmetry_error=symmetry_error,
-            minimum_eigenvalue=minimum_eigenvalue,
-            maximum_eigenvalue=maximum_eigenvalue,
-            condition_number=condition_number,
-        )
-        if not equality.full_row_rank:
-            raise ValueError(f"A1 must have full row rank; detected rank {rank} for {lp.m1} rows.")
-        if not equality.positive_definite:
-            raise ValueError(
-                f"A1 A1^T must be positive definite; minimum eigenvalue is {minimum_eigenvalue}."
+        else:
+            raw_equality_gram = np.asarray((A1 @ A1_transpose).toarray(), dtype=np.float64)
+            symmetry_error = float(
+                np.linalg.norm(raw_equality_gram - raw_equality_gram.T, ord=np.inf)
             )
-        equality_cholesky = linalg.cho_factor(
-            equality_gram,
-            lower=True,
-            check_finite=True,
-        )
+            symmetry_scale = max(1.0, float(np.linalg.norm(raw_equality_gram, ord=np.inf)))
+            symmetry_tolerance = 100.0 * np.finfo(np.float64).eps * symmetry_scale
+            if symmetry_error > symmetry_tolerance:
+                raise ValueError(
+                    "A1 A1^T must be numerically symmetric; "
+                    f"infinity-norm error {symmetry_error} exceeds {symmetry_tolerance}."
+                )
+            equality_gram = 0.5 * (raw_equality_gram + raw_equality_gram.T)
+            singular_values = np.linalg.svd(np.asarray(A1.toarray()), compute_uv=False)
+            singular_tolerance = (
+                max(A1.shape) * np.finfo(np.float64).eps * float(singular_values[0])
+            )
+            rank = int(np.count_nonzero(singular_values > singular_tolerance))
+            eigenvalues = np.linalg.eigvalsh(equality_gram)
+            minimum_eigenvalue = float(eigenvalues[0])
+            maximum_eigenvalue = float(eigenvalues[-1])
+            condition_number = float(np.linalg.cond(equality_gram))
+            equality = EqualitySystemDiagnostics(
+                rows=lp.m1,
+                rank=rank,
+                symmetry_error=symmetry_error,
+                minimum_eigenvalue=minimum_eigenvalue,
+                maximum_eigenvalue=maximum_eigenvalue,
+                condition_number=condition_number,
+            )
+            if not equality.full_row_rank:
+                raise ValueError(
+                    f"A1 must have full row rank; detected rank {rank} for {lp.m1} rows."
+                )
+            if not equality.positive_definite:
+                raise ValueError(
+                    "A1 A1^T must be positive definite; "
+                    f"minimum eigenvalue is {minimum_eigenvalue}."
+                )
+            equality_cholesky = linalg.cho_factor(
+                equality_gram,
+                lower=True,
+                check_finite=True,
+            )
     else:
-        equality_gram = np.empty((0, 0), dtype=np.float64)
+        equality_gram = None if structural_y1 is not None else np.empty((0, 0), dtype=np.float64)
         equality_cholesky = None
         equality = EqualitySystemDiagnostics(
             rows=0,
@@ -405,8 +437,10 @@ def prepare_sgs_hpr(lp: CanonicalLP) -> SGSHPRWorkspace:
         A1_transpose=A1_transpose,
         A2=A2,
         A2_transpose=A2_transpose,
+        equality_backend="structural" if structural_y1 is not None else "direct",
         equality_gram=equality_gram,
         equality_cholesky=equality_cholesky,
+        structural_y1=structural_y1,
         equality=equality,
         spectral=spectral,
     )
@@ -416,14 +450,27 @@ def _solve_equality(
     workspace: SGSHPRWorkspace,
     right_hand_side: FloatVector,
 ) -> tuple[FloatVector, float, float]:
-    if workspace.equality_cholesky is None:
+    if workspace.equality.rows == 0:
         return np.empty(0, dtype=np.float64), 0.0, 0.0
-    solution = linalg.cho_solve(
-        workspace.equality_cholesky,
-        right_hand_side,
-        check_finite=True,
-    )
-    residual = workspace.equality_gram @ solution - right_hand_side
+    if workspace.equality_backend == "structural":
+        assert workspace.structural_y1 is not None
+        solution = workspace.structural_y1.solve(right_hand_side)
+        residual = (
+            _matvec(
+                workspace.A1,
+                _matvec(workspace.A1_transpose, solution),
+            )
+            - right_hand_side
+        )
+    else:
+        assert workspace.equality_cholesky is not None
+        assert workspace.equality_gram is not None
+        solution = linalg.cho_solve(
+            workspace.equality_cholesky,
+            right_hand_side,
+            check_finite=True,
+        )
+        residual = workspace.equality_gram @ solution - right_hand_side
     relative_residual = float(np.linalg.norm(residual) / (1.0 + np.linalg.norm(right_hand_side)))
     infinity_residual = float(np.linalg.norm(residual, ord=np.inf))
     return np.asarray(solution, dtype=np.float64), relative_residual, infinity_residual
@@ -438,7 +485,7 @@ def sgs_hpr_step(
     iteration: int,
     sigma: float,
 ) -> SGSHPRStep:
-    """Perform one exact Algorithm 2 iteration using direct equality solves."""
+    """Perform one exact Algorithm 2 iteration with the prepared equality backend."""
 
     _validate_state(lp, current, name="current")
     _validate_state(lp, anchor, name="anchor")
@@ -522,13 +569,16 @@ def solve_sgs_hpr(
     max_iterations: int = 200_000,
     history_interval: int = 100,
     initial_state: HPRState | None = None,
+    structural_y1: StructuralY1Solver | None = None,
 ) -> SGSHPRResult:
     """Run fixed-penalty, no-restart CPU Algorithm 2.
 
     Equation (54) is evaluated on ``w_bar`` every iteration. The trajectory is
     recorded at ``history_interval`` boundaries and at the stopping iteration.
     The returned ``solution`` is the final checked intermediate state, matching
-    the manuscript's stopping convention.
+    the manuscript's stopping convention. Passing ``structural_y1`` selects
+    the validated Stage 4 equality backend; otherwise the Stage 3 Cholesky
+    oracle remains the default.
     """
 
     if not np.isfinite(sigma) or sigma <= 0.0:
@@ -553,7 +603,7 @@ def solve_sgs_hpr(
     anchor = initial_state.detached_copy()
     current = initial_state.detached_copy()
     preparation_start = perf_counter()
-    prepared = prepare_sgs_hpr(lp)
+    prepared = prepare_sgs_hpr(lp, structural_y1=structural_y1)
     preparation_elapsed_seconds = perf_counter() - preparation_start
 
     history: list[SGSHPRHistoryEntry] = []

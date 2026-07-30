@@ -872,6 +872,12 @@ the standard identity is
 Accordingly, Eqs. (39), (44), and (45) must be validated against a direct
 solve before implementation; their signs must not be copied silently.
 
+Stage 4 resolved this gate numerically and algebraically. The implemented
+Eq. (55) matrix gives the minus Schur complement in Eq. (43), so the valid
+inverse uses the positive correction and difference denominator shown above.
+The printed Eqs. (39), (44), and (45) fail the direct linear-system oracle and
+remain recorded as a manuscript discrepancy.
+
 #### \(y_2\): Eqs. (47)-(50)
 
 **Eq. (47), diagonalizing proximal choice**

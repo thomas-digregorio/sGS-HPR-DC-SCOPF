@@ -91,13 +91,13 @@ export const stages: ResearchStage[] = [
     id: 4,
     title: "Paper-specific structural equality solve",
     purpose: "Replace the dense-looking y1 solve with the diagonal and low-rank formula in Proposition 5.",
-    status: "locked",
+    status: "complete",
     tasks: [
-      locked("4.1", "Confirm A1 block structure"),
-      locked("4.2", "Implement Proposition 5"),
-      locked("4.3", "Cross-check against direct solves"),
-      locked("4.4", "Full-solver trajectory cross-check"),
-      locked("4.5", "Empirical complexity check"),
+      { id: "4.1", title: "Confirm A1 block structure", status: "complete" },
+      { id: "4.2", title: "Implement Proposition 5", status: "complete" },
+      { id: "4.3", title: "Cross-check against direct solves", status: "complete" },
+      { id: "4.4", title: "Full-solver trajectory cross-check", status: "complete" },
+      { id: "4.5", title: "Empirical complexity check", status: "complete" },
     ],
   },
   {
@@ -240,10 +240,16 @@ export const learningNotes = [
       "First-order candidates retain a small balance error. That error is tested explicitly; only a temporary reference-bus adjustment is used to compare PTDF and angle flows.",
   },
   {
-    label: "Stage boundary",
-    title: "The direct solve stays the oracle",
+    label: "Stage 4 finding",
+    title: "The Schur-complement sign decides the inverse",
     body:
-      "Both y1 sweeps use a trusted Cholesky solve in Stage 3. The disputed low-rank Proposition 5 shortcut remains locked until Stage 4 can compare it against this baseline.",
+      "Equation 43 gives a minus rank-one update, so its inverse needs a positive correction. The corrected formula matches Cholesky to FP64 accuracy; the paper's printed sign does not.",
+  },
+  {
+    label: "Performance evidence",
+    title: "Measure the boundary the theorem counts",
+    body:
+      "The paper's complexity claim includes forming the right-hand side with sparse A1 products. That full boundary scaled near-linearly; the shorter solve-only timing remains a disclosed diagnostic.",
   },
   {
     label: "Stage 2 finding",
@@ -269,13 +275,17 @@ export const artifacts = [
   { label: "Primary source", name: "references/AnEfficientGPU-basedHalpernAccelerating.pdf" },
   { label: "Specification", name: "docs/paper_specification.md" },
   { label: "Public network", name: "data/raw/matpower/case5.m" },
-  { label: "Stage evidence", name: "docs/stage_reports/stage_3_report.md" },
-  { label: "Validation results", name: "results/raw/stage_3/stage_3_validation.json" },
+  { label: "Stage evidence", name: "docs/stage_reports/stage_4_report.md" },
+  { label: "Validation results", name: "results/raw/stage_4/stage_4_validation.json" },
   {
-    label: "CPU trajectories",
-    name: "results/raw/stage_3/sgs_hpr_trajectories.jsonl.gz",
+    label: "Solver trajectories",
+    name: "results/raw/stage_4/solver_trajectories.jsonl.gz",
   },
-  { label: "Solver settings", name: "configs/sgs_hpr/stage_3_fixed_sigma.json" },
+  {
+    label: "RHS cross-checks",
+    name: "results/raw/stage_4/structural_crosschecks.jsonl.gz",
+  },
+  { label: "Solver settings", name: "configs/sgs_hpr/stage_4_structural.json" },
   {
     label: "Base row map",
     name: "results/raw/stage_2/case5_base_t1_row_metadata.jsonl.gz",

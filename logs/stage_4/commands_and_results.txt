@@ -1,0 +1,181 @@
+Stage 4 commands and results
+Date: 2026-07-30
+Execution boundary: local Windows CPU, Python FP64; no DGX, GPU, scaling,
+adaptive sigma, or restart execution.
+
+1. Manuscript inspection
+
+The supplied PDF was inspected with Poppler. Pages 7 and 12 were rendered at
+160 DPI and visually checked. Page 7 contains Equations (37)-(46) and
+Proposition 5. Page 12 contains Equation (55).
+
+Result:
+- Equation (55) matches the implemented variable and equality-row order.
+- Equation (43) contains the correct minus rank-one Schur complement.
+- Equations (39), (44), and (45) print the inverse signs for a plus update.
+
+2. Targeted implementation checks
+
+Command:
+  ./.venv/Scripts/python.exe -m pytest tests/unit/test_structural_y1.py -q
+
+Result:
+  22 passed
+
+Command:
+  ./.venv/Scripts/python.exe -m pytest tests/integration/test_stage4_structural_y1.py -q
+
+Result:
+  6 passed
+
+3. Complete Python suite before evidence generation
+
+Command:
+  ./.venv/Scripts/python.exe -m pytest -q
+
+Result:
+  104 passed in 62.37 seconds
+
+4. First complete Stage 4 evidence run
+
+Command:
+  ./.venv/Scripts/python.exe scripts/run_stage_4.py
+
+Result:
+  FAIL - structural cross-checks and full solver cross-checks passed.
+  The initial solve-only timing batch was too short and failed the additional
+  microkernel fit heuristic:
+
+  solve-only slope              0.636
+  solve-only R-squared          0.819
+  solve-only normalized spread  4.889
+
+  The paper-relevant RHS-plus-solve boundary passed:
+
+  RHS-plus-solve slope              1.024
+  RHS-plus-solve R-squared          0.953
+  RHS-plus-solve normalized spread  2.273
+
+  Largest T=1024 speedups:
+
+  solve-only       15.26x
+  RHS plus solve    7.38x
+
+No correctness threshold was changed.
+
+5. Increased-batch timing preflight
+
+Protocol:
+  timing repeats/batch       9 / 16
+  complexity repeats/batch  11 / 64
+
+Result:
+  PASS in the focused preflight.
+
+  solve-only slope/R-squared/spread       0.856 / 0.921 / 2.789
+  RHS-plus-solve slope/R-squared/spread   1.190 / 0.980 / 2.304
+
+6. Second complete Stage 4 evidence run
+
+Command:
+  ./.venv/Scripts/python.exe scripts/run_stage_4.py
+
+Result:
+  FAIL - all correctness and required paper-boundary measurements passed.
+  The solve-only diagnostic remained sensitive to fixed NumPy dispatch and
+  memory effects:
+
+  solve-only slope              0.552
+  solve-only R-squared          0.889
+  solve-only normalized spread  4.860
+
+  The paper-relevant RHS-plus-solve boundary again passed:
+
+  RHS-plus-solve slope              1.016
+  RHS-plus-solve R-squared          0.973
+  RHS-plus-solve normalized spread  1.868
+
+  Largest T=1024 speedups:
+
+  solve-only       16.85x
+  RHS plus solve    7.35x
+
+7. Larger-T diagnostic
+
+The solve-only timing was probed at T=16,384 through T=262,144. Its log-log
+slope moved to 1.600 while the RHS-plus-solve slope remained 1.078 with
+R-squared 0.996. This confirmed that the short NumPy kernel crosses dispatch,
+allocation, cache, and memory-bandwidth regimes and is not a stable standalone
+wall-time complexity oracle.
+
+Decision D-0033 therefore keeps the unchanged timing thresholds on the
+Corollary 1 boundary, which explicitly includes R1 formation through sparse A1
+products. The solve-only fit remains preserved as a non-gating diagnostic.
+The exact solve-only arithmetic count remains O(T + N_ESS).
+
+8. Final complete Stage 4 evidence run
+
+Command:
+  ./.venv/Scripts/python.exe scripts/run_stage_4.py
+
+Result:
+  PASS
+
+  structural_crosschecks       PASS
+  full_solver_crosschecks      PASS
+  performance_and_complexity   PASS
+
+Final measured fits:
+
+  non-gating solve-only slope/R-squared/spread
+    0.943 / 0.972 / 1.830
+
+  gating RHS-plus-solve slope/R-squared/spread
+    1.158 / 0.995 / 1.723
+
+Final largest T=1024 speedups:
+
+  solve-only       19.68x
+  RHS plus solve    7.61x
+
+Evidence:
+  results/raw/stage_4/stage_4_validation.json
+  results/raw/stage_4/structural_crosschecks.jsonl.gz
+  results/raw/stage_4/solver_trajectories.jsonl.gz
+
+The gzip files contain 336 right-hand-side records and 2,289 solver trajectory
+records, respectively.
+
+9. Independent evidence checker
+
+Command:
+  ./.venv/Scripts/python.exe scripts/check_stage_4.py --output results/raw/stage_4/stage_4_checks.json
+
+Result:
+  PASS - 20 passed, 0 failed
+
+10. Final repository quality checks
+
+Command:
+  ./.venv/Scripts/python.exe -m pytest -q
+
+Result:
+  104 passed in 90.18 seconds
+
+Command:
+  ./.venv/Scripts/python.exe -m ruff check .
+
+Result:
+  PASS
+
+Command:
+  ./.venv/Scripts/python.exe -m ruff format --check .
+
+Result:
+  PASS - 53 files already formatted
+
+Command:
+  git diff --check
+
+Result:
+  PASS
