@@ -763,3 +763,94 @@ This preserves the structural oracle instead of quietly applying a fast
 formula to a matrix for which it was not derived. A generalized scaled
 structural solve is possible future work, but it was not needed to validate
 Stage 5 and is not part of the current reproduction claim.
+
+## 30. CPU/GPU parity is a trajectory claim
+
+A final objective alone is a weak porting test. Two implementations can land
+near the same optimum after following different update orders, restart events,
+or penalty schedules. Stage 6 instead freezes the LP, preprocessing, initial
+state, and controls, then compares the CPU and GPU paths after 1 step, 10
+steps, 100 steps, and at termination.
+
+For the two correctness fixtures, the FP64 paths stop on exactly the same
+iterations:
+
+```text
+public T1 case:       CPU 410, GPU 410
+synthetic T2 fixture: CPU 1032, GPU 1032
+```
+
+The largest final relative state difference is 2.62e-14 on T1 and 6.90e-15 on
+T2. Restarts also match at 4 and 8. Together with the intermediate checks,
+this supports algorithmic-path parity at FP64 rounding scale rather than only
+agreement of the reported objective.
+
+## 31. Scaling separates two equality-solve paths on the GPU
+
+The Stage 4 structural formula describes the unscaled Equation (55) equality
+matrix. Ruiz and Pock-Chambolle scaling change both its rows and columns, so a
+descriptor derived from the raw matrix no longer represents the scaled Gram
+matrix.
+
+Stage 6 preserves two deliberately separate paths:
+
+- the scaled production path holds the transformed matrix on the GPU and uses
+  its verified direct Cholesky solve;
+- the unscaled structural path checks the corrected Proposition 5 formula
+  against its direct oracle.
+
+This separation matters mathematically. Reusing the raw structural descriptor
+after scaling would be a different linear system, even if dimensions and array
+shapes still matched.
+
+## 32. Sparse algorithm selection is observed, not assumed
+
+The manuscript names the cuSPARSE CSR Algorithm 2 matrix-vector routine. A
+high-level sparse multiplication call does not prove that this algorithm was
+selected because a library can legally choose its default implementation.
+
+The DGX path therefore creates the low-level cuSPARSE sparse-matrix and dense-
+vector descriptors, requests `CUSPARSE_SPMV_CSR_ALG2`, keeps the workspace
+buffer resident, and records the selected constant. Its outputs are checked
+against the trusted CPU products for both the matrix and its explicit
+transpose. The ordinary CuPy sparse call remains available only as an honestly
+labeled default fallback.
+
+## 33. Data residency defines the iteration boundary
+
+The GPU-resident set includes the sparse matrices and transposes, scaled LP
+vectors, scaling factors, current state, Halpern anchor, candidate state, and
+reusable workspaces. Host-to-device movement occurs during setup. Device-to-
+host movement is reserved for recorded diagnostics and final recovery.
+
+This design makes the iteration boundary meaningful. If a state vector were
+copied back to the CPU every step, a timing labeled "GPU iterations" would
+actually include an implicit host-controlled algorithm. Stage 6 keeps an
+explicit transfer ledger so that any such movement is visible.
+
+## 34. Timing fields answer different questions
+
+Stage 6 separates initialization, first compilation and warm-up, allocation,
+host-to-device transfer, solver initialization, iterations, residual checks,
+device-to-host transfer, and total end-to-end time. These fields should not be
+collapsed prematurely:
+
+- end-to-end time answers how long a fresh solve takes;
+- iteration time describes repeated solver work after preparation;
+- resident-loop time isolates a fixed diagnostic horizon;
+- residual-check time exposes synchronization and recovery cost.
+
+The frozen T1 and T2 problems are correctness fixtures, not performance
+benchmarks. Their timing evidence validates measurement plumbing but supports
+no speedup claim. Repeated compatible comparisons begin in Stage 7 only after
+case provenance and validation are established.
+
+## 35. FP32 is downstream of the FP64 gate
+
+Reduced precision changes sparse reductions, norm accumulation, stopping
+decisions, and potentially the restart schedule. Stage 6 therefore runs FP32
+only after the FP64 CPU/GPU gate passes.
+
+The FP32 record is diagnostic and non-gating. It can reveal which residual
+blocks are sensitive to rounding and inform a future mixed-precision design,
+but it cannot replace the FP64 baseline or justify relaxed acceptance limits.

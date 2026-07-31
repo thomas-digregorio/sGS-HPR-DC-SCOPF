@@ -123,19 +123,25 @@ export function ReproductionDashboard() {
             <div className="metric-note">Stage gates prevent unsupported shortcuts.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Main Stage 5 runs</div>
-            <div className="metric-value">410 / 1,032</div>
-            <div className="metric-note">Iterations for the public T1 case and labeled T2 extension.</div>
+            <div className="metric-label">FP64 CPU / GPU iterations</div>
+            <div className="metric-value">410 / 410</div>
+            <div className="metric-note">
+              Public T1 parity; the labeled T2 fixture also matched at 1,032 / 1,032.
+            </div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Original-space validation</div>
-            <div className="metric-value">All gates PASS</div>
-            <div className="metric-note">KKT below 0.01; objective gap below 0.0002; physical error below 0.01.</div>
+            <div className="metric-label">Largest final state difference</div>
+            <div className="metric-value">2.62 × 10⁻¹⁴</div>
+            <div className="metric-note">
+              Maximum relative x, y, or z error across the final FP64 T1 state.
+            </div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Control provenance</div>
-            <div className="metric-value">Sourced proxy</div>
-            <div className="metric-note">Published HPR-LP equations transferred; exact author DCOPF policy remains unavailable.</div>
+            <div className="metric-label">DGX sparse kernel</div>
+            <div className="metric-value">CSR_ALG2</div>
+            <div className="metric-note">
+              True cuSPARSE algorithm selection verified on the NVIDIA GB10.
+            </div>
           </div>
         </div>
       </section>
@@ -214,69 +220,72 @@ export function ReproductionDashboard() {
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">
-              Stage 4 is approved and Stage 5 passed every acceptance criterion.
-              Stage 6 remains locked until you send the exact approval phrase.
+              Stage 5 is approved and Stage 6 passed its FP64 parity and original-space
+              correctness gates. Stage 7 remains locked until you send the exact
+              approval phrase.
             </p>
-            <div className="gate-command">APPROVE STAGE 5 AND RUN STAGE 6</div>
+            <div className="gate-command">APPROVE STAGE 6 AND RUN STAGE 7</div>
           </section>
 
-          <section className="rail-card" aria-labelledby="stage-five-title">
-            <h2 className="rail-title" id="stage-five-title">Stage 5 evidence brief</h2>
+          <section className="rail-card" aria-labelledby="stage-six-title">
+            <h2 className="rail-title" id="stage-six-title">Stage 6 FP64 parity brief</h2>
             <div className="machine-list">
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Preprocessing pipeline</span>
-                  <span className="machine-state">PASS</span>
+                  <span className="machine-name">Public case5 / T1</span>
+                  <span className="machine-state">410 / 410</span>
                 </div>
                 <div className="machine-detail">
-                  Ten Ruiz passes, Pock-Chambolle alpha one, then full-vector b and c normalization.
+                  GPU KKT 0.005618456235; objective 17479.839088898956; maximum
+                  final relative state error 2.62e-14.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Recovered candidates</span>
-                  <span className="machine-state">PASS</span>
+                  <span className="machine-name">Synthetic resource fixture / T2</span>
+                  <span className="machine-state">1,032 / 1,032</span>
                 </div>
                 <div className="machine-detail">
-                  Worst main-run KKT 0.00895, objective gap 0.0000103, and physical error 0.00606.
+                  GPU KKT 0.008948422297; objective 26580.274984099353; maximum
+                  final relative state error 6.90e-15.
                 </div>
               </div>
             </div>
-            <div className="ablation-panel" aria-label="T1 control ablation">
-              <div className="ablation-heading">Four control combinations / public T1 case</div>
+            <div className="ablation-panel" aria-label="DGX implementation evidence">
+              <div className="ablation-heading">DGX GB10 implementation boundary</div>
               <div className="ablation-grid">
                 <div className="ablation-cell">
-                  <span>Fixed / no restart</span>
-                  <strong>123,328 to gate</strong>
+                  <span>Resident sparse operators</span>
+                  <strong>A and A transpose</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Adaptive / no restart</span>
-                  <strong>5,000-step diagnostic</strong>
+                  <span>Actual cuSPARSE selection</span>
+                  <strong>CSR_ALG2</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Fixed / restart</span>
-                  <strong>524 to gate</strong>
+                  <span>Correctness baseline</span>
+                  <strong>FP64 PASS</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Adaptive / restart</span>
-                  <strong>410 to gate</strong>
+                  <span>Reduced precision</span>
+                  <strong>FP32 diagnostic</strong>
                 </div>
               </div>
               <p className="ablation-note">
-                The adaptive-only run exercises the policy on a fixed horizon; it is not
-                reported as converged.
+                These frozen fixtures establish implementation parity. They are not a
+                repeated performance benchmark, so Stage 6 makes no speedup claim.
               </p>
             </div>
           </section>
 
           <section className="rail-card source-boundary" aria-labelledby="source-boundary-title">
-            <div className="chip">Source limitation</div>
-            <h2 className="rail-title" id="source-boundary-title">HPR-LP policy transfer</h2>
+            <div className="chip">Claim boundary</div>
+            <h2 className="rail-title" id="source-boundary-title">Parity before performance</h2>
             <p className="rail-copy">
-              The exact author DCOPF policy code is unavailable. Stage 5 uses the
-              published HPR-LP penalty and restart equations with the DCOPF paper&apos;s
-              100-step check interval, so this is a sourced proxy rather than an
-              author-identical implementation.
+              The paper used an A100 and did not publish a complete timing boundary.
+              Stage 6 runs on a DGX Spark GB10 and records initialization, warm-up,
+              allocation, transfers, iterations, residual checks, and recovery. Fair
+              repeated benchmark comparisons belong to Stage 7.
             </p>
           </section>
 
@@ -286,7 +295,7 @@ export function ReproductionDashboard() {
               <li>CPU correctness before GPU optimization.</li>
               <li>FP64 first; reduced precision is an experiment.</li>
               <li>No invented data or unstated N-1 constraints.</li>
-              <li>Every speedup includes fair timing boundaries.</li>
+              <li>No speedup claim from Stage 6 correctness fixtures.</li>
             </ul>
           </section>
 
@@ -296,19 +305,21 @@ export function ReproductionDashboard() {
               <div className="machine">
                 <div className="machine-head">
                   <span className="machine-name">Research workstation</span>
-                  <span className="machine-state">Audited</span>
+                  <span className="machine-state">CPU reference</span>
                 </div>
                 <div className="machine-detail">
-                  Windows / local CPU; Stage 5 preprocessing and control validation passed.
+                  The trusted FP64 path supplies frozen states, residuals, objectives,
+                  and policy events for the DGX cross-check.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
                   <span className="machine-name">DGX Spark</span>
-                  <span className="machine-state">Audited</span>
+                  <span className="machine-state">GPU verified</span>
                 </div>
                 <div className="machine-detail">
-                  Audited and reachable; deliberately untouched through the CPU-only Stage 5.
+                  NVIDIA GB10; FP64 CPU/GPU parity and true cuSPARSE CSR_ALG2 selection
+                  verified on the device.
                 </div>
               </div>
             </div>

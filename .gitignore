@@ -46,6 +46,8 @@ results/raw/*
 !results/raw/stage_4/**
 !results/raw/stage_5/
 !results/raw/stage_5/**
+!results/raw/stage_6/
+!results/raw/stage_6/**
 results/processed/*
 !results/processed/.gitkeep
 results/plots/*
@@ -66,6 +68,8 @@ logs/*
 !logs/stage_4/**
 !logs/stage_5/
 !logs/stage_5/**
+!logs/stage_6/
+!logs/stage_6/**
 artifacts/*
 !artifacts/.gitkeep
 
@@ -89,6 +93,7 @@ references/*.pdf
 gurobi.log
 *.log
 *.lic
+!logs/stage_6/stage_6_run.log
 
 # Dashboard build/runtime output
 dashboard/node_modules/

@@ -1,0 +1,11 @@
+{
+  "all_passed": true,
+  "cases": 2,
+  "gating_failures": 0,
+  "gpu_speedup_claimed": false,
+  "stage": 6,
+  "stage_7_benchmarks_locked": true,
+  "status": "PASS",
+  "trajectory_file": "/home/dgxsparktd/sGS-HPR-DC-SCOPF/results/raw/stage_6/stage_6_trajectories.jsonl.gz",
+  "validation_file": "/home/dgxsparktd/sGS-HPR-DC-SCOPF/results/raw/stage_6/stage_6_validation.json"
+}

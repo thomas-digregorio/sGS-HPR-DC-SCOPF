@@ -9,6 +9,7 @@ from gpu_dcopf_hpr.stage5_control import (
     Stage5Control,
     choose_restart_reasons,
     hprlp_sigma_update,
+    hprlp_sigma_update_from_scalars,
     sgs_metric_y_quadratic,
     sgs_restart_merit,
     solve_stage5_sgs_hpr,
@@ -147,6 +148,78 @@ def test_published_sigma_formula_and_guarded_reset() -> None:
     assert not reset.accepted
     assert reset.sigma_after == 1.0
     assert "movement guard" in reset.reason
+
+
+def test_scalar_sigma_update_matches_cpu_wrapper_decision() -> None:
+    lp = analytic_toy_case().lp
+    workspace = prepare_sgs_hpr(lp)
+    reference = HPRState(y=[0.1, -0.3], z=[0.0, 0.0], x=[0.2, -0.1])
+    candidate = HPRState(y=[0.6, 0.2], z=[0.0, 0.0], x=[0.7, 0.4])
+    residuals = evaluate_residuals(
+        lp,
+        x=candidate.x,
+        y=candidate.y,
+        z=candidate.z,
+    )
+    control = Stage5Control(
+        adaptive_sigma=True,
+        movement_minimum=1e-20,
+        movement_maximum=1e20,
+        infeasibility_ratio_minimum=1e-20,
+        infeasibility_ratio_maximum=1e20,
+    )
+    wrapper_update = hprlp_sigma_update(
+        workspace,
+        reference=reference,
+        candidate=candidate,
+        residuals=residuals,
+        sigma_before=3.0,
+        control=control,
+    )
+    scalar_update = hprlp_sigma_update_from_scalars(
+        delta_x=float(np.linalg.norm(candidate.x - reference.x)),
+        delta_y=float(np.sqrt(sgs_metric_y_quadratic(workspace, candidate.y - reference.y))),
+        primal_infeasibility=residuals.paper_normalized_norms[0],
+        dual_infeasibility=residuals.paper_normalized_norms[2],
+        sigma_before=3.0,
+        control=control,
+    )
+
+    assert scalar_update == wrapper_update
+
+
+def test_scalar_sigma_update_preserves_disabled_and_guarded_decisions() -> None:
+    disabled = hprlp_sigma_update_from_scalars(
+        delta_x=2.0,
+        delta_y=4.0,
+        primal_infeasibility=0.25,
+        dual_infeasibility=0.5,
+        sigma_before=3.0,
+        control=Stage5Control(),
+    )
+
+    assert not disabled.attempted
+    assert not disabled.accepted
+    assert disabled.reason == "adaptive sigma disabled"
+    assert disabled.delta_x == 2.0
+    assert disabled.delta_y == 4.0
+    assert disabled.infeasibility_ratio is None
+    assert disabled.sigma_after == 3.0
+
+    guarded = hprlp_sigma_update_from_scalars(
+        delta_x=0.0,
+        delta_y=2.0,
+        primal_infeasibility=0.0,
+        dual_infeasibility=1.0,
+        sigma_before=3.0,
+        control=Stage5Control(adaptive_sigma=True),
+    )
+
+    assert guarded.attempted
+    assert not guarded.accepted
+    assert guarded.reason == ("reset to 1 after movement guard and infeasibility-ratio guard")
+    assert guarded.infeasibility_ratio is None
+    assert guarded.sigma_after == 1.0
 
 
 def test_disabled_stage5_controls_reproduce_stage3_solver_exactly() -> None:

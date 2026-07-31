@@ -111,7 +111,7 @@
       "passed": true
     },
     {
-      "detail": "Stage 5 complete; Stage 6, GPU code, and DGX execution false",
+      "detail": "preserved Stage 5 evidence records Stage 6, GPU code, and DGX execution as not yet started; later approved files are allowed",
       "name": "stage_six_gpu_and_dgx_boundaries_remain_closed",
       "passed": true
     }

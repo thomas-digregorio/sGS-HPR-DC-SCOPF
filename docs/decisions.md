@@ -466,3 +466,92 @@ its original rationale should remain reviewable.
 - **Reason:** The preprocessing and control logic must pass independent CPU
   checks before device residence, sparse GPU kernels, and timing boundaries
   are introduced.
+
+## D-0042 - Keep CuPy optional outside GPU entry points
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Import CuPy lazily through the GPU backend. The package root,
+  CPU implementation, and CPU test suite must remain importable when CuPy is
+  absent. A DGX GPU entry point must fail with an actionable backend error if
+  the pinned CuPy runtime is unavailable.
+- **Reason:** CuPy is required to execute Stage 6 on the Spark but is not a
+  mathematical dependency of the validated CPU oracle. Eager import would
+  unnecessarily break local development and blur simulated tests with DGX
+  evidence.
+
+## D-0043 - Expose two incompatible GPU equality modes
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Use `scaled_direct` for the fully preconditioned Stage 5 LP and
+  solve its equality Gram system by device Cholesky. Use
+  `unscaled_structural` only for the raw Equation (55) LP with the corrected
+  Stage 4 descriptor prepared from that exact LP instance. Reject every mixed
+  scaled/structural pairing.
+- **Reason:** General diagonal scaling changes the Gram structure. A separate
+  scaled structural formula has not been derived, so silently applying the raw
+  formula would sacrifice correctness for an unsupported optimization.
+
+## D-0044 - Disclose ALG2 selection and permit a named correctness fallback
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Request cuSPARSE `CUSPARSE_SPMV_CSR_ALG2` for resident CSR
+  products. If the supported CuPy interface cannot select it audibly, use the
+  declared CuPy cuSPARSE generic default and record the requested path,
+  selected path, fallback flag, reason, and library versions.
+- **Reason:** The paper identifies ALG2, but a library wrapper can hide the
+  low-level algorithm selector. The fallback preserves a testable GPU
+  mathematical port while explicitly reducing kernel-level fidelity and
+  prohibiting an ALG2 performance claim.
+
+## D-0045 - Evaluate acceptance residuals in original coordinates on device
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Keep residual vectors and reductions on the GPU and recover the
+  preconditioned state into original coordinates on device before applying
+  Equation (54) and the raw KKT test. Transfer only scheduled scalar norms and
+  flags during the loop; transfer full state only at named validation or
+  finalization boundaries.
+- **Reason:** Host residual evaluation would hide repeated transfer costs and
+  defeat device residency. Scaled-space residuals alone cannot certify the
+  original MW/MWh problem.
+
+## D-0046 - Separate correctness and resident timing residual cadence
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Check Equation (54) every iteration for the correctness run.
+  Use a separate fixed 1,000-iteration resident timing diagnostic with checks
+  every 100 iterations. Synchronize timed GPU boundaries and report residual
+  time separately from the iteration loop.
+- **Reason:** Every-iteration checking preserves the validated first accepted
+  iterate, while the separate resident diagnostic reveals loop behavior
+  without presenting sparse checking as the correctness algorithm.
+
+## D-0047 - Lock FP64 thresholds before observing GPU results
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Use the thresholds in
+  `configs/sgs_hpr/stage_6_gpu_dgx.json` without post-result relaxation. FP64
+  is required and gating. FP32 may run only after FP64 passes, is non-gating,
+  and cannot replace FP64 evidence. Mixed precision remains disabled.
+- **Reason:** Predeclared thresholds prevent accelerator discrepancies from
+  being normalized after the fact. Reduced precision is an informative study,
+  not a substitute for the CPU FP64 correctness contract.
+
+## D-0048 - Record timing components without claiming Stage 7 speedup
+
+- **Status:** accepted
+- **Stage:** 6
+- **Decision:** Record CUDA initialization, CPU construction and preprocessing,
+  compilation and warm-up, allocation, host-to-device transfer, GPU solver
+  initialization, iteration loop, residual checks, device-to-host transfer,
+  and complete end-to-end wall time as named boundaries. Do not form a speedup
+  from unlike boundaries, and keep benchmark campaigns locked to Stage 7.
+- **Reason:** The manuscript does not define enough timing detail for an exact
+  comparison. A decomposed Stage 6 measurement supports later controlled
+  benchmarks without turning a correctness port into a performance claim.

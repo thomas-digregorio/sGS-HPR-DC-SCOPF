@@ -1,0 +1,88 @@
+{
+  "stage": 6,
+  "algorithm": "Paper Algorithm 2 with Stage 5 preprocessing and sourced HPR-LP controls",
+  "target": "NVIDIA DGX Spark GB10",
+  "gpu_backend": "CuPy",
+  "gpu_backend_version": "14.1.1",
+  "gpu_package": "cupy-cuda13x==14.1.1",
+  "cpu_reference": "Validated NumPy and SciPy Stage 5 implementation",
+  "precision": "float64",
+  "initial_state": "w0=(y,z,x)=all-zero vectors",
+  "requested_spmv_algorithm": "CUSPARSE_SPMV_CSR_ALG2",
+  "fallback_spmv_algorithm": "CuPy cuSPARSE generic default",
+  "store_explicit_transposes": true,
+  "paper_tolerance": 5e-05,
+  "dcopf_kkt_combined_target": 0.01,
+  "dcopf_physical_tolerance": 0.01,
+  "dcopf_maximum_scaled_objective_gap": 0.0002,
+  "maximum_iterations": 150000,
+  "policy_check_interval": 100,
+  "correctness_residual_check_interval": 1,
+  "resident_timing_residual_check_interval": 100,
+  "resident_timing_iterations": 1000,
+  "history_interval": 100,
+  "initial_sigma": 1.0,
+  "ruiz_iterations": 10,
+  "pock_chambolle_alpha": 1,
+  "normalize_b_and_c": true,
+  "maximum_equality_infinity_residual": 5e-10,
+  "maximum_z_x_identity_error": 1e-10,
+  "crosscheck": {
+    "spmv_relative_tolerance": 5e-13,
+    "spmv_absolute_tolerance": 5e-13,
+    "one_step_relative_tolerance": 2e-12,
+    "one_step_absolute_tolerance": 2e-12,
+    "ten_step_relative_tolerance": 2e-10,
+    "ten_step_absolute_tolerance": 2e-11,
+    "fixed_horizon_iterations": 100,
+    "fixed_horizon_state_relative_tolerance": 1e-10,
+    "objective_relative_tolerance": 1e-08,
+    "normalized_residual_absolute_tolerance": 1e-08
+  },
+  "sparse_benchmark": {
+    "warmup_iterations": 50,
+    "repetitions": 2000,
+    "seed": 20260731
+  },
+  "determinism": {
+    "repetitions": 3,
+    "fixed_horizon_iterations": 100,
+    "relative_tolerance": 1e-12,
+    "bitwise_required": false
+  },
+  "precision_study": {
+    "fp64_required": true,
+    "fp32_enabled_after_fp64_pass": true,
+    "mixed_precision_enabled": false,
+    "reduced_precision_is_gating": false
+  },
+  "restart_parameters": {
+    "alpha_sufficient": 0.2,
+    "alpha_necessary": 0.6,
+    "alpha_long": 0.2
+  },
+  "sigma_guards": {
+    "movement_minimum": 1e-16,
+    "movement_maximum": 1000000000000.0,
+    "infeasibility_ratio_minimum": 1e-08,
+    "infeasibility_ratio_maximum": 100000000.0
+  },
+  "timing_boundaries": [
+    "CUDA initialization",
+    "CPU matrix construction and preprocessing",
+    "first-run compilation and warm-up",
+    "allocation",
+    "host-to-device transfer",
+    "GPU solver initialization",
+    "iteration loop",
+    "residual checks",
+    "device-to-host transfer",
+    "complete end-to-end wall time"
+  ],
+  "stage_boundary": {
+    "stage_6_only": true,
+    "stage_7_benchmarks_locked": true,
+    "paper_timing_reproduction_claimed": false,
+    "gpu_speedup_claimed": false
+  }
+}

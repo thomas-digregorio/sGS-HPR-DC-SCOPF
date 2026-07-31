@@ -46,17 +46,28 @@ Only one stage is executed at a time:
 | 10 | Optional N-1 SCOPF research extension |
 
 Every stage ends with tests, a report, preserved evidence, and an acceptance
-decision. To start Stage 6 after reviewing Stage 5, send exactly:
+decision. Stage 5 is approved and Stage 6 is complete. To start Stage 7 after
+reviewing the GPU evidence, send exactly:
 
 ```text
-APPROVE STAGE 5 AND RUN STAGE 6
+APPROVE STAGE 6 AND RUN STAGE 7
 ```
 
 Casual phrases such as "continue" or "looks good" are not stage approval.
 
 ## Current status
 
-Stage 5 is complete and the project is stopped at the Stage 6 gate.
+Stage 6 is complete and the project is stopped at the Stage 7 gate. The frozen
+FP64 CPU and DGX GPU paths reached identical stopping iterations on both
+correctness cases:
+
+| Case | CPU / GPU iterations | GPU raw KKT | GPU objective | Maximum final relative state error |
+|---|---:|---:|---:|---:|
+| Public case5, T=1 | 410 / 410 | 0.005618456235 | 17479.839088898956 | 2.62e-14 |
+| Synthetic resource fixture, T=2 | 1,032 / 1,032 | 0.008948422297 | 26580.274984099353 | 6.90e-15 |
+
+These are implementation-parity results, not performance benchmarks. Stage 6
+makes no CPU/GPU speedup claim.
 
 Validated capabilities now include:
 
@@ -92,28 +103,37 @@ Validated capabilities now include:
 - three-way spectral cross-checks for the projected inequality update;
 - Equation (54) checks on every intermediate iterate;
 - HiGHS, KKT, objective, and physical comparisons on six cases;
-- deterministic repeated trajectories with explicit timing boundaries.
+- deterministic repeated trajectories with explicit timing boundaries;
+- a NumPy/CuPy backend boundary with explicit transfer accounting;
+- resident FP64 GPU matrices, transposes, scaling data, solver state, and
+  reusable workspaces;
+- a verified low-level cuSPARSE path that actually selects
+  `CUSPARSE_SPMV_CSR_ALG2` on the DGX Spark GB10;
+- sparse-operation, one-step, short-trajectory, and final-solution CPU/GPU
+  cross-checks;
+- synchronized initialization, warm-up, transfer, iteration, residual-check,
+  recovery, and end-to-end timing fields, plus explicit allocation accounting;
+- an FP64-first correctness gate followed by a separate non-gating FP32
+  diagnostic.
 
 See `docs/project_state.md` for the authoritative gate state and
-`docs/stage_reports/stage_5_report.md` for acceptance evidence.
+`docs/stage_reports/stage_6_report.md` for acceptance evidence.
 
 ## Environment snapshot
 
-Stage 5 ran locally with Python 3.13.5, NumPy 2.4.1, SciPy 1.16.3, SciPy's
-bundled HiGHS dual-simplex interface, pytest, and Ruff. A project-local virtual
-environment provides the quality tooling while inheriting the audited
-scientific packages. Standalone `highspy` is not installed.
+The Stage 5 CPU reference ran locally with Python 3.13.5, NumPy 2.4.1, SciPy
+1.16.3, SciPy's bundled HiGHS dual-simplex interface, pytest, and Ruff.
 
-The target DGX Spark was audited and remained unchanged during Stage 3:
+Stage 6 ran in an isolated virtual environment on the target DGX Spark:
 
 - Ubuntu 24.04.4 LTS, aarch64;
 - NVIDIA GB10, compute capability 12.1;
-- NVIDIA driver 580.173.02 and loadable CUDA runtime 13.0;
+- NVIDIA driver 580.173.02, CUDA driver API 13.0, CuPy CUDA runtime API 13.2,
+  and CUDA 13.0.3 toolkit;
 - 121.690 GiB system memory with ATS addressing;
 - CPython 3.12.3;
-- no `nvcc` and no installed scientific Python stack.
+- CuPy 14.1.1 for CUDA 13, NumPy 2.3.5, and SciPy 1.16.3.
 
-Stage 5 intentionally did not install packages or run solver code on the DGX.
 Raw machine inventories and access details remain local and are intentionally
 excluded from the public repository. See `environment/README.md` for the
 regeneration and privacy policy.
@@ -125,7 +145,10 @@ manuscript does not fully identify device placements, time series, several
 physical parameters, the exact adaptive-penalty and restart implementation,
 numerical precision, or timing boundaries. Stage 5 therefore pins the
 published HPR-LP v0.1.0 policy as a sourced reconstruction and does not claim
-that it is identical to the authors' unpublished DCOPF code.
+that it is identical to the authors' unpublished DCOPF code. Stage 6 also runs
+on a DGX Spark GB10 rather than the paper's A100. Its timing ledger defines this
+project's measurement boundary; it does not retroactively make that boundary
+identical to the unpublished paper experiment.
 
 Until the required inputs are recovered, this project will not claim exact
 numerical reproduction. Results will be labeled as exact, mathematical,
@@ -153,7 +176,7 @@ gpu-dcopf-hpr/
 Production solver logic belongs in `src/gpu_dcopf_hpr/`, not only in notebooks.
 Raw validation outputs are preserved under `results/raw/stage_N/`.
 
-## Stage 5 checks
+## Stage 6 checks
 
 From this directory:
 
@@ -161,7 +184,14 @@ From this directory:
 ./.venv/Scripts/python.exe -m pytest -q
 ./.venv/Scripts/ruff.exe check .
 ./.venv/Scripts/ruff.exe format --check .
-./.venv/Scripts/python.exe scripts/run_stage_5.py
+./.venv/Scripts/python.exe scripts/check_stage_6.py
+```
+
+The Stage 6 experiment itself runs on the DGX Spark from the repository-local
+environment:
+
+```text
+python scripts/run_stage_6.py
 ```
 
 The dashboard has its own production build and rendered-output test:
@@ -172,8 +202,9 @@ npm run build
 node --test tests/rendered-html.test.mjs
 ```
 
-These commands reproduce the local Stage 5 CPU evidence; they do not begin
-Stage 6 or execute code on the DGX Spark.
+The checker validates the preserved Stage 6 evidence without starting Stage 7.
+The experiment command records DGX data and should be run only in the prepared
+CUDA 13 environment.
 
 ## Research rules in one minute
 

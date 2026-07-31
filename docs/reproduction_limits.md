@@ -4,12 +4,18 @@
 
 This register separates what the manuscript actually specifies from what would
 have to be recovered, derived, or transparently reconstructed. It was prepared
-for Stage 0 on 2026-07-29.
+for Stage 0 on 2026-07-29 and updated after the Stage 6 DGX Spark port on
+2026-07-31.
 
 **Current conclusion:** an exact numerical recreation of the paper's benchmark
 tables cannot be claimed from the available information. The project can target
 a mathematical reproduction first and, if exact experimental inputs remain
 unavailable, a clearly labeled structural reconstruction.
+
+Stage 6 now establishes FP64 CPU/GPU parity for two frozen correctness fixtures
+on this project's DGX Spark. That closes an implementation question for this
+repository; it does not recover the authors' missing benchmark inputs, source,
+precision choice, or timing boundary.
 
 The supplied source is a 17-page accepted/prepublished manuscript. A current
 institutional record identifies the final article as IEEE Transactions on Power
@@ -228,17 +234,37 @@ Attempts to approach published dimensions or timing trends with disclosed
 differences. It must never be presented as an exact timing or data
 reproduction.
 
-## 8. Locked follow-up plan
+## 8. What Stage 6 resolves for this project
 
-1. Stage 1: validate generic LP mathematics independently of power-system data.
-2. Stage 2: pin a small public network source and make every PTDF and indexing
-   choice explicit.
-3. Stage 3: implement fixed-\(\sigma\), no-restart CPU Algorithm 2.
-4. Stage 4: resolve Proposition 5 empirically against direct solves.
-5. Stage 5: inspect pinned HPR-LP/PDLP and preconditioning sources before adding
-   any adaptive formula.
-6. Stage 7: pin public MATPOWER case commits/hashes and decide exact versus
-   structural benchmark status before running published-scale experiments.
-7. At every stage: preserve missing items as missing rather than tuning
+Stage 6 makes several project-side choices observable and reproducible:
+
+- FP64 is the correctness baseline;
+- matrices, transposes, scaling data, state, and workspaces remain resident on
+  the DGX Spark GPU;
+- the low-level sparse path actually selects
+  `CUSPARSE_SPMV_CSR_ALG2` on the NVIDIA GB10;
+- initialization, warm-up, allocation, transfers, solver initialization,
+  iterations, residual checks, recovery, and end-to-end time are recorded as
+  separate fields;
+- the frozen T1 and T2 cases reach the same CPU and GPU stopping iterations;
+- FP32 is a non-gating diagnostic.
+
+These decisions define and validate this implementation. They do not show that
+the authors used FP64, the same transfer policy, identical preprocessing code,
+or the same timing boundary. They also do not make the DGX Spark GB10 a
+performance substitute for the paper's A100.
+
+No Stage 6 speedup is claimed. The two small fixtures are designed to expose
+correctness errors, not to support a throughput conclusion.
+
+## 9. Locked follow-up plan
+
+1. Stage 7: pin public MATPOWER case commits and hashes before constructing a
+   benchmark.
+2. Reconcile every case dimension and sparse nonzero count before solving.
+3. Classify each case as mathematical, structural, or approximate benchmark
+   reconstruction before reporting results.
+4. Validate optimization residuals and physical constraints before timing.
+5. Use repeated compatible timing boundaries before discussing speed.
+6. At every stage, preserve missing items as missing rather than tuning
    synthetic values to match the paper's times.
-

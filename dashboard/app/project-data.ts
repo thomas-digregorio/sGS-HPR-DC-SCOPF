@@ -116,23 +116,28 @@ export const stages: ResearchStage[] = [
       { id: "5.3", title: "Full-vector b and c normalization", status: "complete" },
       { id: "5.4", title: "Sourced adaptive penalty policy", status: "complete" },
       { id: "5.5", title: "Sourced restart policy at 100-step checks", status: "complete" },
-      { id: "5.6", title: "Four-way controls and preprocessing ablations", status: "complete" },
+      {
+        id: "5.6",
+        title: "Controls, preprocessing ablations, and acceptance approval",
+        status: "complete",
+      },
     ],
   },
   {
     id: 6,
     title: "GPU port for DGX Spark",
-    purpose: "Move the validated method to resident FP64 GPU arrays and measure the complete timing boundary.",
-    status: "locked",
+    purpose:
+      "Run the validated method with resident FP64 GPU data, prove CPU parity, and disclose the complete timing boundary.",
+    status: "complete",
     tasks: [
-      locked("6.1", "Backend abstraction"),
-      locked("6.2", "GPU data residency"),
-      locked("6.3", "Sparse-format benchmarks"),
-      locked("6.4", "Profile-guided vector kernels"),
-      locked("6.5", "Buffer reuse"),
-      locked("6.6", "Synchronized GPU timing"),
-      locked("6.7", "CPU/GPU numerical cross-check"),
-      locked("6.8", "FP64-first precision study"),
+      { id: "6.1", title: "Device backend and transfer ledger", status: "complete" },
+      { id: "6.2", title: "Resident LP data, state, matrices, and transposes", status: "complete" },
+      { id: "6.3", title: "DGX sparse-format and transpose benchmarks", status: "complete" },
+      { id: "6.4", title: "Sparse and vector operation parity", status: "complete" },
+      { id: "6.5", title: "Reusable workspaces and allocation accounting", status: "complete" },
+      { id: "6.6", title: "Synchronized phase and iteration timing", status: "complete" },
+      { id: "6.7", title: "CPU and GPU trajectory cross-checks", status: "complete" },
+      { id: "6.8", title: "FP64 gate and non-gating FP32 diagnostic", status: "complete" },
     ],
   },
   {
@@ -269,6 +274,36 @@ export const learningNotes = [
       "Fixed or adaptive penalty and restart on or off form four controlled runs. Comparing them shows which mechanism changes behavior instead of crediting the whole acceleration bundle at once.",
   },
   {
+    label: "Stage 6 parity",
+    title: "Match the path, not only the destination",
+    body:
+      "The FP64 CPU and GPU runs stop on the same iterations for both frozen cases. Matching intermediate states and policy events distinguishes an equivalent algorithmic path from two methods that merely finish near the same point.",
+  },
+  {
+    label: "Sparse kernels",
+    title: "A requested algorithm name is not evidence",
+    body:
+      "The DGX check reaches the low-level cuSPARSE descriptor and records that CSR_ALG2 was actually selected. A high-level sparse call that silently chooses its default would not support the paper-specific kernel claim.",
+  },
+  {
+    label: "GPU residency",
+    title: "Move results, not the iteration state",
+    body:
+      "The LP matrices, transposes, scaling, state vectors, and reusable workspaces stay on the GPU. Explicit host transfers are limited to setup, recorded diagnostics, and final recovery so transfer cost cannot hide inside an iteration claim.",
+  },
+  {
+    label: "Precision study",
+    title: "FP32 is a diagnostic after FP64",
+    body:
+      "FP64 first proves that the port preserves the CPU method at tight tolerances. The FP32 run is recorded separately and cannot weaken or replace that correctness gate.",
+  },
+  {
+    label: "Timing boundary",
+    title: "Parity is not a speedup claim",
+    body:
+      "Stage 6 records initialization, warm-up, allocation, transfers, iterations, residual checks, and recovery. It does not claim acceleration from two tiny correctness fixtures; repeated fair benchmarks begin only after Stage 7 is approved.",
+  },
+  {
     label: "Source boundary",
     title: "A sourced proxy is not author identity",
     body:
@@ -298,19 +333,23 @@ export const artifacts = [
   { label: "Primary source", name: "references/AnEfficientGPU-basedHalpernAccelerating.pdf" },
   { label: "Specification", name: "docs/paper_specification.md" },
   { label: "Public network", name: "data/raw/matpower/case5.m" },
-  { label: "Stage evidence", name: "docs/stage_reports/stage_5_report.md" },
-  { label: "Validation results", name: "results/raw/stage_5/stage_5_validation.json" },
+  { label: "Stage evidence", name: "docs/stage_reports/stage_6_report.md" },
+  { label: "Validation results", name: "results/raw/stage_6/stage_6_validation.json" },
   {
-    label: "Trajectories and policy events",
-    name: "results/raw/stage_5/stage_5_trajectories.jsonl.gz",
+    label: "GPU trace and timing ledger",
+    name: "results/raw/stage_6/stage_6_trajectories.jsonl.gz",
   },
   {
     label: "Independent checker",
-    name: "results/raw/stage_5/stage_5_checks.json",
+    name: "results/raw/stage_6/stage_6_checks.json",
   },
   {
     label: "Solver settings",
-    name: "configs/sgs_hpr/stage_5_preconditioning_controls.json",
+    name: "configs/sgs_hpr/stage_6_gpu_dgx.json",
+  },
+  {
+    label: "DGX package pins",
+    name: "environment/dgx_stage6_requirements.txt",
   },
   {
     label: "Base row map",

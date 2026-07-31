@@ -465,16 +465,21 @@ def choose_restart_reasons(
     return tuple(reasons)
 
 
-def hprlp_sigma_update(
-    workspace: SGSHPRWorkspace,
+def hprlp_sigma_update_from_scalars(
     *,
-    reference: HPRState,
-    candidate: HPRState,
-    residuals: ResidualEvaluation,
+    delta_x: float,
+    delta_y: float,
+    primal_infeasibility: float,
+    dual_infeasibility: float,
     sigma_before: float,
     control: Stage5Control,
 ) -> SigmaUpdate:
-    """Apply published HPR-LP Eqs. (15)-(18) in the sGS metric."""
+    """Apply HPR-LP Eqs. (15)-(18) from precomputed scalar diagnostics.
+
+    This decision-only boundary is shared by CPU and accelerator control paths.
+    Callers remain responsible for computing ``delta_y`` in the appropriate
+    multiplier metric and for supplying normalized primal and dual infeasibility.
+    """
 
     sigma_value = _positive_finite(sigma_before, name="sigma_before")
     if not control.adaptive_sigma:
@@ -482,29 +487,16 @@ def hprlp_sigma_update(
             attempted=False,
             accepted=False,
             reason="adaptive sigma disabled",
-            delta_x=0.0,
-            delta_y=0.0,
-            primal_infeasibility=residuals.paper_normalized_norms[0],
-            dual_infeasibility=residuals.paper_normalized_norms[2],
+            delta_x=delta_x,
+            delta_y=delta_y,
+            primal_infeasibility=primal_infeasibility,
+            dual_infeasibility=dual_infeasibility,
             infeasibility_ratio=None,
             sigma_before=sigma_value,
             sigma_after=sigma_value,
         )
 
-    _validate_state(workspace.source_lp, reference, name="reference")
-    _validate_state(workspace.source_lp, candidate, name="candidate")
-    delta_x = float(np.linalg.norm(candidate.x - reference.x))
-    delta_y = float(
-        np.sqrt(
-            sgs_metric_y_quadratic(
-                workspace,
-                candidate.y - reference.y,
-            )
-        )
-    )
-    primal = residuals.paper_normalized_norms[0]
-    dual = residuals.paper_normalized_norms[2]
-    ratio = dual / primal if primal > 0.0 else None
+    ratio = dual_infeasibility / primal_infeasibility if primal_infeasibility > 0.0 else None
 
     movements_ok = (
         control.movement_minimum < delta_x < control.movement_maximum
@@ -526,8 +518,8 @@ def hprlp_sigma_update(
                 reason="accepted HPR-LP Eq. (16)",
                 delta_x=delta_x,
                 delta_y=delta_y,
-                primal_infeasibility=primal,
-                dual_infeasibility=dual,
+                primal_infeasibility=primal_infeasibility,
+                dual_infeasibility=dual_infeasibility,
                 infeasibility_ratio=ratio,
                 sigma_before=sigma_value,
                 sigma_after=float(sigma_after),
@@ -544,11 +536,56 @@ def hprlp_sigma_update(
         reason="reset to 1 after " + " and ".join(failed),
         delta_x=delta_x,
         delta_y=delta_y,
-        primal_infeasibility=primal,
-        dual_infeasibility=dual,
+        primal_infeasibility=primal_infeasibility,
+        dual_infeasibility=dual_infeasibility,
         infeasibility_ratio=ratio,
         sigma_before=sigma_value,
         sigma_after=1.0,
+    )
+
+
+def hprlp_sigma_update(
+    workspace: SGSHPRWorkspace,
+    *,
+    reference: HPRState,
+    candidate: HPRState,
+    residuals: ResidualEvaluation,
+    sigma_before: float,
+    control: Stage5Control,
+) -> SigmaUpdate:
+    """Compute sGS diagnostics and apply published HPR-LP Eqs. (15)-(18)."""
+
+    sigma_value = _positive_finite(sigma_before, name="sigma_before")
+    if not control.adaptive_sigma:
+        return hprlp_sigma_update_from_scalars(
+            delta_x=0.0,
+            delta_y=0.0,
+            primal_infeasibility=residuals.paper_normalized_norms[0],
+            dual_infeasibility=residuals.paper_normalized_norms[2],
+            sigma_before=sigma_value,
+            control=control,
+        )
+
+    _validate_state(workspace.source_lp, reference, name="reference")
+    _validate_state(workspace.source_lp, candidate, name="candidate")
+    delta_x = float(np.linalg.norm(candidate.x - reference.x))
+    delta_y = float(
+        np.sqrt(
+            sgs_metric_y_quadratic(
+                workspace,
+                candidate.y - reference.y,
+            )
+        )
+    )
+    primal = residuals.paper_normalized_norms[0]
+    dual = residuals.paper_normalized_norms[2]
+    return hprlp_sigma_update_from_scalars(
+        delta_x=delta_x,
+        delta_y=delta_y,
+        primal_infeasibility=primal,
+        dual_infeasibility=dual,
+        sigma_before=sigma_value,
+        control=control,
     )
 
 

@@ -1,4 +1,4 @@
-"""Independently validate preserved Stage 5 evidence and the Stage 6 boundary."""
+"""Validate preserved Stage 5 evidence and its recorded pre-Stage-6 boundary."""
 
 from __future__ import annotations
 
@@ -1144,15 +1144,6 @@ def _stage_boundary_checks(
 ) -> None:
     boundary = _mapping(evidence.get("stage_boundary"))
     unsupported = _mapping(config.get("unsupported_or_explicitly_bounded"))
-    premature_paths = [
-        path
-        for path in (
-            "scripts/run_stage_6.py",
-            "src/gpu_dcopf_hpr/gpu_solver.py",
-            "src/gpu_dcopf_hpr/dgx_runner.py",
-        )
-        if (PROJECT_ROOT / path).exists()
-    ]
     boundary_valid = (
         evidence.get("all_passed") is True
         and _mapping(evidence.get("component_validation")).get("passed") is True
@@ -1167,16 +1158,14 @@ def _stage_boundary_checks(
         and unsupported.get("gpu") is False
         and unsupported.get("dgx_execution") is False
         and unsupported.get("scaled_structural_eq55_backend_available") is False
-        and not premature_paths
     )
     add_check(
         checks,
         "stage_six_gpu_and_dgx_boundaries_remain_closed",
         boundary_valid,
         (
-            "Stage 5 complete; Stage 6, GPU code, and DGX execution false"
-            if not premature_paths
-            else f"premature_paths={premature_paths}"
+            "preserved Stage 5 evidence records Stage 6, GPU code, and DGX "
+            "execution as not yet started; later approved files are allowed"
         ),
     )
 

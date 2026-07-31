@@ -45,3 +45,30 @@ Package metadata reports PyTorch 2.9.1+cu128, but a clean child-process import
 exits with OpenMP error 15 because libomp.dll and libiomp5md.dll conflict. The
 unsafe KMP_DUPLICATE_LIB_OK workaround was not used. Treat PyTorch as unusable
 in this environment until it is rebuilt in a clean project environment.
+
+
+Stage 6 DGX Spark experiment environment
+========================================
+Resolved: 2026-07-31
+Scope: isolated repository-local virtual environment for the GPU port
+
+Component                 DGX Spark Stage 6
+------------------------  ----------------------------------
+Platform                  Ubuntu 24.04.4 LTS, Linux aarch64
+Python                    3.12.3
+pip                       26.2
+NumPy                     2.3.5
+SciPy                     1.16.3
+CuPy                      14.1.1 (cupy-cuda13x)
+cuda-pathfinder           1.6.0
+pytest                    8.4.2
+Ruff                      0.16.0
+NVIDIA GPU                GB10, compute capability 12.1
+NVIDIA driver             580.173.02
+CUDA driver API           13.0
+CuPy CUDA runtime API     13.2
+CUDA toolkit              13.0.3
+nvcc                      13.0.88
+
+The exact Python package pins are in dgx_stage6_requirements.txt. This public
+snapshot omits hostnames, network addresses, credentials, and SSH settings.

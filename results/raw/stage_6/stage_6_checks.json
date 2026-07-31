@@ -1,0 +1,119 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_six_paths",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "configuration_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "validation_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "config_sha256=8c614877391f65579f8e7075ce3d3787555c2c6da9ea775f252b7e1b73b6e789, executed_source_hashes=19, input_hashes_match=True",
+      "name": "embedded_configuration_and_input_hashes_match_versioned_sources",
+      "passed": true
+    },
+    {
+      "detail": "stage=6, final status=PASS, required precision=float64, backend=CuPy",
+      "name": "stage_six_fp64_cupy_run_identity",
+      "passed": true
+    },
+    {
+      "detail": "device=NVIDIA GB10, cc=[12, 1], cupy=14.1.1",
+      "name": "dgx_spark_gb10_fp64_device_and_pinned_cupy_environment",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1:periods=1,n=15; case5_synthetic_extension_t2:periods=2,n=36",
+      "name": "both_t1_and_t2_cases_have_exact_stage5_preconditioning",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1:production=scaled_direct,structural=unscaled_structural,rejections=True; case5_synthetic_extension_t2:production=scaled_direct,structural=unscaled_structural,rejections=True",
+      "name": "scaled_direct_production_and_guarded_unscaled_structural_paths",
+      "passed": true
+    },
+    {
+      "detail": "verified_operator_kernels=4",
+      "name": "fp64_a1_a2_actual_alg2_selection_and_repeatable_probes",
+      "passed": true
+    },
+    {
+      "detail": "operators=4, public_benchmark_label=cupyx.cusparse.spmv CUSPARSE_MV_ALG_DEFAULT",
+      "name": "csr_normal_transpose_and_explicit_transpose_gates",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1:horizons=[1, 10, 100]; case5_synthetic_extension_t2:horizons=[1, 10, 100]",
+      "name": "one_ten_and_one_hundred_step_cpu_gpu_state_parity",
+      "passed": true
+    },
+    {
+      "detail": "repetitions=3, fixed_horizon=100",
+      "name": "three_run_fp64_state_and_policy_determinism",
+      "passed": true
+    },
+    {
+      "detail": "1000 resident iterations with one compact residual check per 100 iterations",
+      "name": "resident_one_thousand_step_cadence_and_cuda_timing",
+      "passed": true
+    },
+    {
+      "detail": "solver_ledgers=19; only compact 10/2/3-scalar packets cross during loops; full states cross only at final_state phases",
+      "name": "solver_transfer_phase_direction_and_device_residency_audit",
+      "passed": true
+    },
+    {
+      "detail": "case5_base_t1:cpu_kkt=0.005618456243486992,gpu_kkt=0.0056184562351526725; case5_synthetic_extension_t2:cpu_kkt=0.00894842229674516,gpu_kkt=0.008948422296659148",
+      "name": "original_space_eq54_kkt_physics_objective_and_sweep_invariants",
+      "passed": true
+    },
+    {
+      "detail": "objective and residual differences recomputed; policy schedules compared directly",
+      "name": "cpu_gpu_policy_objective_and_normalized_residual_parity",
+      "passed": true
+    },
+    {
+      "detail": "boundaries=['CPU matrix construction and preprocessing', 'CUDA initialization', 'GPU solver initialization', 'allocation', 'complete end-to-end wall time', 'device-to-host transfer', 'first-run compilation and warm-up', 'host-to-device transfer', 'iteration loop', 'residual checks'], synchronization_policy=Explicit transfers and CUDA-event intervals are synchronized. Nested boundaries are labeled and are not summed into a speedup.",
+      "name": "all_required_timing_boundaries_have_units_and_truthful_methods",
+      "passed": true
+    },
+    {
+      "detail": "fp64=PASS, fp32=COMPLETED, cases=['case5_base_t1', 'case5_synthetic_extension_t2']",
+      "name": "fp32_is_non_gating_after_fp64_and_mixed_precision_is_disabled",
+      "passed": true
+    },
+    {
+      "detail": "rows=146, sha256=eb5f1fafe2fb7496726893a97457bee155fb503a8a71e0e90872ad484b0f9c3d",
+      "name": "trajectory_gzip_integrity_and_sha256",
+      "passed": true
+    },
+    {
+      "detail": "trajectory_groups=26, expected=26, policy_groups=12",
+      "name": "trajectory_rows_cover_all_cases_runs_and_policy_schedules",
+      "passed": true
+    },
+    {
+      "detail": "boundary={'gpu_speedup_claimed': False, 'paper_timing_reproduction_claimed': False, 'stage_6_complete': True, 'stage_6_executed': True, 'stage_6_only': True, 'stage_7_benchmarks_locked': True}",
+      "name": "stage_seven_locked_and_no_timing_or_speedup_claim",
+      "passed": true
+    }
+  ],
+  "configuration": "configs/sgs_hpr/stage_6_gpu_dgx.json",
+  "evidence": "results/raw/stage_6/stage_6_validation.json",
+  "evidence_files": {
+    "trajectories_and_policy_events": "results/raw/stage_6/stage_6_trajectories.jsonl.gz"
+  },
+  "passed": true,
+  "stage": 6,
+  "summary": {
+    "passed": 21
+  }
+}
