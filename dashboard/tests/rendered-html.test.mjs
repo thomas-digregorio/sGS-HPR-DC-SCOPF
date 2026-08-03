@@ -21,21 +21,39 @@ test("server-renders the research dashboard", async () => {
 
   const html = await response.text();
   assert.match(html, /<title>HPR Reproduction Control Room<\/title>/i);
-  assert.match(html, /From paper to verified GPU solver/);
+  assert.match(html, /Six benchmark runs, structurally verified/);
   assert.match(html, /Research roadmap/);
-  assert.match(html, /APPROVE STAGE 6 AND RUN STAGE 7/);
+  assert.match(html, /APPROVE STAGE 7 AND RUN STAGE 8/);
   assert.match(html, /Controls, preprocessing ablations, and acceptance approval/);
-  assert.match(html, /Stage 6 passed \/ Stage 7 awaits approval/);
-  assert.match(html, /Stage 6 FP64 parity brief/);
-  assert.match(html, /410 \/ 410/);
-  assert.match(html, /1,032 \/ 1,032/);
-  assert.match(html, /2.62 × 10⁻¹⁴/);
-  assert.match(html, /6.90e-15/);
-  assert.match(html, /CSR_ALG2/);
-  assert.match(html, /FP64 PASS/);
-  assert.match(html, /FP32 diagnostic/);
-  assert.match(html, /no speedup claim/i);
-  assert.match(html, /Stage 7 remains locked/);
+  assert.match(html, /Stage 7 passed \/ Stage 8 awaits approval/);
+  assert.match(html, /Stage 7 structural benchmark brief/);
+  assert.match(html, /Accepted benchmark rows/);
+  assert.match(html, /6 \/ 6/);
+  assert.match(html, /19 \/ 19/);
+  assert.match(html, /0 \/ 18/);
+  assert.match(html, /18 \/ 18 differ/);
+  assert.match(html, /4\.1797236508e-6/);
+  assert.match(html, /0\.0096347433/);
+  assert.match(html, /0\.00622103995/);
+  assert.match(html, /4\.2849939e-8/);
+  assert.match(html, /537\.835392 s/);
+  assert.match(html, /Solver-core median seconds/);
+  for (const value of [
+    "1.463376", "13.190169", "1.013252",
+    "7.265354", "47.398903", "2.924268",
+    "32.095478", "153.046368", "9.480950",
+    "101.242296", "336.657478", "21.084461",
+    "5.366418", "60.349654", "3.938934",
+    "22.138002", "250.601316", "15.408042",
+  ]) {
+    assert.ok(html.includes(value), `missing Stage 7 timing median ${value}`);
+  }
+  assert.match(html, /paper timings are context only/i);
+  assert.match(html, /Stage 8 large runs remain locked/);
+  assert.match(html, /docs\/stage_reports\/stage_7_report\.md/);
+  assert.doesNotMatch(html, /APPROVE STAGE 6 AND RUN STAGE 7/);
+  assert.doesNotMatch(html, /Stage 7 remains locked/);
+  assert.doesNotMatch(html, /Stage 6 FP64 parity brief/);
   assert.match(html, /DGX Spark/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Starter Project/i);
 });
@@ -52,6 +70,7 @@ test("starter preview is removed and product metadata is present", async () => {
   );
   assert.match(page, /ReproductionDashboard/);
   assert.match(layout, /HPR Reproduction Control Room/);
+  assert.match(layout, /\/og-stage7\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton|site-creator-vinext-starter/);
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);
 });

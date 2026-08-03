@@ -4,8 +4,8 @@ This companion dashboard visualizes the research stages, atomic tasks, gate
 state, evidence files, machine status, and short learning notes for the
 GPU DCOPF sGS-HPR reproduction.
 
-Current gate: Stage 5 approved; Stage 6 passed; Stage 7 awaits the exact
-approval command.
+Current gate: Stage 7 passed; Stage 8 remains locked until the exact command
+`APPROVE STAGE 7 AND RUN STAGE 8` is received.
 
 The dashboard is evidence-driven. Its source data live in
 `app/project-data.ts` and are updated when a stage report changes the

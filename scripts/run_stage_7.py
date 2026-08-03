@@ -2245,16 +2245,42 @@ def _sequence_or_empty(value: Any) -> list[Any]:
 
 
 def _source_manifest(config_path: Path) -> list[dict[str, Any]]:
+    tracked_bytes, tracked_error = _git_bytes(
+        "ls-tree",
+        "-r",
+        "--name-only",
+        "HEAD",
+        "--",
+        "src/gpu_dcopf_hpr",
+    )
+    tracked_package_paths = (
+        set()
+        if tracked_bytes is None
+        else {
+            PROJECT_ROOT / relative
+            for relative in tracked_bytes.decode("utf-8", errors="replace").splitlines()
+            if relative.startswith("src/gpu_dcopf_hpr/") and relative.endswith(".py")
+        }
+    )
+    local_package_paths = set((SOURCE_ROOT / "gpu_dcopf_hpr").glob("*.py"))
     paths = [
         Path(__file__).resolve(),
         config_path,
         DEFAULT_REQUIREMENTS,
-        *sorted((SOURCE_ROOT / "gpu_dcopf_hpr").glob("*.py")),
+        *sorted(tracked_package_paths | local_package_paths),
     ]
     manifest: list[dict[str, Any]] = []
+    if tracked_error is not None:
+        manifest.append(
+            {
+                "path": "src/gpu_dcopf_hpr",
+                "git_blob": None,
+                "sha256": None,
+                "sha256_definition": CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+                "passed": False,
+            }
+        )
     for path in paths:
-        if not path.is_file():
-            continue
         relative = path.relative_to(PROJECT_ROOT).as_posix()
         identity = _canonical_git_blob_identity(Path(relative), path)
         manifest.append(

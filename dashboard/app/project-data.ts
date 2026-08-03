@@ -144,14 +144,14 @@ export const stages: ResearchStage[] = [
     id: 7,
     title: "Small and medium benchmark reproduction",
     purpose: "Reconstruct public cases transparently and validate every run before discussing speed.",
-    status: "locked",
+    status: "complete",
     tasks: [
-      locked("7.1", "Benchmark data provenance"),
-      locked("7.2", "Paper data availability decision"),
-      locked("7.3", "Dimension reproduction"),
-      locked("7.4", "Small and medium runs"),
-      locked("7.5", "Numerical and physical validation"),
-      locked("7.6", "Repeated fair timing"),
+      { id: "7.1", title: "Benchmark data provenance", status: "complete" },
+      { id: "7.2", title: "Paper data availability decision", status: "complete" },
+      { id: "7.3", title: "Dimension reproduction", status: "complete" },
+      { id: "7.4", title: "Small and medium runs", status: "complete" },
+      { id: "7.5", title: "Numerical and physical validation", status: "complete" },
+      { id: "7.6", title: "Repeated fair timing", status: "complete" },
     ],
   },
   {
@@ -193,6 +193,51 @@ export const stages: ResearchStage[] = [
     ],
   },
 ];
+
+export const stageSevenTimings = [
+  {
+    caseName: "case1354pegase",
+    horizon: "T4",
+    highsMedian: "1.463376",
+    cpuMedian: "13.190169",
+    gpuMedian: "1.013252",
+  },
+  {
+    caseName: "case1354pegase",
+    horizon: "T16",
+    highsMedian: "7.265354",
+    cpuMedian: "47.398903",
+    gpuMedian: "2.924268",
+  },
+  {
+    caseName: "case1354pegase",
+    horizon: "T48",
+    highsMedian: "32.095478",
+    cpuMedian: "153.046368",
+    gpuMedian: "9.480950",
+  },
+  {
+    caseName: "case1354pegase",
+    horizon: "T96",
+    highsMedian: "101.242296",
+    cpuMedian: "336.657478",
+    gpuMedian: "21.084461",
+  },
+  {
+    caseName: "case2868rte",
+    horizon: "T4",
+    highsMedian: "5.366418",
+    cpuMedian: "60.349654",
+    gpuMedian: "3.938934",
+  },
+  {
+    caseName: "case2868rte",
+    horizon: "T16",
+    highsMedian: "22.138002",
+    cpuMedian: "250.601316",
+    gpuMedian: "15.408042",
+  },
+] as const;
 
 export const learningNotes = [
   {
@@ -298,10 +343,16 @@ export const learningNotes = [
       "FP64 first proves that the port preserves the CPU method at tight tolerances. The FP32 run is recorded separately and cannot weaken or replace that correctness gate.",
   },
   {
-    label: "Timing boundary",
-    title: "Parity is not a speedup claim",
+    label: "Stage 7 validation",
+    title: "Correctness makes timing reportable",
     body:
-      "Stage 6 records initialization, warm-up, allocation, transfers, iterations, residual checks, and recovery. It does not claim acceleration from two tiny correctness fixtures; repeated fair benchmarks begin only after Stage 7 is approved.",
+      "Each HiGHS, CPU FP64, and GPU FP64 track first passed objective, normalized residual, raw KKT, and physical checks. Only then did its warm-up and measured repetitions become reportable evidence.",
+  },
+  {
+    label: "Stage 7 structure",
+    title: "Matching dimensions does not match sparse work",
+    body:
+      "All 18 Table II rows reproduce the published row and variable counts, but every reconstructed nonzero count differs. Sparse support changes memory traffic and runtime, so the paper's timings remain context rather than a direct comparison.",
   },
   {
     label: "Source boundary",
@@ -332,31 +383,23 @@ export const learningNotes = [
 export const artifacts = [
   { label: "Primary source", name: "references/AnEfficientGPU-basedHalpernAccelerating.pdf" },
   { label: "Specification", name: "docs/paper_specification.md" },
-  { label: "Public network", name: "data/raw/matpower/case5.m" },
-  { label: "Stage evidence", name: "docs/stage_reports/stage_6_report.md" },
-  { label: "Validation results", name: "results/raw/stage_6/stage_6_validation.json" },
-  {
-    label: "GPU trace and timing ledger",
-    name: "results/raw/stage_6/stage_6_trajectories.jsonl.gz",
-  },
+  { label: "Pinned network bundle", name: "data/raw/matpower/stage7/README.md" },
+  { label: "Stage evidence", name: "docs/stage_reports/stage_7_report.md" },
+  { label: "Validation results", name: "results/raw/stage_7/stage_7_validation.json" },
   {
     label: "Independent checker",
-    name: "results/raw/stage_6/stage_6_checks.json",
+    name: "results/raw/stage_7/stage_7_checks.json",
   },
   {
-    label: "Solver settings",
-    name: "configs/sgs_hpr/stage_6_gpu_dgx.json",
+    label: "Evidence ledger",
+    name: "results/raw/stage_7/README.md",
+  },
+  {
+    label: "Frozen benchmark protocol",
+    name: "configs/benchmarks/stage_7_small_medium.json",
   },
   {
     label: "DGX package pins",
-    name: "environment/dgx_stage6_requirements.txt",
-  },
-  {
-    label: "Base row map",
-    name: "results/raw/stage_2/case5_base_t1_row_metadata.jsonl.gz",
-  },
-  {
-    label: "Synthetic row map",
-    name: "results/raw/stage_2/case5_synthetic_extension_t2_row_metadata.jsonl.gz",
+    name: "environment/dgx_stage7_requirements.txt",
   },
 ];

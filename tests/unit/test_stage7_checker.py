@@ -80,8 +80,11 @@ def _process_memory() -> dict[str, Any]:
     snapshot = {
         "rss_bytes": 100,
         "cumulative_process_peak_bytes": 200,
-        "peak_scope": "test",
-        "sources": ["test"],
+        "peak_scope": "cumulative process lifetime; not isolated to this solve",
+        "sources": [
+            "psutil.Process.memory_info.rss",
+            "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+        ],
     }
     return {"before": snapshot, "after": snapshot}
 
@@ -719,6 +722,43 @@ def test_checker_accepts_complete_recomputed_fixture(
     assert result["summary"].get("failed", 0) == 0
 
 
+def _replace_first_highs_correctness_memory(
+    evidence: dict[str, Any], snapshot: dict[str, Any]
+) -> None:
+    track = evidence["cases"][0]["solver_tracks"]["highs"]
+    for attempt_name in ("correctness", "first_run"):
+        track[attempt_name]["process_memory"] = {
+            "before": copy.deepcopy(snapshot),
+            "after": copy.deepcopy(snapshot),
+        }
+
+
+def _linux_getrusage_snapshot() -> dict[str, Any]:
+    return {
+        "rss_bytes": None,
+        "cumulative_process_peak_bytes": 200,
+        "peak_scope": "cumulative process lifetime; not isolated to this solve",
+        "sources": ["resource.getrusage(RUSAGE_SELF).ru_maxrss"],
+    }
+
+
+def test_checker_accepts_disclosed_getrusage_peak_when_rss_is_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence, git_hashes = _valid_evidence()
+    _replace_first_highs_correctness_memory(evidence, _linux_getrusage_snapshot())
+
+    result = _run(tmp_path, monkeypatch, evidence, git_hashes)
+
+    assert result["passed"] is True
+    assert (
+        _checks_by_name(result)[
+            "required_correctness_objective_residual_physical_and_timing_gates"
+        ]["passed"]
+        is True
+    )
+
+
 def test_checker_rejects_wrong_and_dirty_matpower_worktree_identity(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -807,6 +847,63 @@ def _alter_statistics(evidence: dict[str, Any]) -> None:
     evidence["cases"][0]["solver_tracks"]["highs"]["statistics"]["median_seconds"] = 99.0
 
 
+def _mutate_first_highs_correctness_memory(
+    evidence: dict[str, Any], mutation: Callable[[dict[str, Any]], None]
+) -> None:
+    _replace_first_highs_correctness_memory(evidence, _linux_getrusage_snapshot())
+    track = evidence["cases"][0]["solver_tracks"]["highs"]
+    for attempt_name in ("correctness", "first_run"):
+        for snapshot in track[attempt_name]["process_memory"].values():
+            mutation(snapshot)
+
+
+def _drop_process_peak(evidence: dict[str, Any]) -> None:
+    _mutate_first_highs_correctness_memory(
+        evidence, lambda snapshot: snapshot.pop("cumulative_process_peak_bytes")
+    )
+
+
+def _make_process_peak_negative(evidence: dict[str, Any]) -> None:
+    _mutate_first_highs_correctness_memory(
+        evidence, lambda snapshot: snapshot.__setitem__("cumulative_process_peak_bytes", -1)
+    )
+
+
+def _change_process_peak_scope(evidence: dict[str, Any]) -> None:
+    _mutate_first_highs_correctness_memory(
+        evidence, lambda snapshot: snapshot.__setitem__("peak_scope", "per solve")
+    )
+
+
+def _drop_getrusage_source(evidence: dict[str, Any]) -> None:
+    _mutate_first_highs_correctness_memory(
+        evidence, lambda snapshot: snapshot.__setitem__("sources", [])
+    )
+
+
+def _claim_unavailable_psutil_rss(evidence: dict[str, Any]) -> None:
+    _mutate_first_highs_correctness_memory(
+        evidence,
+        lambda snapshot: snapshot.__setitem__(
+            "sources",
+            [
+                "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+                "psutil.Process.memory_info.rss",
+            ],
+        ),
+    )
+
+
+def _remove_psutil_source_from_numeric_rss(evidence: dict[str, Any]) -> None:
+    snapshot = {
+        "rss_bytes": 100,
+        "cumulative_process_peak_bytes": 200,
+        "peak_scope": "cumulative process lifetime; not isolated to this solve",
+        "sources": ["resource.getrusage(RUSAGE_SELF).ru_maxrss"],
+    }
+    _replace_first_highs_correctness_memory(evidence, snapshot)
+
+
 def _relax_threshold(evidence: dict[str, Any]) -> None:
     evidence["configuration"]["acceptance"]["raw_kkt_tolerance"] = 1.0
 
@@ -879,6 +976,27 @@ def _drift_cupy(evidence: dict[str, Any]) -> None:
         (_tamper_source, "source_manifest_matches_exact_clean_executed_git_commit"),
         (_allocate_stage8, "exactly_six_stage7_cases_and_zero_stage8_allocations"),
         (_alter_statistics, "required_correctness_objective_residual_physical_and_timing_gates"),
+        (_drop_process_peak, "required_correctness_objective_residual_physical_and_timing_gates"),
+        (
+            _make_process_peak_negative,
+            "required_correctness_objective_residual_physical_and_timing_gates",
+        ),
+        (
+            _change_process_peak_scope,
+            "required_correctness_objective_residual_physical_and_timing_gates",
+        ),
+        (
+            _drop_getrusage_source,
+            "required_correctness_objective_residual_physical_and_timing_gates",
+        ),
+        (
+            _claim_unavailable_psutil_rss,
+            "required_correctness_objective_residual_physical_and_timing_gates",
+        ),
+        (
+            _remove_psutil_source_from_numeric_rss,
+            "required_correctness_objective_residual_physical_and_timing_gates",
+        ),
         (_relax_threshold, "frozen_configuration_hash_content_and_thresholds"),
         (_tamper_provenance, "pinned_matpower_provenance_hashes"),
         (

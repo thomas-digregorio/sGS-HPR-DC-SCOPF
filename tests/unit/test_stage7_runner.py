@@ -457,6 +457,13 @@ def test_in_repo_partial_remains_resume_compatible_with_scoped_source_cleanlines
     assert (
         next(row for row in tampered if row["path"] == "scripts/run_stage_7.py")["passed"] is False
     )
+    runner_path.write_bytes(b"# runner\n")
+    package_path.unlink()
+    deleted = _source_manifest(config_path)
+    assert (
+        next(row for row in deleted if row["path"] == "src/gpu_dcopf_hpr/__init__.py")["passed"]
+        is False
+    )
 
 
 def test_track_validates_before_warmup_and_five_measurements() -> None:

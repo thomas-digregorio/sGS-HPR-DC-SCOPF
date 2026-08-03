@@ -2,7 +2,13 @@
 
 import { useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { artifacts, learningNotes, stages, type StageStatus } from "./project-data";
+import {
+  artifacts,
+  learningNotes,
+  stages,
+  stageSevenTimings,
+  type StageStatus,
+} from "./project-data";
 
 type Filter = "all" | StageStatus;
 
@@ -34,7 +40,6 @@ export function ReproductionDashboard() {
   const nextLockedStage = coreStages.find(
     (stage) => stage.id > currentStage.id && stage.status === "locked",
   );
-  const passedCoreStages = coreStages.filter((stage) => stage.status === "complete").length;
   const currentDone = currentStage.tasks.filter((task) => task.status === "complete").length;
   const currentProgress = Math.round((currentDone / currentStage.tasks.length) * 100);
   const stageFocusLabel = activeStage
@@ -81,11 +86,11 @@ export function ReproductionDashboard() {
         <div className="hero">
           <div>
             <p className="eyebrow">DGX Spark research program / stage-gated</p>
-            <h1 id="hero-title">From paper to verified GPU solver.</h1>
+            <h1 id="hero-title">Six benchmark runs, structurally verified.</h1>
             <p className="hero-copy">
-              Reproducing Wang et al.&apos;s GPU-based sGS-HPR method for large-scale
-              DC optimal power flow - with every equation, assumption, test, and timing
-              boundary preserved as evidence.
+              Stage 7 completed the predeclared small and medium DGX Spark campaign
+              across HiGHS, CPU FP64 sGS-HPR, and GPU FP64 sGS-HPR. Every correctness
+              gate passed; structural differences keep the paper&apos;s timings contextual.
             </p>
             <div className="hero-actions">
               <button
@@ -118,29 +123,27 @@ export function ReproductionDashboard() {
 
         <div className="metric-strip" aria-label="Project summary">
           <div className="metric-card">
-            <div className="metric-label">Core stages passed</div>
-            <div className="metric-value">{passedCoreStages} / {coreStages.length}</div>
-            <div className="metric-note">Stage gates prevent unsupported shortcuts.</div>
+            <div className="metric-label">Accepted benchmark rows</div>
+            <div className="metric-value">6 / 6</div>
+            <div className="metric-note">All three required solver tracks passed.</div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">FP64 CPU / GPU iterations</div>
-            <div className="metric-value">410 / 410</div>
+            <div className="metric-label">Independent checker</div>
+            <div className="metric-value">19 / 19</div>
+            <div className="metric-note">Every evidence and boundary check passed.</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-label">Reconstructed nnz matches</div>
+            <div className="metric-value">0 / 18</div>
             <div className="metric-note">
-              Public T1 parity; the labeled T2 fixture also matched at 1,032 / 1,032.
+              Dimensions match, but all 18 sparse nonzero counts differ from the paper.
             </div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Largest final state difference</div>
-            <div className="metric-value">2.62 × 10⁻¹⁴</div>
+            <div className="metric-label">Longest measured solve</div>
+            <div className="metric-value">537.835392 s</div>
             <div className="metric-note">
-              Maximum relative x, y, or z error across the final FP64 T1 state.
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">DGX sparse kernel</div>
-            <div className="metric-value">CSR_ALG2</div>
-            <div className="metric-note">
-              True cuSPARSE algorithm selection verified on the NVIDIA GB10.
+              Preserved CPU FP64 sample; it is not a solver-core median.
             </div>
           </div>
         </div>
@@ -220,72 +223,106 @@ export function ReproductionDashboard() {
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">
-              Stage 5 is approved and Stage 6 passed its FP64 parity and original-space
-              correctness gates. Stage 7 remains locked until you send the exact
-              approval phrase.
+              Stage 7 passed its six-case correctness and timing campaign plus the
+              independent 19-check audit. Stage 8 large runs remain locked until you
+              send the exact approval phrase.
             </p>
-            <div className="gate-command">APPROVE STAGE 6 AND RUN STAGE 7</div>
+            <div className="gate-command">APPROVE STAGE 7 AND RUN STAGE 8</div>
           </section>
 
-          <section className="rail-card" aria-labelledby="stage-six-title">
-            <h2 className="rail-title" id="stage-six-title">Stage 6 FP64 parity brief</h2>
+          <section className="rail-card" aria-labelledby="stage-seven-title">
+            <h2 className="rail-title" id="stage-seven-title">Stage 7 structural benchmark brief</h2>
+            <p className="rail-copy">
+              Six predeclared rows completed required HiGHS, CPU FP64, and GPU FP64
+              correctness solves before any measured repetitions were accepted.
+            </p>
             <div className="machine-list">
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Public case5 / T1</span>
-                  <span className="machine-state">410 / 410</span>
+                  <span className="machine-name">Accepted campaign</span>
+                  <span className="machine-state">6 / 6</span>
                 </div>
                 <div className="machine-detail">
-                  GPU KKT 0.005618456235; objective 17479.839088898956; maximum
-                  final relative state error 2.62e-14.
+                  Four case1354pegase horizons and two case2868rte horizons passed
+                  every solver, precision, objective, residual, and physical gate.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Synthetic resource fixture / T2</span>
-                  <span className="machine-state">1,032 / 1,032</span>
+                  <span className="machine-name">Structural ledger</span>
+                  <span className="machine-state">18 / 18 differ</span>
                 </div>
                 <div className="machine-detail">
-                  GPU KKT 0.008948422297; objective 26580.274984099353; maximum
-                  final relative state error 6.90e-15.
+                  Published row and variable counts are reproduced exactly, while all
+                  reconstructed nonzero counts differ from the paper.
                 </div>
               </div>
             </div>
-            <div className="ablation-panel" aria-label="DGX implementation evidence">
-              <div className="ablation-heading">DGX GB10 implementation boundary</div>
+            <div className="ablation-panel" aria-label="Stage 7 numerical maxima">
+              <div className="ablation-heading">Maximum across accepted candidates</div>
               <div className="ablation-grid">
                 <div className="ablation-cell">
-                  <span>Resident sparse operators</span>
-                  <strong>A and A transpose</strong>
+                  <span>Normalized stopping block</span>
+                  <strong>4.1797236508e-6</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Actual cuSPARSE selection</span>
-                  <strong>CSR_ALG2</strong>
+                  <span>Raw KKT norm</span>
+                  <strong>0.0096347433</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Correctness baseline</span>
-                  <strong>FP64 PASS</strong>
+                  <span>Physical violation</span>
+                  <strong>0.00622103995</strong>
                 </div>
                 <div className="ablation-cell">
-                  <span>Reduced precision</span>
-                  <strong>FP32 diagnostic</strong>
+                  <span>Objective gap</span>
+                  <strong>4.2849939e-8</strong>
                 </div>
               </div>
+            </div>
+            <div className="timing-panel" aria-labelledby="timing-title">
+              <div className="ablation-heading" id="timing-title">
+                Solver-core median seconds
+              </div>
+              <div className="timing-table-wrap">
+                <table className="timing-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Benchmark</th>
+                      <th scope="col">HiGHS</th>
+                      <th scope="col">CPU FP64</th>
+                      <th scope="col">GPU FP64</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stageSevenTimings.map((timing) => (
+                      <tr key={timing.caseName + "-" + timing.horizon}>
+                        <th scope="row">
+                          <span>{timing.caseName}</span>
+                          <small>{timing.horizon}</small>
+                        </th>
+                        <td>{timing.highsMedian}</td>
+                        <td>{timing.cpuMedian}</td>
+                        <td>{timing.gpuMedian}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <p className="ablation-note">
-                These frozen fixtures establish implementation parity. They are not a
-                repeated performance benchmark, so Stage 6 makes no speedup claim.
+                These are separate local medians with named inclusion boundaries. No
+                timing ratio or speedup is computed, and paper timings are context only.
               </p>
             </div>
           </section>
 
           <section className="rail-card source-boundary" aria-labelledby="source-boundary-title">
             <div className="chip">Claim boundary</div>
-            <h2 className="rail-title" id="source-boundary-title">Parity before performance</h2>
+            <h2 className="rail-title" id="source-boundary-title">Structure before comparison</h2>
             <p className="rail-copy">
-              The paper used an A100 and did not publish a complete timing boundary.
-              Stage 6 runs on a DGX Spark GB10 and records initialization, warm-up,
-              allocation, transfers, iterations, residual checks, and recovery. Fair
-              repeated benchmark comparisons belong to Stage 7.
+              The authors&apos; resource placements, time series, and matrix-construction
+              code remain unavailable. Exact dimensions therefore coexist with different
+              sparse support in all 18 rows. The paper&apos;s timings are context only, not
+              directly comparable values for the DGX Spark reconstruction.
             </p>
           </section>
 
@@ -295,7 +332,7 @@ export function ReproductionDashboard() {
               <li>CPU correctness before GPU optimization.</li>
               <li>FP64 first; reduced precision is an experiment.</li>
               <li>No invented data or unstated N-1 constraints.</li>
-              <li>No speedup claim from Stage 6 correctness fixtures.</li>
+              <li>No direct timing comparison across different sparse workloads.</li>
             </ul>
           </section>
 
@@ -308,18 +345,18 @@ export function ReproductionDashboard() {
                   <span className="machine-state">CPU reference</span>
                 </div>
                 <div className="machine-detail">
-                  The trusted FP64 path supplies frozen states, residuals, objectives,
-                  and policy events for the DGX cross-check.
+                  The FP64 path passed all six Stage 7 benchmark rows and supplies the
+                  original-coordinate correctness reference for each GPU cross-check.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
                   <span className="machine-name">DGX Spark</span>
-                  <span className="machine-state">GPU verified</span>
+                  <span className="machine-state">Stage 7 PASS</span>
                 </div>
                 <div className="machine-detail">
-                  NVIDIA GB10; FP64 CPU/GPU parity and true cuSPARSE CSR_ALG2 selection
-                  verified on the device.
+                  NVIDIA GB10; six resident FP64 GPU tracks passed the numerical,
+                  physical, memory, transfer, and timing evidence gates.
                 </div>
               </div>
             </div>

@@ -325,7 +325,7 @@ a {
 .main-grid {
   display: grid;
   gap: 30px;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) 420px;
   margin: 0 auto;
   max-width: 1440px;
   padding: 42px;
@@ -640,7 +640,7 @@ a {
 
 .rule-list li::before {
   color: var(--green-bright);
-  content: "→";
+  content: "\2192";
   left: 0;
   position: absolute;
 }
@@ -748,6 +748,72 @@ a {
   font-size: 11px;
   line-height: 1.5;
   margin: 10px 0 0;
+}
+
+.timing-panel {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding-top: 17px;
+}
+
+.timing-table-wrap {
+  margin-top: 11px;
+  overflow-x: auto;
+}
+
+.timing-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+.timing-table th,
+.timing-table td {
+  border-bottom: 1px solid var(--line);
+  padding: 8px 5px;
+  text-align: right;
+  vertical-align: top;
+}
+
+.timing-table thead th {
+  color: var(--ink-soft);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.timing-table th:first-child {
+  text-align: left;
+  width: 34%;
+}
+
+.timing-table tbody th span,
+.timing-table tbody th small {
+  display: block;
+}
+
+.timing-table tbody th span {
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+
+.timing-table tbody th small {
+  color: var(--ink-soft);
+  font-size: 9px;
+  margin-top: 2px;
+}
+
+.timing-table td {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 9px;
+}
+
+.timing-table tbody tr:last-child th,
+.timing-table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .source-boundary {

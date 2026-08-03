@@ -54,6 +54,21 @@ MEASURED_RUNS = 5
 ESCALATED_RUNS = 9
 VARIABILITY_THRESHOLD = 0.2
 
+PROCESS_MEMORY_PEAK_SCOPE = "cumulative process lifetime; not isolated to this solve"
+PSUTIL_RSS_SOURCE = "psutil.Process.memory_info.rss"
+PSUTIL_PEAK_SOURCE = "psutil.Process.memory_info.peak_wset"
+GETRUSAGE_PEAK_SOURCE = "resource.getrusage(RUSAGE_SELF).ru_maxrss"
+PROCESS_MEMORY_SOURCES = {
+    PSUTIL_RSS_SOURCE,
+    PSUTIL_PEAK_SOURCE,
+    GETRUSAGE_PEAK_SOURCE,
+}
+RSS_PROCESS_MEMORY_SOURCE_SETS = {
+    frozenset({PSUTIL_RSS_SOURCE, PSUTIL_PEAK_SOURCE}),
+    frozenset({PSUTIL_RSS_SOURCE, GETRUSAGE_PEAK_SOURCE}),
+    frozenset({PSUTIL_RSS_SOURCE, PSUTIL_PEAK_SOURCE, GETRUSAGE_PEAK_SOURCE}),
+}
+
 REQUIRED_TRACKS = ("highs", "cpu_fp64_sgs_hpr", "gpu_fp64_sgs_hpr")
 EXPECTED_CASES = {
     "case1354pegase:T4",
@@ -740,14 +755,40 @@ def _ledger_checks(checks: list[dict[str, Any]], evidence: dict[str, Any]) -> No
     )
 
 
+def _process_memory_snapshot_valid(value: Any) -> bool:
+    snapshot = _mapping(value)
+    if set(snapshot) != {
+        "rss_bytes",
+        "cumulative_process_peak_bytes",
+        "peak_scope",
+        "sources",
+    }:
+        return False
+    raw_sources = snapshot.get("sources")
+    if not isinstance(raw_sources, list) or not all(
+        isinstance(source, str) for source in raw_sources
+    ):
+        return False
+    sources = frozenset(raw_sources)
+    if (
+        not sources
+        or len(sources) != len(raw_sources)
+        or not sources.issubset(PROCESS_MEMORY_SOURCES)
+        or snapshot.get("peak_scope") != PROCESS_MEMORY_PEAK_SCOPE
+        or not _nonnegative(snapshot.get("cumulative_process_peak_bytes"))
+    ):
+        return False
+
+    rss = snapshot.get("rss_bytes")
+    if _nonnegative(rss):
+        return sources in RSS_PROCESS_MEMORY_SOURCE_SETS
+    return rss is None and sources == frozenset({GETRUSAGE_PEAK_SOURCE})
+
+
 def _memory_record_valid(value: Any) -> bool:
     record = _mapping(value)
-    before = _mapping(record.get("before"))
-    after = _mapping(record.get("after"))
-    return all(
-        _nonnegative(_mapping(snapshot).get("rss_bytes"))
-        and _nonnegative(_mapping(snapshot).get("cumulative_process_peak_bytes"))
-        for snapshot in (before, after)
+    return set(record) == {"before", "after"} and all(
+        _process_memory_snapshot_valid(record.get(name)) for name in ("before", "after")
     )
 
 

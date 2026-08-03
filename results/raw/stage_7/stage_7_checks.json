@@ -1,0 +1,106 @@
+{
+  "checks": [
+    {
+      "detail": "complete",
+      "name": "required_stage_seven_paths",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "configuration_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "loaded",
+      "name": "validation_is_valid_json",
+      "passed": true
+    },
+    {
+      "detail": "status=PASS, all_passed=True",
+      "name": "stage_status_and_runner_aggregate",
+      "passed": true
+    },
+    {
+      "detail": "canonical_sha256=06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062, expected=06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062, commit_blob=ca418467e54e6816fbf66befa74f32cd61ea923f, worktree_blob=ca418467e54e6816fbf66befa74f32cd61ea923f, worktree_clean=True",
+      "name": "frozen_configuration_hash_content_and_thresholds",
+      "passed": true
+    },
+    {
+      "detail": "policy_fingerprint=e6911ef7e5ccab32a8392c917b892eeabbed3df16a44b1e342cd8ef664274dcf",
+      "name": "reconstruction_policy_contract",
+      "passed": true
+    },
+    {
+      "detail": "canonical_sha256=827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf, commit_blob=f41e1e434c33f8cbb49abf30176302ef5b57c227, worktree_blob=f41e1e434c33f8cbb49abf30176302ef5b57c227, worktree_clean=True",
+      "name": "frozen_dgx_environment_requirements",
+      "passed": true
+    },
+    {
+      "detail": "python=3.12.3, numpy=2.3.5, scipy=1.16.3, cupy-cuda13x=14.1.1",
+      "name": "executed_python_and_numeric_packages_match_frozen_requirements",
+      "passed": true
+    },
+    {
+      "detail": "records=3, expected=3",
+      "name": "pinned_matpower_provenance_hashes",
+      "passed": true
+    },
+    {
+      "detail": "commit=ff6f762a00463e4769861f6aaf6f6fbbad6cc8af, execution_source_paths_clean=True, source_count=24, repository_status=''",
+      "name": "source_manifest_matches_exact_clean_executed_git_commit",
+      "passed": true
+    },
+    {
+      "detail": "recorded=65051e4de81a55b2803d1ff885db182f75e9865ad3f1703dd4a7a335886d6624, recomputed=65051e4de81a55b2803d1ff885db182f75e9865ad3f1703dd4a7a335886d6624",
+      "name": "run_fingerprint_recomputed",
+      "passed": true
+    },
+    {
+      "detail": "rows=18, unique=18, paper_comparable=0",
+      "name": "all_eighteen_exact_dimension_and_reconstructed_nnz_rows",
+      "passed": true
+    },
+    {
+      "detail": "case_keys=['case1354pegase:T16', 'case1354pegase:T4', 'case1354pegase:T48', 'case1354pegase:T96', 'case2868rte:T16', 'case2868rte:T4'], boundary={'exact_paper_reproduction_claimed': False, 'n_minus_1_extension_enabled': False, 'paper_a100_timing_reproduction_claimed': False, 'stage_7_complete': True, 'stage_7_executed': True, 'stage_7_only': True, 'stage_8_allocation_count': 0, 'stage_8_large_runs_locked': True}",
+      "name": "exactly_six_stage7_cases_and_zero_stage8_allocations",
+      "passed": true
+    },
+    {
+      "detail": "gurobi_available=False",
+      "name": "required_solver_availability_and_optional_gurobi_semantics",
+      "passed": true
+    },
+    {
+      "detail": "validated_cases=6",
+      "name": "executed_case_dimensions_nnz_and_sparse_preprocessing",
+      "passed": true
+    },
+    {
+      "detail": "required_tracks=['highs', 'cpu_fp64_sgs_hpr', 'gpu_fp64_sgs_hpr'], cases=6",
+      "name": "required_correctness_objective_residual_physical_and_timing_gates",
+      "passed": true
+    },
+    {
+      "detail": "gpu_tracks=6",
+      "name": "fp64_nvidia_device_memory_and_transfer_evidence",
+      "passed": true
+    },
+    {
+      "detail": "case_timing_records=6",
+      "name": "first_run_warmup_core_and_end_to_end_timing_boundaries",
+      "passed": true
+    },
+    {
+      "detail": "not present",
+      "name": "report_manifest_if_present",
+      "passed": true
+    }
+  ],
+  "configuration": "configs/benchmarks/stage_7_small_medium.json",
+  "evidence": "results/raw/stage_7/stage_7_validation.json",
+  "passed": true,
+  "stage": 7,
+  "summary": {
+    "passed": 19
+  }
+}

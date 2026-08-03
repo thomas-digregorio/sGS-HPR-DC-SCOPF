@@ -656,3 +656,22 @@ its original rationale should remain reviewable.
   different byte hash from the same LF Git blob. The correction was made
   before any model allocation or solver run, and it changes no Stage 7
   construction, solver, stopping, precision, scaling, or timing policy.
+
+## D-0056 - Keep post-run integrity hardening separate from benchmark identity
+
+- **Status:** accepted after Stage 7 execution
+- **Stage:** 7
+- **Decision:** Keep the accepted benchmark tied to clean executed commit
+  `ff6f762a00463e4769861f6aaf6f6fbbad6cc8af`. Allow the independent checker
+  to accept explicitly scoped Linux `getrusage`-only cumulative-peak telemetry
+  when live `psutil` RSS is unavailable, with strict telemetry-provenance and
+  scope tests. Require source-manifest preflight to fail closed when a tracked
+  Python source file is deleted. Do not present either later hardening change
+  as part of the executed source or alter the preserved evidence.
+- **Reason:** Honest platform telemetry should pass under its true cumulative
+  process-lifetime scope, while missing tracked executable source must never
+  pass provenance preflight. Both changes strengthen integrity around the
+  accepted run without changing its model, samples, numerical thresholds, or
+  timing thresholds, so no numerical rerun is required. A later head with
+  changed execution-source files must fail the accepted run's exact-source
+  identity check rather than inherit its 19/19 result.

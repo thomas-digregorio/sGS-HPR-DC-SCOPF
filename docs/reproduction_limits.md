@@ -4,18 +4,20 @@
 
 This register separates what the manuscript actually specifies from what would
 have to be recovered, derived, or transparently reconstructed. It was prepared
-for Stage 0 on 2026-07-29 and updated after the Stage 6 DGX Spark port on
-2026-07-31.
+for Stage 0 on 2026-07-29 and updated after the Stage 7 structural benchmark
+campaign on 2026-08-03.
 
 **Current conclusion:** an exact numerical recreation of the paper's benchmark
-tables cannot be claimed from the available information. The project can target
-a mathematical reproduction first and, if exact experimental inputs remain
-unavailable, a clearly labeled structural reconstruction.
+tables cannot be claimed from the available information. Stage 7 therefore
+reports a clearly labeled structural reproduction using pinned public networks
+and a frozen deterministic protocol for the missing author additions.
 
-Stage 6 now establishes FP64 CPU/GPU parity for two frozen correctness fixtures
-on this project's DGX Spark. That closes an implementation question for this
-repository; it does not recover the authors' missing benchmark inputs, source,
-precision choice, or timing boundary.
+Stage 7 establishes six-case HiGHS, CPU FP64, and GPU FP64 correctness plus
+repeated timing, memory, and transfer evidence on this project's DGX Spark. It
+matches all 18 published row and variable dimensions, but every reproduced
+sparse nonzero count differs. That result strengthens this implementation
+without recovering the authors' missing inputs, source, precision choice, or
+timing boundary.
 
 The supplied source is a 17-page accepted/prepublished manuscript. A current
 institutional record identifies the final article as IEEE Transactions on Power
@@ -220,15 +222,15 @@ environment. **Not currently possible from available evidence.**
 ### Mathematical reproduction
 
 Implements the printed LP, Algorithm 2, closed-form updates, and Eq. (54);
-validates against independent LP solutions on available data. **Current primary
-target for Stages 1-6.**
+validates against independent LP solutions on available data. **Completed as
+the primary target for Stages 1-6.**
 
 ### Structural reproduction
 
 Uses pinned public base cases plus a published, deterministic protocol for
 placing and parameterizing RGs/ESSs and time series; compares dimensions,
 sparsity, correctness, and scaling without claiming identical instances.
-**Likely benchmark target if author data remain unavailable.**
+**This is the accepted Stage 7 classification.**
 
 ### Approximate benchmark reconstruction
 
@@ -236,7 +238,7 @@ Attempts to approach published dimensions or timing trends with disclosed
 differences. It must never be presented as an exact timing or data
 reproduction.
 
-## 8. What Stage 6 resolves for this project
+## 8. What Stages 6 and 7 resolve for this project
 
 Stage 6 makes several project-side choices observable and reproducible:
 
@@ -259,19 +261,39 @@ performance substitute for the paper's A100.
 No Stage 6 speedup is claimed. The two small fixtures are designed to expose
 correctness errors, not to support a throughput conclusion.
 
+Stage 7 additionally makes the benchmark boundary observable:
+
+- the public MATPOWER 8.1 case files, commit, Git blobs, and canonical hashes
+  are pinned;
+- one deterministic protocol supplies the missing resource placement and
+  time-series inputs without tuning;
+- all 18 Table II rows have exact `m` and `n` reconciliation;
+- every sparse nonzero count differs by 8.136% to 36.659%, so no paper time is
+  directly comparable;
+- exactly six small/medium cases pass HiGHS, CPU FP64, GPU FP64, raw-KKT,
+  physical, objective, memory, and transfer gates;
+- the other 12 rows are count-only and record zero Stage 8 allocations; and
+- first runs, warm-ups, measured repetitions, variability, and complete-case
+  walls are reported separately.
+
+These observations still do not identify the authors' hidden additions or
+make the DGX Spark GB10 equivalent to the paper's A100.
+
 ## 9. Locked follow-up plan
 
-1. Stage 7: pin public MATPOWER case commits and hashes before constructing a
-   benchmark.
-2. Reconcile every case dimension and sparse nonzero count before solving.
-3. Classify each case as mathematical, structural, or approximate benchmark
-   reconstruction before reporting results.
-4. Validate optimization residuals and physical constraints before timing.
-5. Use repeated compatible timing boundaries before discussing speed.
-6. At every stage, preserve missing items as missing rather than tuning
+1. Keep Stage 8 allocations and solves locked until the exact approval gate.
+2. Preserve the Stage 7 structural classification and sparse-count differences
+   when large cases are authorized.
+3. Validate optimization residuals and physical constraints before timing any
+   new case.
+4. Keep first-run, warm-up, solver-core, transfer, and end-to-end boundaries
+   separate.
+5. Do not compare DGX timing directly with Table II unless sparse workload and
+   inclusion boundaries are shown to be compatible.
+6. Continue to preserve missing author items as missing rather than tuning
    synthetic values to match the paper's times.
 
-## 10. Stage 7 public-data decision
+## 10. Stage 7 public-data result
 
 Stage 7 pins the unmodified network files from MATPOWER 8.1 at resolved commit
 `1a828c7af590714499284e36ee9c81273388c594`. This resolves the base-network
@@ -286,3 +308,24 @@ original files, records each transformation, and prohibits tuning toward the
 paper's timings. A nonzero sparse-count difference blocks a direct comparison
 with the corresponding paper time even when the row and variable dimensions
 match exactly.
+
+The completed ledger confirms that boundary: all 18 dimension pairs match,
+while all 18 nonzero counts differ. Stage 7 executed only case1354pegase at
+T=4, 16, 48, and 96 and case2868rte at T=4 and 16. The remaining rows were
+evaluated count-only, without full model allocation or a solver run.
+
+All six required HiGHS, CPU FP64 sGS-HPR, and GPU FP64 sGS-HPR tracks passed.
+The largest raw KKT norm was `0.0096347433`, the largest physical violation was
+`0.0062210399 MW/MWh`, and the largest scaled objective gap to HiGHS was
+`4.28499e-8`. The independent checker passed 19/19 checks. These results
+validate this structural reconstruction; they do not close any missing-author
+item listed above.
+
+The accepted run remains tied to commit `ff6f762`. Post-run checker maintenance
+accepts honestly scoped Linux `getrusage`-only cumulative peaks when `psutil`
+RSS is unavailable, and source preflight now fails closed on deletion of a
+tracked Python file. Strict provenance and scope tests accompany both changes.
+They changed no accepted evidence or threshold and required no numerical
+rerun. The accepted 19/19 check is evaluated against `ff6f762`; checking a
+later head with changed execution-source files fails source identity by design,
+not a numerical or timing gate.

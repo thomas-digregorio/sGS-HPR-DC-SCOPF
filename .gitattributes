@@ -1,0 +1,3 @@
+# Preserve accepted Stage 7 evidence bytes and published SHA-256 values exactly.
+results/raw/stage_7/*.json binary
+results/raw/stage_7/**/*.json binary

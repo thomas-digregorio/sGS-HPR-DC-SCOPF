@@ -46,28 +46,29 @@ Only one stage is executed at a time:
 | 10 | Optional N-1 SCOPF research extension |
 
 Every stage ends with tests, a report, preserved evidence, and an acceptance
-decision. Stage 5 is approved and Stage 6 is complete. To start Stage 7 after
-reviewing the GPU evidence, send exactly:
+decision. Stage 6 is approved and Stage 7 is complete. To start Stage 8 after
+reviewing the structural benchmark evidence, send exactly:
 
 ```text
-APPROVE STAGE 6 AND RUN STAGE 7
+APPROVE STAGE 7 AND RUN STAGE 8
 ```
 
 Casual phrases such as "continue" or "looks good" are not stage approval.
 
 ## Current status
 
-Stage 6 is complete and the project is stopped at the Stage 7 gate. The frozen
-FP64 CPU and DGX GPU paths reached identical stopping iterations on both
-correctness cases:
+Stage 7 is complete with **PASS**, and the project is stopped at the Stage 8
+gate. Exactly six public-network structural reconstructions ran on the DGX
+Spark: case1354pegase at T=4, 16, 48, and 96, and case2868rte at T=4 and 16.
+HiGHS, CPU FP64 sGS-HPR, and GPU FP64 sGS-HPR passed every frozen correctness
+gate in all six cases. The independent checker passed **19/19** checks.
 
-| Case | CPU / GPU iterations | GPU raw KKT | GPU objective | Maximum final relative state error |
-|---|---:|---:|---:|---:|
-| Public case5, T=1 | 410 / 410 | 0.005618456235 | 17479.839088898956 | 2.62e-14 |
-| Synthetic resource fixture, T=2 | 1,032 / 1,032 | 0.008948422297 | 26580.274984099353 | 6.90e-15 |
-
-These are implementation-parity results, not performance benchmarks. Stage 6
-makes no CPU/GPU speedup claim.
+All 18 Table II rows have exact row and variable dimensions. Their reproduced
+sparse nonzero counts differ from the paper by 8.136% to 36.659% because the
+author resource placements and matrix-construction details remain unavailable.
+The result is therefore a structural reproduction, not an exact instance or
+paper-timing reproduction. No speedup is claimed, and Stage 8 recorded zero
+allocations.
 
 Validated capabilities now include:
 
@@ -114,17 +115,28 @@ Validated capabilities now include:
 - synchronized initialization, warm-up, transfer, iteration, residual-check,
   recovery, and end-to-end timing fields, plus explicit allocation accounting;
 - an FP64-first correctness gate followed by a separate non-gating FP32
-  diagnostic.
+  diagnostic;
+- canonical Git-blob provenance for MATPOWER 8.1 case1354pegase,
+  case2868rte, and case9241pegase;
+- an exact 18-row symbolic dimension and sparse-nonzero ledger with Stage 8
+  allocation locks;
+- a generalized scaled block-arrow equality solve that avoids a dense Gram
+  matrix on the Stage 7 cases;
+- sparse-only spectral certification without materializing a normal matrix;
+- repeated HiGHS, CPU FP64, and GPU FP64 timing with first-run, warm-up,
+  measured-sample, variability, memory, and transfer evidence; and
+- independent enforcement of the six-case Stage 7 boundary and zero Stage 8
+  allocations.
 
 See `docs/project_state.md` for the authoritative gate state and
-`docs/stage_reports/stage_6_report.md` for acceptance evidence.
+`docs/stage_reports/stage_7_report.md` for acceptance evidence.
 
 ## Environment snapshot
 
 The Stage 5 CPU reference ran locally with Python 3.13.5, NumPy 2.4.1, SciPy
 1.16.3, SciPy's bundled HiGHS dual-simplex interface, pytest, and Ruff.
 
-Stage 6 ran in an isolated virtual environment on the target DGX Spark:
+Stages 6 and 7 ran in an isolated virtual environment on the target DGX Spark:
 
 - Ubuntu 24.04.4 LTS, aarch64;
 - NVIDIA GB10, compute capability 12.1;
@@ -133,6 +145,12 @@ Stage 6 ran in an isolated virtual environment on the target DGX Spark:
 - 121.690 GiB system memory with ATS addressing;
 - CPython 3.12.3;
 - CuPy 14.1.1 for CUDA 13, NumPy 2.3.5, and SciPy 1.16.3.
+
+Stage 7 executed from clean detached commit
+`ff6f762a00463e4769861f6aaf6f6fbbad6cc8af`. Its configuration and package
+requirements were verified over canonical LF Git-blob content before model
+allocation. The required sparse GPU path selected
+`CUSPARSE_SPMV_CSR_ALG2` for FP64 products.
 
 Raw machine inventories and access details remain local and are intentionally
 excluded from the public repository. See `environment/README.md` for the
@@ -145,15 +163,20 @@ manuscript does not fully identify device placements, time series, several
 physical parameters, the exact adaptive-penalty and restart implementation,
 numerical precision, or timing boundaries. Stage 5 therefore pins the
 published HPR-LP v0.1.0 policy as a sourced reconstruction and does not claim
-that it is identical to the authors' unpublished DCOPF code. Stage 6 also runs
-on a DGX Spark GB10 rather than the paper's A100. Its timing ledger defines this
-project's measurement boundary; it does not retroactively make that boundary
-identical to the unpublished paper experiment.
+that it is identical to the authors' unpublished DCOPF code. Stages 6 and 7
+also run on a DGX Spark GB10 rather than the paper's A100.
+
+Stage 7 pins the public MATPOWER 8.1 networks and freezes one transparent
+reconstruction for the missing author additions. It reproduces every published
+row and variable dimension, but none of the 18 sparse nonzero counts. Its
+timing ledger defines this project's measurement boundaries; it does not make
+those boundaries or sparse workloads identical to the unpublished paper
+experiment.
 
 Until the required inputs are recovered, this project will not claim exact
-numerical reproduction. Results will be labeled as exact, mathematical,
-structural, or approximate benchmark reconstruction according to the evidence
-actually available.
+numerical reproduction. Stage 7 is explicitly labeled a structural
+reproduction. Results continue to be classified as exact, mathematical,
+structural, or approximate according to the evidence actually available.
 
 ## Repository map
 
@@ -176,7 +199,7 @@ gpu-dcopf-hpr/
 Production solver logic belongs in `src/gpu_dcopf_hpr/`, not only in notebooks.
 Raw validation outputs are preserved under `results/raw/stage_N/`.
 
-## Stage 6 checks
+## Stage 7 checks
 
 From this directory:
 
@@ -184,14 +207,14 @@ From this directory:
 ./.venv/Scripts/python.exe -m pytest -q
 ./.venv/Scripts/ruff.exe check .
 ./.venv/Scripts/ruff.exe format --check .
-./.venv/Scripts/python.exe scripts/check_stage_6.py
+./.venv/Scripts/python.exe scripts/check_stage_7.py
 ```
 
-The Stage 6 experiment itself runs on the DGX Spark from the repository-local
-environment:
+The Stage 7 experiment itself runs on the DGX Spark from the pinned
+repository-local environment:
 
 ```text
-python scripts/run_stage_6.py
+python scripts/run_stage_7.py --no-resume --device-id 0 --output-dir <outside-worktree-run-directory>
 ```
 
 The dashboard has its own production build and rendered-output test:
@@ -202,9 +225,20 @@ npm run build
 node --test tests/rendered-html.test.mjs
 ```
 
-The checker validates the preserved Stage 6 evidence without starting Stage 7.
+The checker validates the preserved Stage 7 evidence without starting Stage 8.
 The experiment command records DGX data and should be run only in the prepared
-CUDA 13 environment.
+CUDA 13 environment. Large rows remain locked unless Stage 8 receives explicit
+approval.
+
+The accepted evidence remains tied to executed commit `ff6f762`. Later
+integrity maintenance taught the checker to accept accurately scoped Linux
+`getrusage`-only peak telemetry when `psutil` RSS is unavailable, and hardened
+source preflight so a deleted tracked Python file fails closed. Those changes
+altered neither the accepted evidence nor any numerical or timing threshold;
+no benchmark rerun was required. The accepted 19/19 check is evaluated against
+the exact accepted commit; a later head with changed execution-source files is
+expected to fail source identity rather than inherit the old benchmark claim.
+A clean detached `ff6f762` recheck passed 19/19 with the hardened checker.
 
 ## Research rules in one minute
 
