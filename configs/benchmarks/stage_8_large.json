@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0",
+  "stage": 8,
+  "name": "stage_8_large_structural_reproduction",
+  "classification": "structural_reproduction",
+  "approval_gate": "APPROVE STAGE 7 AND RUN STAGE 8",
+  "base_stage_7": {
+    "configuration_path": "configs/benchmarks/stage_7_small_medium.json",
+    "configuration_sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+    "evidence_path": "results/raw/stage_7/stage_7_validation.json",
+    "evidence_sha256": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+    "requirements_path": "environment/dgx_stage7_requirements.txt",
+    "requirements_sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+    "reuse_reconstruction_protocol_without_changes": true,
+    "reuse_algorithm_without_changes": true,
+    "reuse_acceptance_thresholds_without_changes": true,
+    "reuse_timing_protocol_without_changes": true
+  },
+  "resource_policy": {
+    "estimate_before_every_allocation": true,
+    "host_safety_fraction": 0.8,
+    "device_safety_fraction": 0.8,
+    "unified_memory_accounting": "sum_host_assembly_peak_and_device_planning",
+    "require_observed_host_available_bytes": true,
+    "require_observed_device_total_bytes": true,
+    "require_observed_device_free_bytes": true,
+    "required_sparse_index_bits": 32,
+    "stop_before_allocation_if_unsafe": true
+  },
+  "execution_policy": {
+    "one_new_case_per_invocation": true,
+    "strict_predecessor_pass_required": true,
+    "stop_after_failure_or_memory_block": true,
+    "resume_by_run_fingerprint": true,
+    "retry_requires_explicit_flag": true,
+    "do_not_replace_failures_with_estimates": true
+  },
+  "campaign_order": [
+    "case2868rte:T48",
+    "case2868rte:T64",
+    "case2868rte:T96",
+    "case9241pegase:T4",
+    "case9241pegase:T6",
+    "case9241pegase:T16",
+    "case9241pegase:T24",
+    "case9241pegase:T32"
+  ],
+  "reconciliation_only_rows": [
+    "case2868rte:T56",
+    "case2868rte:T72",
+    "case2868rte:T80",
+    "case2868rte:T88"
+  ],
+  "expected_preallocation_blocks": {
+    "case9241pegase:T24": "signed_int32_csr_nnz_limit",
+    "case9241pegase:T32": "signed_int32_csr_nnz_limit"
+  },
+  "stage_boundary": {
+    "stage_8_only": true,
+    "stage_9_locked": true,
+    "exact_paper_reproduction_claimed": false,
+    "paper_a100_timing_reproduction_claimed": false,
+    "n_minus_1_extension_enabled": false,
+    "speedup_claim_requires_matching_formulation_hardware_and_boundaries": true
+  }
+}
