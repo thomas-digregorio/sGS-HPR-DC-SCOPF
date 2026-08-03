@@ -1,0 +1,194 @@
+{
+  "schema_version": "1.0",
+  "stage": 7,
+  "name": "stage_7_small_medium_structural_reconstruction",
+  "classification": "structural_reproduction",
+  "precision": "FP64",
+  "paper_source": {
+    "title": "An Efficient GPU-based Halpern Accelerating Algorithm for Large-scale DC Optimal Power Flow",
+    "table": "Table II",
+    "reported_gpu": "NVIDIA A100-SXM4-80GB",
+    "reported_cuda": "12.3",
+    "reported_time_limit_seconds": 3600
+  },
+  "public_network_source": {
+    "project": "MATPOWER",
+    "release": "8.1",
+    "tag_object": "3f8ecfdbc79b07697d6b45f8d868ac1c2d27f788",
+    "resolved_commit": "1a828c7af590714499284e36ee9c81273388c594",
+    "repository": "https://github.com/MATPOWER/matpower",
+    "release_doi": "10.5281/zenodo.15871662",
+    "retrieved_utc_date": "2026-08-03",
+    "license": "MATPOWER 8.1 three-clause BSD license",
+    "files": [
+      {
+        "case": "case1354pegase",
+        "path": "data/raw/matpower/stage7/case1354pegase.m",
+        "upstream_path": "data/case1354pegase.m",
+        "git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+        "sha256": "9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103"
+      },
+      {
+        "case": "case2868rte",
+        "path": "data/raw/matpower/stage7/case2868rte.m",
+        "upstream_path": "data/case2868rte.m",
+        "git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+        "sha256": "07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101"
+      },
+      {
+        "case": "case9241pegase",
+        "path": "data/raw/matpower/stage7/case9241pegase.m",
+        "upstream_path": "data/case9241pegase.m",
+        "git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+        "sha256": "d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01"
+      }
+    ]
+  },
+  "author_data_availability": {
+    "renewable_locations": "missing",
+    "storage_locations": "missing",
+    "load_profiles": "missing",
+    "renewable_profiles": "missing",
+    "reserve_requirements": "missing",
+    "generator_ramp_modifications": "missing",
+    "storage_parameters": "missing",
+    "matrix_construction_code": "missing",
+    "exact_restart_and_penalty_code": "missing"
+  },
+  "reconstruction_protocol": {
+    "frozen_before_benchmark_runs": true,
+    "timing_tuning_prohibited": true,
+    "load_profile": "flat MATPOWER active demand in every period",
+    "load_definition": "MATPOWER Pd + Gs treated as active withdrawal",
+    "generator_policy": "retain every MATPOWER generator row; originally offline rows are fixed at zero output and zero reserve",
+    "generator_ramp_fraction_of_pmax_per_hour": 0.1,
+    "renewable_placement": "cycle through MATPOWER generator buses in ascending generator-row order",
+    "renewable_total_nameplate_fraction_of_base_load": 0.1,
+    "renewable_nameplate_distribution": "equal across reconstructed renewable rows",
+    "renewable_minimum_fraction": 0.0,
+    "renewable_availability_fraction": 1.0,
+    "storage_placement": "use every second reconstructed renewable location, cycling deterministically when required",
+    "storage_total_power_fraction_of_base_load": 0.01,
+    "storage_power_distribution": "equal across reconstructed storage rows",
+    "storage_duration_hours": 4.0,
+    "storage_minimum_energy_fraction": 0.0,
+    "storage_initial_state_fraction": 0.5,
+    "storage_charge_efficiency": 0.95,
+    "storage_discharge_efficiency": 0.95,
+    "reserve_up_fraction_of_base_load": 0.01,
+    "reserve_down_fraction_of_base_load": 0.01,
+    "renewable_penalty_per_mwh": 1.0,
+    "storage_loss_penalty_per_mwh": 1.0,
+    "positive_rate_a_policy": "preserve the MATPOWER rateA value",
+    "zero_rate_a_policy": "retain the paper-required branch rows with a finite bound derived to be redundant over the variable box",
+    "zero_rate_a_bound_proof": "outward-rounded triangle bound over the complete variable box",
+    "inactive_branch_policy": "retain paper-count rows as zero-flow rows while excluding them from topology",
+    "angle_limit_policy": "ignore MATPOWER angle-difference limits because they are absent from the paper model",
+    "objective_policy": "use the linear and constant MATPOWER polynomial terms; reject nonzero higher-order terms",
+    "interval_hours": 1.0,
+    "ptdf_zero_atol": 1e-12,
+    "ptdf_rhs_chunk_columns": 128,
+    "ptdf_reference_policy": "use the public MATPOWER type-3 reference bus",
+    "seed": 20260803
+  },
+  "algorithm": {
+    "ruiz_iterations": 10,
+    "pock_chambolle": true,
+    "pock_chambolle_alpha": 1.0,
+    "normalize_b_and_c": true,
+    "initial_sigma": 1.0,
+    "adaptive_sigma": true,
+    "restart": true,
+    "policy_check_interval": 100,
+    "correctness_residual_check_interval": 1,
+    "requested_spmv_algorithm": "CUSPARSE_SPMV_CSR_ALG2",
+    "mixed_precision_enabled": false
+  },
+  "acceptance": {
+    "paper_residual_tolerance": 0.00005,
+    "raw_kkt_tolerance": 0.01,
+    "maximum_physical_violation": 0.01,
+    "maximum_scaled_objective_gap_to_highs": 0.0002,
+    "maximum_dimension_difference_for_execution": 0,
+    "nonzero_nnz_difference_blocks_paper_time_comparability": true,
+    "required_solver_tracks": [
+      "highs",
+      "cpu_fp64_sgs_hpr",
+      "gpu_fp64_sgs_hpr"
+    ],
+    "gurobi_required_only_when_installed_and_licensed": true
+  },
+  "timing": {
+    "warmup_runs": 1,
+    "measured_runs": 5,
+    "maximum_measured_runs_after_variability_escalation": 9,
+    "relative_range_escalation_threshold": 0.2,
+    "per_solve_time_limit_seconds": 3600,
+    "report_first_run_separately": true,
+    "report_statistics": [
+      "median",
+      "minimum",
+      "maximum",
+      "standard_deviation",
+      "interquartile_range"
+    ],
+    "speedup_requires_matching_boundaries": true
+  },
+  "cases": [
+    {
+      "case": "case1354pegase",
+      "buses": 1354,
+      "branches": 1991,
+      "generators": 260,
+      "renewables": 136,
+      "storage": 68,
+      "rows": [
+        {"periods": 4, "m": 20192, "n": 4208, "nnz": 7190640, "paper_gurobi_seconds": 1.136, "paper_sgs_hpr_seconds": 3.849, "execute_stage_7": true},
+        {"periods": 16, "m": 82124, "n": 16832, "nnz": 28791792, "paper_gurobi_seconds": 1.945, "paper_sgs_hpr_seconds": 4.113, "execute_stage_7": true},
+        {"periods": 48, "m": 247276, "n": 50496, "nnz": 86586352, "paper_gurobi_seconds": 5.848, "paper_sgs_hpr_seconds": 6.757, "execute_stage_7": true},
+        {"periods": 96, "m": 495004, "n": 100992, "nnz": 173800432, "paper_gurobi_seconds": 15.231, "paper_sgs_hpr_seconds": 7.857, "execute_stage_7": true}
+      ]
+    },
+    {
+      "case": "case2868rte",
+      "buses": 2868,
+      "branches": 3808,
+      "generators": 600,
+      "renewables": 286,
+      "storage": 143,
+      "rows": [
+        {"periods": 4, "m": 40163, "n": 9488, "nnz": 30111616, "paper_gurobi_seconds": 8.489, "paper_sgs_hpr_seconds": 4.546, "execute_stage_7": true},
+        {"periods": 16, "m": 163823, "n": 37952, "nnz": 120508576, "paper_gurobi_seconds": 34.659, "paper_sgs_hpr_seconds": 7.695, "execute_stage_7": true},
+        {"periods": 48, "m": 493583, "n": 113856, "nnz": 295998240, "paper_gurobi_seconds": 90.154, "paper_sgs_hpr_seconds": 13.948, "execute_stage_7": false},
+        {"periods": 56, "m": 576023, "n": 132832, "nnz": 345459808, "paper_gurobi_seconds": 104.152, "paper_sgs_hpr_seconds": 15.988, "execute_stage_7": false},
+        {"periods": 64, "m": 658463, "n": 151808, "nnz": 394957984, "paper_gurobi_seconds": 109.656, "paper_sgs_hpr_seconds": 16.157, "execute_stage_7": false},
+        {"periods": 72, "m": 740903, "n": 170784, "nnz": 444492768, "paper_gurobi_seconds": 115.025, "paper_sgs_hpr_seconds": 16.808, "execute_stage_7": false},
+        {"periods": 80, "m": 823343, "n": 189760, "nnz": 494064160, "paper_gurobi_seconds": 119.797, "paper_sgs_hpr_seconds": 17.287, "execute_stage_7": false},
+        {"periods": 88, "m": 905783, "n": 208736, "nnz": 543672160, "paper_gurobi_seconds": 124.926, "paper_sgs_hpr_seconds": 17.538, "execute_stage_7": false},
+        {"periods": 96, "m": 988223, "n": 227712, "nnz": 593316768, "paper_gurobi_seconds": 130.554, "paper_sgs_hpr_seconds": 17.899, "execute_stage_7": false}
+      ]
+    },
+    {
+      "case": "case9241pegase",
+      "buses": 9241,
+      "branches": 16049,
+      "generators": 1445,
+      "renewables": 920,
+      "storage": 460,
+      "rows": [
+        {"periods": 4, "m": 152774, "n": 24700, "nnz": 373238888, "paper_gurobi_seconds": 66.904, "paper_sgs_hpr_seconds": 8.04, "execute_stage_7": false},
+        {"periods": 6, "m": 230376, "n": 37050, "nnz": 559872262, "paper_gurobi_seconds": 136.266, "paper_sgs_hpr_seconds": 19.478, "execute_stage_7": false},
+        {"periods": 16, "m": 618386, "n": 98800, "nnz": 1493149532, "paper_gurobi_seconds": null, "paper_sgs_hpr_seconds": 59.784, "execute_stage_7": false},
+        {"periods": 24, "m": 928794, "n": 148200, "nnz": 2239903828, "paper_gurobi_seconds": null, "paper_sgs_hpr_seconds": 138.55, "execute_stage_7": false},
+        {"periods": 32, "m": 1239202, "n": 197600, "nnz": 2986775884, "paper_gurobi_seconds": null, "paper_sgs_hpr_seconds": 227.682, "execute_stage_7": false}
+      ]
+    }
+  ],
+  "stage_boundary": {
+    "stage_7_only": true,
+    "stage_8_large_runs_locked": true,
+    "exact_paper_reproduction_claimed": false,
+    "paper_a100_timing_reproduction_claimed": false,
+    "n_minus_1_extension_enabled": false
+  }
+}

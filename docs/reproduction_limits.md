@@ -198,8 +198,10 @@ unless a compatible boundary is established.
 ## 6. Source-code availability decision
 
 The manuscript and its institutional article record do not link a
-paper-specific sGS-HPR/DCOPF source repository. Targeted searches by exact title
-and algorithm name did not locate one as of 2026-07-29. This is an
+paper-specific sGS-HPR/DCOPF source repository. The institutional record and
+the now-published IEEE citation were rechecked together with targeted exact-title,
+algorithm-name, and public-code searches on 2026-08-03; no author data or
+paper-specific implementation was located. This is an
 evidence-of-search statement, not proof that private or newly released code
 does not exist.
 
@@ -268,3 +270,19 @@ correctness errors, not to support a throughput conclusion.
 5. Use repeated compatible timing boundaries before discussing speed.
 6. At every stage, preserve missing items as missing rather than tuning
    synthetic values to match the paper's times.
+
+## 10. Stage 7 public-data decision
+
+Stage 7 pins the unmodified network files from MATPOWER 8.1 at resolved commit
+`1a828c7af590714499284e36ee9c81273388c594`. This resolves the base-network
+source and version, but none of the missing author additions listed above.
+
+The public cases also differ from the counts implied by Table II if interpreted
+with ordinary MATPOWER operational semantics: some branch `rateA` values are
+zero, case2868 contains offline generator rows, and case2868 includes branch
+angle-difference limits that are absent from the printed DCOPF. Stage 7 therefore
+uses a separate, frozen structural-reconstruction protocol. It preserves the
+original files, records each transformation, and prohibits tuning toward the
+paper's timings. A nonzero sparse-count difference blocks a direct comparison
+with the corresponding paper time even when the row and variable dimensions
+match exactly.

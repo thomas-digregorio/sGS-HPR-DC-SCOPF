@@ -34,6 +34,8 @@ from .sgs_hpr import (
     prepare_sgs_hpr,
     sgs_hpr_step,
 )
+from .stage7_scaled_y1 import ScaledBlockArrowY1Solver
+from .stage7_spectral import SparseSpectralCertificate
 from .structural_y1 import StructuralY1Solver
 
 FloatVector = NDArray[np.float64]
@@ -330,6 +332,9 @@ def _solve_equality_metric(
     if workspace.equality_backend == "structural":
         assert workspace.structural_y1 is not None
         return workspace.structural_y1.solve(right_hand_side)
+    if workspace.equality_backend == "scaled_structural":
+        assert workspace.scaled_structural_y1 is not None
+        return workspace.scaled_structural_y1.solve(right_hand_side)
     assert workspace.equality_cholesky is not None
     return np.asarray(
         linalg.cho_solve(
@@ -617,14 +622,17 @@ def solve_stage5_sgs_hpr(
     history_interval: int = 100,
     initial_state: HPRState | None = None,
     structural_y1: StructuralY1Solver | None = None,
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None = None,
+    spectral_certificate: SparseSpectralCertificate | None = None,
+    prepared_workspace: SGSHPRWorkspace | None = None,
     preconditioner: LPPreconditioner | None = None,
     control: Stage5Control | None = None,
 ) -> Stage5SGSHPRResult:
     """Run CPU sGS-HPR with optional reversible preprocessing and policies.
 
-    Convergence is always decided in recovered original coordinates.  A raw
-    Stage 4 structural equality solver is rejected for a preconditioned LP
-    because general column scaling destroys its Equation (55) Gram structure.
+    Convergence is always decided in recovered original coordinates. A raw
+    Stage 4 structural equality solver is rejected for a preconditioned LP;
+    ``scaled_structural_y1`` is the validated generalized block-arrow path.
     """
 
     sigma_value = _positive_finite(sigma, name="sigma")
@@ -637,6 +645,8 @@ def solve_stage5_sgs_hpr(
         raise ValueError("history_interval must be a positive integer.")
     policy = Stage5Control() if control is None else control
 
+    if structural_y1 is not None and scaled_structural_y1 is not None:
+        raise ValueError("structural_y1 and scaled_structural_y1 are mutually exclusive.")
     if preconditioner is not None:
         if preconditioner.source_lp is not lp:
             raise ValueError("preconditioner must be prepared from the supplied CanonicalLP.")
@@ -645,8 +655,17 @@ def solve_stage5_sgs_hpr(
                 "a raw structural_y1 backend cannot be reused after Stage 5 "
                 "row/column preprocessing; use the direct equality backend."
             )
+        if (
+            scaled_structural_y1 is not None
+            and scaled_structural_y1.preconditioner is not preconditioner
+        ):
+            raise ValueError(
+                "scaled_structural_y1 must be prepared from the exact supplied preconditioner."
+            )
         algorithm_lp = preconditioner.scaled_lp
     else:
+        if scaled_structural_y1 is not None:
+            raise ValueError("scaled_structural_y1 requires its exact preconditioner.")
         algorithm_lp = lp
 
     total_start = perf_counter()
@@ -665,9 +684,40 @@ def solve_stage5_sgs_hpr(
     anchor = algorithm_initial.detached_copy()
     current = algorithm_initial.detached_copy()
     sigma_reference = algorithm_initial.detached_copy()
-    preparation_start = perf_counter()
-    workspace = prepare_sgs_hpr(algorithm_lp, structural_y1=structural_y1)
-    preparation_elapsed_seconds = perf_counter() - preparation_start
+    if prepared_workspace is None:
+        preparation_start = perf_counter()
+        workspace = prepare_sgs_hpr(
+            algorithm_lp,
+            structural_y1=structural_y1,
+            scaled_structural_y1=scaled_structural_y1,
+            spectral_certificate=spectral_certificate,
+        )
+        preparation_elapsed_seconds = perf_counter() - preparation_start
+    else:
+        if prepared_workspace.source_lp is not algorithm_lp:
+            raise ValueError("prepared_workspace must be tied to the exact algorithm LP.")
+        if scaled_structural_y1 is None:
+            raise ValueError("prepared_workspace reuse requires scaled_structural_y1.")
+        if (
+            prepared_workspace.equality_backend != "scaled_structural"
+            or prepared_workspace.scaled_structural_y1 is not scaled_structural_y1
+        ):
+            raise ValueError("prepared_workspace must use the exact supplied scaled_structural_y1.")
+        if algorithm_lp.m2:
+            if spectral_certificate is None:
+                raise ValueError(
+                    "prepared_workspace reuse requires its exact spectral_certificate."
+                )
+            if prepared_workspace.spectral is not spectral_certificate:
+                raise ValueError(
+                    "prepared_workspace spectral certificate identity/fingerprint mismatch."
+                )
+        elif spectral_certificate is not None or prepared_workspace.spectral is not None:
+            raise ValueError(
+                "prepared_workspace and spectral_certificate must have no A2 certificate."
+            )
+        workspace = prepared_workspace
+        preparation_elapsed_seconds = 0.0
 
     history: list[Stage5HistoryEntry] = []
     policy_events: list[Stage5PolicyEvent] = []

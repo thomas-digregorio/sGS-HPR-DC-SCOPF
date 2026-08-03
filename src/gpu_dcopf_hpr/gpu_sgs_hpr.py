@@ -15,8 +15,11 @@ The equality modes are intentionally explicit:
     Apply the corrected Stage 4 Equation (55) descriptor on the raw,
     unscaled LP.  A descriptor tied to that exact LP instance is required.
 
-The raw structural descriptor is never accepted by ``scaled_direct``.  A
-scaled structural formula has not been derived in this reproduction.
+``scaled_structural``
+    Apply the Stage 7 generalized block-arrow factors to the exact diagonally
+    scaled LP in FP64. The prepared factors are uploaded once and reused.
+
+The equality descriptors are mutually exclusive and tied to exact LP objects.
 """
 
 from __future__ import annotations
@@ -33,9 +36,13 @@ from .gpu_backend import CuPyBackend, create_gpu_backend
 from .gpu_sparse import ResidentCSR, prepare_resident_csr
 from .hpr_generic import HPRState
 from .sgs_hpr import ALGORITHM_2_UPDATE_ORDER, estimate_inequality_spectrum
+from .stage7_scaled_y1 import (
+    DeviceScaledBlockArrowY1Solver,
+    ScaledBlockArrowY1Solver,
+)
 from .structural_y1 import StructuralY1Solver
 
-GPUEqualityMode = Literal["scaled_direct", "unscaled_structural"]
+GPUEqualityMode = Literal["scaled_direct", "unscaled_structural", "scaled_structural"]
 GPUPrecision = Literal["float64", "float32"]
 
 
@@ -129,6 +136,8 @@ class GPUSGSHPRWorkspace:
     equality_gram: Any | None
     equality_cholesky: Any | None
     structural_y1: StructuralY1Solver | None
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None
+    device_scaled_structural_y1: DeviceScaledBlockArrowY1Solver | None
     structural_coupling: Any | None
     structural_inverse_storage_diagonal: Any | None
     structural_weight: Any | None
@@ -261,6 +270,7 @@ def prepare_gpu_sgs_hpr(
     *,
     equality_mode: GPUEqualityMode = "scaled_direct",
     structural_y1: StructuralY1Solver | None = None,
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None = None,
     inequality_lambda: float | None = None,
     backend: CuPyBackend | None = None,
     dtype: GPUPrecision = "float64",
@@ -269,26 +279,46 @@ def prepare_gpu_sgs_hpr(
 
     ``scaled_direct`` treats ``lp`` as the Stage 5 algorithm LP after its full
     diagonal preconditioning and performs dense Cholesky solves on that scaled
-    system.  ``unscaled_structural`` instead requires the corrected raw
-    Equation (55) descriptor tied to ``lp``.  The two modes cannot be mixed.
+    system. ``unscaled_structural`` requires the corrected raw Equation (55)
+    descriptor. ``scaled_structural`` requires Stage 7 block-arrow factors
+    tied to this exact scaled LP and is intentionally FP64-only.
     """
 
-    if equality_mode not in {"scaled_direct", "unscaled_structural"}:
-        raise ValueError("equality_mode must be 'scaled_direct' or 'unscaled_structural'.")
+    allowed_modes = {"scaled_direct", "unscaled_structural", "scaled_structural"}
+    if equality_mode not in allowed_modes:
+        raise ValueError(
+            "equality_mode must be 'scaled_direct', 'unscaled_structural', or 'scaled_structural'."
+        )
     if dtype not in {"float64", "float32"}:
         raise ValueError("dtype must be 'float64' or 'float32'.")
-    if equality_mode == "scaled_direct" and structural_y1 is not None:
-        raise ValueError(
-            "scaled_direct cannot use the raw StructuralY1Solver; a scaled structural "
-            "formula has not been derived."
-        )
+    if structural_y1 is not None and scaled_structural_y1 is not None:
+        raise ValueError("structural_y1 and scaled_structural_y1 are mutually exclusive.")
+    if equality_mode == "scaled_direct":
+        if structural_y1 is not None:
+            raise ValueError("scaled_direct cannot use the raw StructuralY1Solver.")
+        if scaled_structural_y1 is not None:
+            raise ValueError("scaled_direct cannot use a ScaledBlockArrowY1Solver.")
     if equality_mode == "unscaled_structural":
+        if scaled_structural_y1 is not None:
+            raise ValueError("unscaled_structural cannot use a ScaledBlockArrowY1Solver.")
         if structural_y1 is None:
             raise ValueError("unscaled_structural requires a corrected StructuralY1Solver.")
         if structural_y1.source_lp is not lp:
             raise ValueError(
                 "the unscaled structural descriptor must be prepared from the same "
                 "CanonicalLP instance."
+            )
+    if equality_mode == "scaled_structural":
+        if structural_y1 is not None:
+            raise ValueError("scaled_structural cannot use the raw StructuralY1Solver.")
+        if scaled_structural_y1 is None:
+            raise ValueError("scaled_structural requires a ScaledBlockArrowY1Solver.")
+        if dtype != "float64":
+            raise ValueError("scaled_structural requires FP64 (dtype='float64').")
+        if scaled_structural_y1.source_lp is not lp:
+            raise ValueError(
+                "the scaled structural descriptor must be prepared from the same exact "
+                "scaled CanonicalLP instance."
             )
 
     if lp.m2:
@@ -342,6 +372,7 @@ def prepare_gpu_sgs_hpr(
     structural_coupling = None
     structural_inverse = None
     structural_weight = None
+    device_scaled_structural_y1 = None
     if equality_mode == "scaled_direct":
         if lp.m1:
             host_gram = np.asarray((A1_host @ A1_host.T).toarray(), dtype=host_dtype)
@@ -358,11 +389,18 @@ def prepare_gpu_sgs_hpr(
         else:
             equality_gram = xp.empty((0, 0), dtype=device_dtype)
             equality_cholesky = xp.empty((0, 0), dtype=device_dtype)
-    else:
+    elif equality_mode == "unscaled_structural":
         assert structural_y1 is not None
         structural_coupling = upload(structural_y1.diagnostics.coupling)
         structural_inverse = upload(structural_y1.inverse_storage_diagonal)
         structural_weight = structural_coupling * structural_inverse
+    else:
+        assert scaled_structural_y1 is not None
+        device_scaled_structural_y1 = scaled_structural_y1.to_device(
+            selected_backend,
+            phase="preparation",
+            triangular_solve=_select_triangular_solver(xp),
+        )
 
     zero_scalar = xp.asarray(0.0, dtype=device_dtype)
     return GPUSGSHPRWorkspace(
@@ -386,6 +424,8 @@ def prepare_gpu_sgs_hpr(
         equality_gram=equality_gram,
         equality_cholesky=equality_cholesky,
         structural_y1=structural_y1,
+        scaled_structural_y1=scaled_structural_y1,
+        device_scaled_structural_y1=device_scaled_structural_y1,
         structural_coupling=structural_coupling,
         structural_inverse_storage_diagonal=structural_inverse,
         structural_weight=structural_weight,
@@ -478,6 +518,17 @@ def _solve_unscaled_structural(
         xp.subtract(rhs[periods:], storage_solution, out=storage_solution)
         storage_solution *= inverse
 
+    return _sparse_equality_residual(workspace, rhs, out)
+
+
+def _sparse_equality_residual(
+    workspace: GPUSGSHPRWorkspace,
+    rhs: Any,
+    out: Any,
+) -> tuple[Any, Any]:
+    """Evaluate ``A1 A1.T out - rhs`` through the resident sparse operator."""
+
+    xp = workspace.backend.xp
     residual = workspace.buffers.m1_residual
     _matvec_into(
         workspace.A1_resident,
@@ -497,6 +548,17 @@ def _solve_unscaled_structural(
     return relative, infinity
 
 
+def _solve_scaled_structural(
+    workspace: GPUSGSHPRWorkspace,
+    rhs: Any,
+    out: Any,
+) -> tuple[Any, Any]:
+    solver = workspace.device_scaled_structural_y1
+    assert solver is not None
+    solver.solve_into(rhs, out)
+    return _sparse_equality_residual(workspace, rhs, out)
+
+
 def _solve_equality(
     workspace: GPUSGSHPRWorkspace,
     rhs: Any,
@@ -506,7 +568,9 @@ def _solve_equality(
         return workspace.zero_scalar, workspace.zero_scalar
     if workspace.equality_mode == "scaled_direct":
         return _solve_scaled_direct(workspace, rhs, out)
-    return _solve_unscaled_structural(workspace, rhs, out)
+    if workspace.equality_mode == "unscaled_structural":
+        return _solve_unscaled_structural(workspace, rhs, out)
+    return _solve_scaled_structural(workspace, rhs, out)
 
 
 def gpu_sgs_hpr_step(

@@ -16,6 +16,7 @@ htmlcov/
 build/
 dist/
 *.egg-info/
+tmp/
 
 # Editors and operating systems
 .idea/
@@ -48,6 +49,8 @@ results/raw/*
 !results/raw/stage_5/**
 !results/raw/stage_6/
 !results/raw/stage_6/**
+!results/raw/stage_7/
+!results/raw/stage_7/**
 results/processed/*
 !results/processed/.gitkeep
 results/plots/*
@@ -70,6 +73,8 @@ logs/*
 !logs/stage_5/**
 !logs/stage_6/
 !logs/stage_6/**
+!logs/stage_7/
+!logs/stage_7/**
 artifacts/*
 !artifacts/.gitkeep
 
@@ -94,6 +99,7 @@ gurobi.log
 *.log
 *.lic
 !logs/stage_6/stage_6_run.log
+!logs/stage_7/*.log
 
 # Dashboard build/runtime output
 dashboard/node_modules/

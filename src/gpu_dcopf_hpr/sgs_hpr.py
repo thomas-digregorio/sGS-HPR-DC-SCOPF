@@ -15,6 +15,8 @@ from .canonical_lp import CanonicalLP
 from .hpr_generic import HPRState, halpern_update, reflect_state
 from .projections import project_box, project_nonnegative
 from .residuals import ResidualEvaluation, evaluate_residuals
+from .stage7_scaled_y1 import ScaledBlockArrowY1Solver
+from .stage7_spectral import SparseSpectralCertificate, canonical_csr_sha256
 from .structural_y1 import StructuralY1Solver
 
 FloatVector = NDArray[np.float64]
@@ -140,12 +142,13 @@ class SGSHPRWorkspace:
     A1_transpose: sparse.csr_matrix
     A2: sparse.csr_matrix
     A2_transpose: sparse.csr_matrix
-    equality_backend: Literal["direct", "structural"]
+    equality_backend: Literal["direct", "structural", "scaled_structural"]
     equality_gram: FloatMatrix | None
     equality_cholesky: tuple[FloatMatrix, bool] | None
     structural_y1: StructuralY1Solver | None
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None
     equality: EqualitySystemDiagnostics
-    spectral: SpectralEstimateDiagnostics | None
+    spectral: SpectralEstimateDiagnostics | SparseSpectralCertificate | None
 
 
 @dataclass(frozen=True, slots=True)
@@ -347,10 +350,43 @@ def estimate_inequality_spectrum(
     )
 
 
+def _validate_sparse_spectral_certificate(
+    A2: sparse.csr_matrix,
+    certificate: SparseSpectralCertificate,
+) -> SparseSpectralCertificate:
+    if not isinstance(certificate, SparseSpectralCertificate):
+        raise TypeError("spectral_certificate must be a SparseSpectralCertificate.")
+    canonical = A2.copy()
+    canonical.sum_duplicates()
+    canonical.eliminate_zeros()
+    canonical.sort_indices()
+    expected = (int(canonical.shape[0]), int(canonical.shape[1]), int(canonical.nnz))
+    actual = (certificate.rows, certificate.columns, certificate.nonzeros)
+    if actual != expected:
+        raise ValueError(
+            "spectral_certificate dimensions/nonzeros do not match A2: "
+            f"expected {expected}, received {actual}."
+        )
+    actual_sha256 = canonical_csr_sha256(canonical)
+    if certificate.matrix_sha256 != actual_sha256:
+        raise ValueError(
+            "spectral_certificate matrix fingerprint does not match the exact canonical A2."
+        )
+    if (
+        not certificate.finite_certificate
+        or certificate.lambda_used <= certificate.rayleigh_estimate
+        or certificate.lambda_used < certificate.certified_upper_bound
+    ):
+        raise ValueError("spectral_certificate must contain a finite conservative lambda.")
+    return certificate
+
+
 def prepare_sgs_hpr(
     lp: CanonicalLP,
     *,
     structural_y1: StructuralY1Solver | None = None,
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None = None,
+    spectral_certificate: SparseSpectralCertificate | None = None,
 ) -> SGSHPRWorkspace:
     """Prepare sparse operators and a direct or structural equality backend."""
 
@@ -358,11 +394,19 @@ def prepare_sgs_hpr(
     A2 = _csr(lp.A2, rows=lp.m2, columns=lp.n, name="A2")
     A1_transpose = A1.T.tocsr()
     A2_transpose = A2.T.tocsr()
+    if structural_y1 is not None and scaled_structural_y1 is not None:
+        raise ValueError("structural_y1 and scaled_structural_y1 are mutually exclusive.")
     if structural_y1 is not None and structural_y1.source_lp is not lp:
         raise ValueError("structural_y1 must be prepared from the same CanonicalLP instance.")
+    if scaled_structural_y1 is not None and scaled_structural_y1.source_lp is not lp:
+        raise ValueError(
+            "scaled_structural_y1 must be prepared from the same scaled CanonicalLP instance."
+        )
+
+    structural_backend = structural_y1 is not None or scaled_structural_y1 is not None
 
     if lp.m1:
-        if structural_y1 is not None:
+        if structural_backend:
             equality_gram = None
             equality_cholesky = None
             equality = EqualitySystemDiagnostics(
@@ -419,7 +463,7 @@ def prepare_sgs_hpr(
                 check_finite=True,
             )
     else:
-        equality_gram = None if structural_y1 is not None else np.empty((0, 0), dtype=np.float64)
+        equality_gram = None if structural_backend else np.empty((0, 0), dtype=np.float64)
         equality_cholesky = None
         equality = EqualitySystemDiagnostics(
             rows=0,
@@ -430,17 +474,34 @@ def prepare_sgs_hpr(
             condition_number=1.0,
         )
 
-    spectral = estimate_inequality_spectrum(A2) if lp.m2 else None
+    if lp.m2:
+        spectral = (
+            estimate_inequality_spectrum(A2)
+            if spectral_certificate is None
+            else _validate_sparse_spectral_certificate(A2, spectral_certificate)
+        )
+    else:
+        if spectral_certificate is not None:
+            raise ValueError("spectral_certificate must be None when A2 has no rows.")
+        spectral = None
+    equality_backend: Literal["direct", "structural", "scaled_structural"]
+    if scaled_structural_y1 is not None:
+        equality_backend = "scaled_structural"
+    elif structural_y1 is not None:
+        equality_backend = "structural"
+    else:
+        equality_backend = "direct"
     return SGSHPRWorkspace(
         source_lp=lp,
         A1=A1,
         A1_transpose=A1_transpose,
         A2=A2,
         A2_transpose=A2_transpose,
-        equality_backend="structural" if structural_y1 is not None else "direct",
+        equality_backend=equality_backend,
         equality_gram=equality_gram,
         equality_cholesky=equality_cholesky,
         structural_y1=structural_y1,
+        scaled_structural_y1=scaled_structural_y1,
         equality=equality,
         spectral=spectral,
     )
@@ -455,6 +516,16 @@ def _solve_equality(
     if workspace.equality_backend == "structural":
         assert workspace.structural_y1 is not None
         solution = workspace.structural_y1.solve(right_hand_side)
+        residual = (
+            _matvec(
+                workspace.A1,
+                _matvec(workspace.A1_transpose, solution),
+            )
+            - right_hand_side
+        )
+    elif workspace.equality_backend == "scaled_structural":
+        assert workspace.scaled_structural_y1 is not None
+        solution = workspace.scaled_structural_y1.solve(right_hand_side)
         residual = (
             _matvec(
                 workspace.A1,

@@ -555,3 +555,87 @@ its original rationale should remain reviewable.
 - **Reason:** The manuscript does not define enough timing detail for an exact
   comparison. A decomposed Stage 6 measurement supports later controlled
   benchmarks without turning a correctness port into a performance claim.
+
+## D-0049 - Pin MATPOWER 8.1 without editing source cases
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Use the official MATPOWER 8.1 files for case1354pegase,
+  case2868rte, and case9241pegase at resolved commit
+  `1a828c7af590714499284e36ee9c81273388c594`. Record the upstream Git blobs,
+  local SHA-256 hashes, release DOI, license, and retrieval date. Preserve the
+  files byte-for-byte.
+- **Reason:** A named case without a version and hash is not a reproducible
+  benchmark input. Keeping transformations outside the source files separates
+  public provenance from reconstruction choices.
+
+## D-0050 - Freeze one non-tuned structural reconstruction
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Use the versioned protocol in
+  `configs/benchmarks/stage_7_small_medium.json`. It uses flat public load,
+  deterministic generator-bus placement, fixed load-relative RG/ESS/reserve
+  magnitudes, fixed storage efficiencies and duration, and deterministic ramp
+  proxies. The final pre-execution file SHA-256 is
+  `e539f34328f4b8bc28538113c42d68123a785021090a72dfab637a1e99280a94`;
+  it also freezes the PTDF reference, numerical-zero threshold, selected-column
+  batching, load definition, and zero-rate-line proof. Do not revise these
+  choices in response to dimensions, convergence, or timing.
+- **Reason:** The author placements and time series remain missing. A frozen
+  transparent protocol permits structural experiments without disguising
+  synthetic operating data as author data.
+
+## D-0051 - Retain paper-count rows without changing MATPOWER files
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Retain every generator row; originally offline generators are
+  fixed at zero. Retain every active branch row; preserve positive `rateA`
+  values and give zero-rate branches a finite bound proven redundant over the
+  reconstructed variable box. Ignore branch angle-difference limits because
+  they are not in Eqs. (1)-(10). Record raw, operational, and reconstructed
+  counts separately.
+- **Reason:** The paper's dimension table counts all generator and branch rows,
+  while ordinary MATPOWER filtering does not. Explicit fixed-zero and redundant
+  structures reproduce dimensions without silently changing source data or
+  adding constraints absent from the paper.
+
+## D-0052 - Make sparse-count mismatch a comparability boundary
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Require exact row and variable dimensions for each executed
+  Stage 7 case. Report every nonzero-count difference. Any nonzero difference
+  prevents treating the DGX time as a direct reproduction of the paper's Table
+  II time, but does not by itself prevent a clearly labeled structural run.
+- **Reason:** Device placement and PTDF construction determine sparsity and are
+  not available from the paper. A post-result percentage tolerance would be
+  arbitrary.
+
+## D-0053 - Generalize the equality structure after diagonal scaling
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Preserve the block-arrow sparsity of the scaled equality Gram
+  and solve it with a generalized scaled structural backend. Cross-check every
+  new backend against direct Cholesky on small and medium equality systems. Do
+  not apply the raw rank-one Proposition 5 descriptor to a scaled LP.
+- **Reason:** Positive diagonal scaling destroys the manuscript's rank-one
+  coefficients but not the time/storage arrow pattern. This generalization
+  satisfies the preconditioned Stage 7 structural path without reviving the
+  invalid raw/scaled pairing rejected in Stages 5 and 6.
+
+## D-0054 - Separate validation, warm-up, and measured timing
+
+- **Status:** accepted before Stage 7 execution
+- **Stage:** 7
+- **Decision:** Validate an untimed FP64 solve before timing it. Then run one
+  warm-up and at least five measured repetitions where practical, preserving
+  every repetition and reporting median, range, standard deviation, and IQR.
+  Use matching stopping, precision, scaling, residual cadence, and inclusion
+  boundaries for any local ratio. Keep all Stage 8 allocations and runs locked.
+- **Reason:** The paper does not publish a complete timing boundary or
+  repetition data, and it used different hardware. Repetition-level evidence
+  is necessary for a defensible DGX benchmark while large-case execution
+  remains outside Stage 7.

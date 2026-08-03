@@ -16,7 +16,7 @@
       "passed": true
     },
     {
-      "detail": "config_sha256=8c614877391f65579f8e7075ce3d3787555c2c6da9ea775f252b7e1b73b6e789, executed_source_hashes=19, input_hashes_match=True",
+      "detail": "config_sha256=8c614877391f65579f8e7075ce3d3787555c2c6da9ea775f252b7e1b73b6e789, frozen_stage_6_commit=2a8e4936a66c7ea4dade4ca208419076d603b446, executed_source_hashes=19, input_hashes_match=True",
       "name": "embedded_configuration_and_input_hashes_match_versioned_sources",
       "passed": true
     },

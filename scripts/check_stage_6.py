@@ -11,6 +11,7 @@ import gzip
 import hashlib
 import json
 import math
+import subprocess
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,7 @@ DEFAULT_DCOPF_CONFIGS = (
     PROJECT_ROOT / "configs" / "dcopf" / "case5_base_stage_2.json",
     PROJECT_ROOT / "configs" / "dcopf" / "case5_synthetic_extension_stage_2.json",
 )
+FROZEN_STAGE_6_COMMIT = "2a8e4936a66c7ea4dade4ca208419076d603b446"
 
 EXPECTED_CASES = {
     "case5_base_t1": 1,
@@ -94,6 +96,49 @@ def _sha256(path: Path) -> str | None:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _git_output(*arguments: str) -> bytes | None:
+    """Return raw Git output, or ``None`` when the frozen object is unavailable."""
+
+    try:
+        completed = subprocess.run(
+            ["git", *arguments],
+            cwd=PROJECT_ROOT,
+            check=False,
+            capture_output=True,
+        )
+    except OSError:
+        return None
+    return completed.stdout if completed.returncode == 0 else None
+
+
+def _frozen_stage6_source_hashes() -> dict[str, str] | None:
+    """Hash the exact runner and package sources preserved by the Stage 6 commit."""
+
+    tree = _git_output(
+        "ls-tree",
+        "-r",
+        "--name-only",
+        FROZEN_STAGE_6_COMMIT,
+        "--",
+        "src/gpu_dcopf_hpr",
+    )
+    if tree is None:
+        return None
+    package_paths = sorted(
+        path
+        for path in tree.decode("utf-8").splitlines()
+        if path.startswith("src/gpu_dcopf_hpr/") and path.endswith(".py")
+    )
+    source_paths = ["scripts/run_stage_6.py", *package_paths]
+    hashes: dict[str, str] = {}
+    for path in source_paths:
+        blob = _git_output("show", f"{FROZEN_STAGE_6_COMMIT}:{path}")
+        if blob is None:
+            return None
+        hashes[path] = hashlib.sha256(blob).hexdigest()
+    return hashes
 
 
 def _load_json(path: Path) -> tuple[dict[str, Any], str | None]:
@@ -365,13 +410,7 @@ def _configuration_checks(
     dcopf_inputs = [_mapping(item) for item in _sequence(inputs.get("dcopf_configs"))]
     dcopf_hashes = {item.get("sha256") for item in dcopf_inputs}
     source_inputs = [_mapping(item) for item in _sequence(inputs.get("source_files"))]
-    expected_source_paths = (
-        PROJECT_ROOT / "scripts" / "run_stage_6.py",
-        *sorted((PROJECT_ROOT / "src" / "gpu_dcopf_hpr").glob("*.py")),
-    )
-    expected_source_hashes = {
-        path.relative_to(PROJECT_ROOT).as_posix(): _sha256(path) for path in expected_source_paths
-    }
+    expected_source_hashes = _frozen_stage6_source_hashes()
     recorded_source_hashes = {str(item.get("path")): item.get("sha256") for item in source_inputs}
     hashes_valid = (
         config_input.get("sha256") == _sha256(config_path)
@@ -379,8 +418,9 @@ def _configuration_checks(
         and requirement_input.get("sha256") == _sha256(DEFAULT_REQUIREMENTS)
         and dcopf_hashes == {_sha256(path) for path in DEFAULT_DCOPF_CONFIGS}
         and len(dcopf_inputs) == 2
+        and expected_source_hashes is not None
         and recorded_source_hashes == expected_source_hashes
-        and len(source_inputs) == len(expected_source_paths) == 19
+        and len(source_inputs) == len(recorded_source_hashes) == len(expected_source_hashes) == 19
     )
     add_check(
         checks,
@@ -388,6 +428,7 @@ def _configuration_checks(
         frozen and evidence.get("configuration") == config and hashes_valid,
         (
             f"config_sha256={_sha256(config_path)}, "
+            f"frozen_stage_6_commit={FROZEN_STAGE_6_COMMIT}, "
             f"executed_source_hashes={len(source_inputs)}, input_hashes_match={hashes_valid}"
         ),
     )

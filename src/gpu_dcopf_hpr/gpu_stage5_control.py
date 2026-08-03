@@ -37,6 +37,7 @@ from .stage5_control import (
     choose_restart_reasons,
     hprlp_sigma_update_from_scalars,
 )
+from .stage7_scaled_y1 import ScaledBlockArrowY1Solver
 
 
 @dataclass(slots=True)
@@ -213,15 +214,26 @@ def prepare_gpu_stage6_problem(
     backend: CuPyBackend | None = None,
     dtype: GPUPrecision = "float64",
     inequality_lambda: float | None = None,
+    scaled_structural_y1: ScaledBlockArrowY1Solver | None = None,
 ) -> GPUStage6Problem:
     """Upload the full Stage 5 scaled problem and its recovery factors once."""
 
     if preconditioner.source_lp is not original_lp:
         raise ValueError("preconditioner must be prepared from original_lp.")
     selected_backend = create_gpu_backend() if backend is None else backend
+    if (
+        scaled_structural_y1 is not None
+        and scaled_structural_y1.preconditioner is not preconditioner
+    ):
+        raise ValueError(
+            "scaled_structural_y1 must be prepared from the exact supplied preconditioner."
+        )
     workspace = prepare_gpu_sgs_hpr(
         preconditioner.scaled_lp,
-        equality_mode="scaled_direct",
+        equality_mode=(
+            "scaled_structural" if scaled_structural_y1 is not None else "scaled_direct"
+        ),
+        scaled_structural_y1=scaled_structural_y1,
         inequality_lambda=inequality_lambda,
         backend=selected_backend,
         dtype=dtype,

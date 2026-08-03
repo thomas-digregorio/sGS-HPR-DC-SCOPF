@@ -1,0 +1,14 @@
+# Stage 7 reuses the validated Stage 6 DGX Spark environment without mutation.
+# CPython 3.12, Linux aarch64, NVIDIA driver 580.173.02.
+# Recorded APIs: CUDA driver 13.0 and CuPy CUDA runtime 13.2; toolkit 13.0.3.
+cupy-cuda13x==14.1.1
+cuda-pathfinder==1.6.0
+numpy==2.3.5
+scipy==1.16.3
+pytest==8.4.2
+ruff==0.16.0
+iniconfig==2.3.0
+packaging==26.2
+pluggy==1.6.0
+Pygments==2.20.0
+pip==26.2
