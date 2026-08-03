@@ -24,9 +24,10 @@ DEFAULT_CONFIG = PROJECT_ROOT / "configs" / "benchmarks" / "stage_7_small_medium
 DEFAULT_EVIDENCE = PROJECT_ROOT / "results" / "raw" / "stage_7" / "stage_7_validation.json"
 DEFAULT_OUTPUT = PROJECT_ROOT / "results" / "raw" / "stage_7" / "stage_7_checks.json"
 
-FROZEN_CONFIG_SHA256 = "e539f34328f4b8bc28538113c42d68123a785021090a72dfab637a1e99280a94"
+FROZEN_CONFIG_SHA256 = "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062"
 FROZEN_REQUIREMENTS_SHA256 = "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
 POLICY_FINGERPRINT = "e6911ef7e5ccab32a8392c917b892eeabbed3df16a44b1e342cd8ef664274dcf"
+CANONICAL_GIT_BLOB_SHA256_DEFINITION = "SHA-256 of canonical Git blob bytes with LF text content"
 TIMING_BOUNDARIES = {
     "highs": "SciPy linprog call including HiGHS interface/model setup and solve",
     "cpu_fp64_sgs_hpr": (
@@ -96,17 +97,17 @@ EXPECTED_ROWS: dict[str, tuple[int, int, int, int, bool]] = {
 PROVENANCE = {
     "data/raw/matpower/stage7/case1354pegase.m": (
         "case1354pegase",
-        "9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103",
+        "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
         "d6ede376f35af472b45b93ae771209c483427c26",
     ),
     "data/raw/matpower/stage7/case2868rte.m": (
         "case2868rte",
-        "07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101",
+        "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
         "0223116b52b3bd10786ccd61a808c440826aacdc",
     ),
     "data/raw/matpower/stage7/case9241pegase.m": (
         "case9241pegase",
-        "d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01",
+        "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
         "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
     ),
 }
@@ -252,6 +253,11 @@ def _git_blob_sha256(commit: str, path: str) -> str | None:
     return None if value is None else _sha256_bytes(value)
 
 
+def _git_blob_oid(commit: str, path: str) -> str | None:
+    value = _git_bytes("rev-parse", f"{commit}:{path}")
+    return None if value is None else value.decode().strip()
+
+
 def _git_tree_paths(commit: str) -> list[str] | None:
     value = _git_bytes("ls-tree", "-r", "--name-only", commit, "--", "src/gpu_dcopf_hpr")
     if value is None:
@@ -260,6 +266,63 @@ def _git_tree_paths(commit: str) -> list[str] | None:
         path
         for path in value.decode("utf-8").splitlines()
         if path.startswith("src/gpu_dcopf_hpr/") and path.endswith(".py")
+    )
+
+
+def _git_worktree_identity(
+    path: str,
+) -> tuple[str | None, str | None, str | None]:
+    """Return the filtered blob, tracked diff, and path-specific status."""
+
+    blob = _git_bytes("hash-object", f"--path={path}", path)
+    difference = _git_bytes(
+        "diff",
+        "--name-only",
+        "--",
+        path,
+    )
+    status = _git_bytes(
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=no",
+        "--",
+        path,
+    )
+    return (
+        None if blob is None else blob.decode().strip(),
+        None if difference is None else difference.decode("utf-8", errors="replace").strip(),
+        None if status is None else status.decode("utf-8", errors="replace").strip(),
+    )
+
+
+def _portable_identity_valid(
+    value: Any,
+    *,
+    expected_blob: str | None,
+    expected_sha256: str,
+) -> bool:
+    identity = _mapping(value)
+    return (
+        expected_blob is not None
+        and identity.get("sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
+        and identity.get("expected_git_blob") == expected_blob
+        and identity.get("head_git_blob") == expected_blob
+        and identity.get("filtered_worktree_git_blob") == expected_blob
+        and identity.get("worktree_status") == ""
+        and identity.get("worktree_diff") == ""
+        and re.fullmatch(r"[0-9a-f]{64}", str(identity.get("worktree_raw_sha256", ""))) is not None
+        and identity.get("canonical_git_blob_sha256") == expected_sha256
+        and _integer(identity.get("canonical_git_blob_size_bytes"), minimum=1)
+        and identity.get("checks")
+        == {
+            "head_blob_matches": True,
+            "filtered_worktree_blob_matches": True,
+            "worktree_clean": True,
+            "canonical_blob_read": True,
+            "canonical_blob_uses_lf_text": True,
+        }
+        and identity.get("errors") == []
+        and identity.get("passed") is True
     )
 
 
@@ -337,6 +400,7 @@ def _frozen_configuration_valid(config: dict[str, Any]) -> bool:
         and source.get("tag_object") == "3f8ecfdbc79b07697d6b45f8d868ac1c2d27f788"
         and source.get("resolved_commit") == "1a828c7af590714499284e36ee9c81273388c594"
         and source.get("release_doi") == "10.5281/zenodo.15871662"
+        and source.get("sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
     )
 
 
@@ -346,18 +410,42 @@ def _configuration_checks(
     evidence: dict[str, Any],
     config_path: Path,
 ) -> None:
-    actual_hash = _sha256(config_path)
+    config_relative = config_path.resolve().relative_to(PROJECT_ROOT.resolve()).as_posix()
+    environment = _mapping(evidence.get("environment"))
+    commit = _mapping(environment.get("git")).get("head")
+    commit_valid = isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
+    executed_blob = _git_blob_oid(str(commit), config_relative) if commit_valid else None
+    actual_hash = _git_blob_sha256(str(commit), config_relative) if commit_valid else None
+    filtered_blob, worktree_diff, worktree_status = _git_worktree_identity(config_relative)
     embedded = _mapping(evidence.get("configuration"))
     validation = _mapping(evidence.get("configuration_validation"))
+    provenance_config = _mapping(_mapping(evidence.get("provenance")).get("config"))
     add_check(
         checks,
         "frozen_configuration_hash_content_and_thresholds",
         bool(config)
+        and commit_valid
         and actual_hash == FROZEN_CONFIG_SHA256
+        and provenance_config.get("sha256") == FROZEN_CONFIG_SHA256
+        and provenance_config.get("sha256_matches_frozen") is True
+        and provenance_config.get("sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
+        and provenance_config.get("passed") is True
+        and _portable_identity_valid(
+            provenance_config.get("portable_identity"),
+            expected_blob=executed_blob,
+            expected_sha256=FROZEN_CONFIG_SHA256,
+        )
+        and filtered_blob == executed_blob
+        and worktree_diff == ""
+        and worktree_status == ""
         and embedded == config
         and _frozen_configuration_valid(config)
         and validation == {"errors": [], "passed": True},
-        f"sha256={actual_hash}, expected={FROZEN_CONFIG_SHA256}",
+        (
+            f"canonical_sha256={actual_hash}, expected={FROZEN_CONFIG_SHA256}, "
+            f"commit_blob={executed_blob}, worktree_blob={filtered_blob}, "
+            f"worktree_clean={worktree_diff == ''}"
+        ),
     )
 
     policy = _mapping(evidence.get("policy_contract"))
@@ -372,8 +460,16 @@ def _configuration_checks(
     )
 
     requirements_path = PROJECT_ROOT / "environment" / "dgx_stage7_requirements.txt"
+    requirements_relative = requirements_path.relative_to(PROJECT_ROOT).as_posix()
     requirements = _mapping(evidence.get("requirements_freeze"))
     parsed_pins = _requirements_pins(requirements_path)
+    requirements_blob = _git_blob_oid(str(commit), requirements_relative) if commit_valid else None
+    requirements_sha = (
+        _git_blob_sha256(str(commit), requirements_relative) if commit_valid else None
+    )
+    requirements_worktree_blob, requirements_diff, requirements_status = _git_worktree_identity(
+        requirements_relative
+    )
     critical_names = ("cupy-cuda13x", "numpy", "scipy")
     expected_pins = (
         {}
@@ -383,9 +479,18 @@ def _configuration_checks(
     add_check(
         checks,
         "frozen_dgx_environment_requirements",
-        _sha256(requirements_path) == FROZEN_REQUIREMENTS_SHA256
+        requirements_sha == FROZEN_REQUIREMENTS_SHA256
         and requirements.get("path") == "environment/dgx_stage7_requirements.txt"
         and requirements.get("sha256") == FROZEN_REQUIREMENTS_SHA256
+        and requirements.get("sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
+        and _portable_identity_valid(
+            requirements.get("portable_identity"),
+            expected_blob=requirements_blob,
+            expected_sha256=FROZEN_REQUIREMENTS_SHA256,
+        )
+        and requirements_worktree_blob == requirements_blob
+        and requirements_diff == ""
+        and requirements_status == ""
         and requirements.get("expected_pins") == expected_pins
         and all(
             _mapping(requirements.get("pins")).get(key) == value
@@ -393,7 +498,11 @@ def _configuration_checks(
         )
         and requirements.get("errors") == []
         and requirements.get("passed") is True,
-        f"sha256={_sha256(requirements_path)}",
+        (
+            f"canonical_sha256={requirements_sha}, commit_blob={requirements_blob}, "
+            f"worktree_blob={requirements_worktree_blob}, "
+            f"worktree_clean={requirements_diff == ''}"
+        ),
     )
 
     environment = _mapping(evidence.get("environment"))
@@ -438,7 +547,9 @@ def _provenance_checks(
     )
     for path, (case_name, expected_sha, expected_blob) in PROVENANCE.items():
         row = rows_by_path.get(path, {})
-        local_path = PROJECT_ROOT / path
+        filtered_blob, worktree_diff, worktree_status = _git_worktree_identity(path)
+        commit = _mapping(_mapping(evidence.get("environment")).get("git")).get("head")
+        executed_blob = _git_blob_oid(str(commit), path) if isinstance(commit, str) else None
         valid = valid and (
             row.get("case_name") == case_name
             and row.get("inside_project") is True
@@ -450,7 +561,17 @@ def _provenance_checks(
             and row.get("actual_git_blob") == expected_blob
             and row.get("git_blob_matches") is True
             and row.get("passed") is True
-            and _sha256(local_path) == expected_sha
+            and _portable_identity_valid(
+                row.get("portable_identity"),
+                expected_blob=expected_blob,
+                expected_sha256=expected_sha,
+            )
+            and isinstance(commit, str)
+            and executed_blob == expected_blob
+            and _git_blob_sha256(commit, path) == expected_sha
+            and filtered_blob == expected_blob
+            and worktree_diff == ""
+            and worktree_status == ""
         )
     add_check(
         checks,
@@ -465,7 +586,6 @@ def _source_checks(checks: list[dict[str, Any]], evidence: dict[str, Any]) -> No
     git = _mapping(environment.get("git"))
     commit = git.get("head")
     commit_valid = isinstance(commit, str) and re.fullmatch(r"[0-9a-f]{40}", commit) is not None
-    clean = git.get("status_porcelain") == ""
     manifest = [_mapping(row) for row in _sequence(evidence.get("source_manifest"))]
     manifest_map = {str(row.get("path")): row for row in manifest}
     tree_paths = _git_tree_paths(commit) if commit_valid else None
@@ -481,22 +601,33 @@ def _source_checks(checks: list[dict[str, Any]], evidence: dict[str, Any]) -> No
     )
     valid = (
         commit_valid
-        and clean
         and expected_paths is not None
         and len(manifest) == len(manifest_map)
         and set(manifest_map) == expected_paths
     )
     if valid:
-        valid = all(
-            re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", ""))) is not None
-            and row.get("sha256") == _git_blob_sha256(str(commit), path)
-            for path, row in manifest_map.items()
-        )
+        for path, row in manifest_map.items():
+            executed_blob = _git_blob_oid(str(commit), path)
+            executed_sha = _git_blob_sha256(str(commit), path)
+            filtered_blob, worktree_diff, worktree_status = _git_worktree_identity(path)
+            valid = valid and (
+                re.fullmatch(r"[0-9a-f]{64}", str(row.get("sha256", ""))) is not None
+                and row.get("sha256") == executed_sha
+                and row.get("git_blob") == executed_blob
+                and row.get("sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
+                and row.get("passed") is True
+                and filtered_blob == executed_blob
+                and worktree_diff == ""
+                and worktree_status == ""
+            )
     add_check(
         checks,
         "source_manifest_matches_exact_clean_executed_git_commit",
         valid,
-        f"commit={commit}, clean={clean}, source_count={len(manifest)}",
+        (
+            f"commit={commit}, execution_source_paths_clean={valid}, "
+            f"source_count={len(manifest)}, repository_status={git.get('status_porcelain')!r}"
+        ),
     )
 
     provenance = _mapping(evidence.get("provenance"))
@@ -1175,6 +1306,7 @@ def _case_checks(
             and construction.get("policy_fingerprint") == POLICY_FINGERPRINT
             and construction.get("input_sha256")
             == next(value[1] for value in PROVENANCE.values() if value[0] == case_name)
+            and construction.get("input_sha256_definition") == CANONICAL_GIT_BLOB_SHA256_DEFINITION
             and re.fullmatch(
                 r"[0-9a-f]{64}", str(_mapping(construction.get("lp_fingerprint")).get("sha256", ""))
             )

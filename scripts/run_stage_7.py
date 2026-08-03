@@ -88,6 +88,9 @@ DEFAULT_REQUIREMENTS = PROJECT_ROOT / "environment" / "dgx_stage7_requirements.t
 DEFAULT_OUTPUT = PROJECT_ROOT / "results" / "raw" / "stage_7"
 PARTIAL_NAME = "stage_7_validation.partial.json"
 FINAL_NAME = "stage_7_validation.json"
+CANONICAL_GIT_BLOB_SHA256_DEFINITION = "SHA-256 of canonical Git blob bytes with LF text content"
+FROZEN_CONFIG_SHA256 = "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062"
+FROZEN_REQUIREMENTS_SHA256 = "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
 
 EXECUTABLE_CASE_COUNT = 6
 TABLE_ROW_COUNT = 18
@@ -225,6 +228,109 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _git_bytes(*arguments: str) -> tuple[bytes | None, str | None]:
+    """Run one read-only Git command and retain an auditable failure reason."""
+
+    try:
+        result = subprocess.run(
+            ["git", *arguments],
+            cwd=PROJECT_ROOT,
+            capture_output=True,
+            check=False,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        return None, f"{type(error).__name__}: {error}"
+    if result.returncode != 0:
+        message = result.stderr.decode("utf-8", errors="replace").strip()
+        return None, message or f"git {' '.join(arguments)} exited {result.returncode}"
+    return result.stdout, None
+
+
+def _canonical_git_blob_identity(
+    relative: Path,
+    path: Path,
+    *,
+    expected_blob: str | None = None,
+) -> dict[str, Any]:
+    """Hash canonical Git blob bytes while proving the worktree is equivalent.
+
+    Git's path-aware ``hash-object`` applies the repository's text conversion,
+    so an LF checkout and an equivalent CRLF checkout resolve to the same blob.
+    The committed blob, filtered worktree blob, and configured upstream blob
+    must all agree before the canonical SHA-256 is accepted.
+    """
+
+    relative_text = relative.as_posix()
+    errors: list[str] = []
+    head_bytes, head_error = _git_bytes("rev-parse", f"HEAD:{relative_text}")
+    head_blob = None if head_bytes is None else head_bytes.decode().strip()
+    canonical_blob = expected_blob or head_blob
+    worktree_bytes, worktree_error = _git_bytes(
+        "hash-object",
+        f"--path={relative_text}",
+        str(path),
+    )
+    status_bytes, status_error = _git_bytes(
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=no",
+        "--",
+        relative_text,
+    )
+    diff_bytes, diff_error = _git_bytes(
+        "diff",
+        "--name-only",
+        "--",
+        relative_text,
+    )
+    if canonical_blob is None:
+        blob_bytes, blob_error = None, "the canonical Git blob is unavailable"
+    else:
+        blob_bytes, blob_error = _git_bytes("cat-file", "blob", canonical_blob)
+    for label, error in (
+        ("HEAD blob", head_error),
+        ("filtered worktree blob", worktree_error),
+        ("worktree status", status_error),
+        ("worktree diff", diff_error),
+        ("canonical blob read", blob_error),
+    ):
+        if error is not None:
+            errors.append(f"{label}: {error}")
+
+    worktree_blob = None if worktree_bytes is None else worktree_bytes.decode().strip()
+    worktree_status = (
+        None if status_bytes is None else status_bytes.decode("utf-8", errors="replace").strip()
+    )
+    worktree_diff = (
+        None if diff_bytes is None else diff_bytes.decode("utf-8", errors="replace").strip()
+    )
+    canonical_sha256 = None if blob_bytes is None else hashlib.sha256(blob_bytes).hexdigest()
+    canonical_lf_text = blob_bytes is not None and b"\r" not in blob_bytes
+    checks = {
+        "head_blob_matches": head_blob == canonical_blob,
+        "filtered_worktree_blob_matches": worktree_blob == canonical_blob,
+        "worktree_clean": worktree_status == "" and worktree_diff == "",
+        "canonical_blob_read": blob_bytes is not None,
+        "canonical_blob_uses_lf_text": canonical_lf_text,
+    }
+    errors.extend(f"{name} check failed" for name, passed in checks.items() if not passed)
+    return {
+        "sha256_definition": CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+        "expected_git_blob": canonical_blob,
+        "head_git_blob": head_blob,
+        "filtered_worktree_git_blob": worktree_blob,
+        "worktree_status": worktree_status,
+        "worktree_diff": worktree_diff,
+        "worktree_raw_sha256": _sha256(path) if path.is_file() else None,
+        "canonical_git_blob_sha256": canonical_sha256,
+        "canonical_git_blob_size_bytes": None if blob_bytes is None else len(blob_bytes),
+        "checks": checks,
+        "errors": errors,
+        "passed": not errors and all(checks.values()),
+    }
 
 
 def _hash_array(values: Any) -> str:
@@ -423,6 +529,8 @@ def _requirements_freeze(path: Path = DEFAULT_REQUIREMENTS) -> dict[str, Any]:
             "errors": ["Stage 7 DGX requirements file is missing"],
             "passed": False,
         }
+    relative = path.resolve().relative_to(PROJECT_ROOT.resolve())
+    identity = _canonical_git_blob_identity(relative, path.resolve())
     pins: dict[str, str] = {}
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
@@ -435,9 +543,16 @@ def _requirements_freeze(path: Path = DEFAULT_REQUIREMENTS) -> dict[str, Any]:
         for name, expected in EXPECTED_REQUIREMENT_PINS.items()
         if pins.get(name) != expected
     ]
+    if identity["canonical_git_blob_sha256"] != FROZEN_REQUIREMENTS_SHA256:
+        errors.append(
+            f"Stage 7 DGX requirements canonical SHA-256 drifted from {FROZEN_REQUIREMENTS_SHA256}"
+        )
+    errors.extend(str(error) for error in identity["errors"])
     return {
-        "path": path.relative_to(PROJECT_ROOT).as_posix(),
-        "sha256": _sha256(path),
+        "path": relative.as_posix(),
+        "sha256": identity["canonical_git_blob_sha256"],
+        "sha256_definition": CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+        "portable_identity": identity,
         "pins": pins,
         "expected_pins": EXPECTED_REQUIREMENT_PINS,
         "errors": errors,
@@ -455,6 +570,9 @@ def _validate_stage7_config(config: Mapping[str, Any]) -> list[str]:
         errors.append("Stage 7 must remain a structural reproduction")
     if config.get("precision") != "FP64":
         errors.append("Stage 7 execution precision must remain FP64")
+    source = config.get("public_network_source", {})
+    if source.get("sha256_definition") != CANONICAL_GIT_BLOB_SHA256_DEFINITION:
+        errors.append("public_network_source.sha256_definition drifted from the portable contract")
 
     reconstruction = config.get("reconstruction_protocol", {})
     expected_reconstruction = {
@@ -625,28 +743,51 @@ def _policy_contract(config: Mapping[str, Any]) -> dict[str, Any]:
 def _verify_provenance(config: Mapping[str, Any], config_path: Path) -> dict[str, Any]:
     records: list[dict[str, Any]] = []
     errors: list[str] = []
+    config_relative = config_path.resolve().relative_to(PROJECT_ROOT.resolve())
+    config_identity = _canonical_git_blob_identity(config_relative, config_path.resolve())
+    config_record = {
+        "path": str(config_path),
+        "sha256": config_identity["canonical_git_blob_sha256"],
+        "sha256_definition": CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+        "portable_identity": config_identity,
+        "sha256_matches_frozen": (
+            config_identity["canonical_git_blob_sha256"] == FROZEN_CONFIG_SHA256
+        ),
+        "passed": bool(
+            config_identity["passed"]
+            and config_identity["canonical_git_blob_sha256"] == FROZEN_CONFIG_SHA256
+        ),
+    }
+    if not config_record["passed"]:
+        details = list(config_identity["errors"])
+        if not config_record["sha256_matches_frozen"]:
+            details.append(
+                "canonical SHA-256 does not match the frozen Stage 7 configuration "
+                f"{FROZEN_CONFIG_SHA256}"
+            )
+        errors.append("frozen config is not the clean canonical Git blob: " + "; ".join(details))
     for item in config.get("public_network_source", {}).get("files", []):
         relative = Path(str(item.get("path", "")))
         path = (PROJECT_ROOT / relative).resolve()
         inside = path.is_relative_to(PROJECT_ROOT.resolve())
         exists = inside and path.is_file()
-        actual_sha = _sha256(path) if exists else None
         expected_sha = item.get("sha256")
+        expected_blob = str(item.get("git_blob", ""))
+        identity = (
+            _canonical_git_blob_identity(relative, path, expected_blob=expected_blob)
+            if exists
+            else {
+                "canonical_git_blob_sha256": None,
+                "filtered_worktree_git_blob": None,
+                "checks": {},
+                "errors": ["input path is absent or outside the project"],
+                "passed": False,
+            }
+        )
+        actual_sha = identity["canonical_git_blob_sha256"]
         sha_matches = actual_sha == expected_sha
-        blob = None
-        if exists:
-            try:
-                blob = subprocess.run(
-                    ["git", "hash-object", str(path)],
-                    cwd=PROJECT_ROOT,
-                    capture_output=True,
-                    text=True,
-                    check=True,
-                    timeout=20,
-                ).stdout.strip()
-            except (OSError, subprocess.SubprocessError):
-                blob = None
-        blob_matches = blob == item.get("git_blob")
+        blob = identity["filtered_worktree_git_blob"]
+        blob_matches = blob == expected_blob
         record = {
             "case_name": item.get("case"),
             "path": relative.as_posix(),
@@ -658,17 +799,23 @@ def _verify_provenance(config: Mapping[str, Any], config_path: Path) -> dict[str
             "expected_git_blob": item.get("git_blob"),
             "actual_git_blob": blob,
             "git_blob_matches": blob_matches,
-            "passed": bool(inside and exists and sha_matches and blob_matches),
+            "portable_identity": identity,
+            "passed": bool(
+                inside and exists and identity["passed"] and sha_matches and blob_matches
+            ),
         }
         if not record["passed"]:
-            errors.append(f"provenance mismatch for {relative.as_posix()}")
+            detail = "; ".join(identity.get("errors", []))
+            errors.append(
+                f"provenance mismatch for {relative.as_posix()}" + (f": {detail}" if detail else "")
+            )
         records.append(record)
     return {
-        "config": {"path": str(config_path), "sha256": _sha256(config_path)},
+        "config": config_record,
         "upstream": dict(config.get("public_network_source", {})),
         "files": records,
         "errors": errors,
-        "passed": not errors and len(records) == 3,
+        "passed": not errors and config_record["passed"] and len(records) == 3,
     }
 
 
@@ -1699,7 +1846,12 @@ def _run_case(
         "dimensions": model.dimension_summary(),
         "lp_fingerprint": _lp_fingerprint(model),
         "policy_fingerprint": model.fleet.policy_fingerprint,
-        "input_sha256": _sha256(network_path),
+        "input_sha256": next(
+            str(item["sha256"])
+            for item in config["public_network_source"]["files"]
+            if item["case"] == key.case_name
+        ),
+        "input_sha256_definition": config["public_network_source"]["sha256_definition"],
     }
     expected_nnz = preflight.row.published_nnz
     actual_nnz = int(model.lp.A1.nnz + model.lp.A2.nnz)
@@ -2099,23 +2251,30 @@ def _source_manifest(config_path: Path) -> list[dict[str, Any]]:
         DEFAULT_REQUIREMENTS,
         *sorted((SOURCE_ROOT / "gpu_dcopf_hpr").glob("*.py")),
     ]
-    return [
-        {
-            "path": path.relative_to(PROJECT_ROOT).as_posix(),
-            "sha256": _sha256(path),
-        }
-        for path in paths
-        if path.is_file()
-    ]
+    manifest: list[dict[str, Any]] = []
+    for path in paths:
+        if not path.is_file():
+            continue
+        relative = path.relative_to(PROJECT_ROOT).as_posix()
+        identity = _canonical_git_blob_identity(Path(relative), path)
+        manifest.append(
+            {
+                "path": relative,
+                "git_blob": identity["expected_git_blob"],
+                "sha256": identity["canonical_git_blob_sha256"],
+                "sha256_definition": CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+                "passed": identity["passed"],
+            }
+        )
+    return manifest
 
 
 def _run_fingerprint(
-    config_path: Path,
     provenance: Mapping[str, Any],
     sources: Sequence[Mapping[str, Any]],
 ) -> str:
     payload = {
-        "config_sha256": _sha256(config_path),
+        "config_sha256": provenance["config"]["sha256"],
         "inputs": [
             {"path": row["path"], "sha256": row["actual_sha256"]} for row in provenance["files"]
         ],
@@ -2151,7 +2310,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     provenance = _verify_provenance(config, config_path)
     policy = _policy_contract(config)
     sources = _source_manifest(config_path)
-    fingerprint = _run_fingerprint(config_path, provenance, sources)
+    if any(row.get("passed") is not True for row in sources):
+        errors.append("the canonical source manifest does not match the executed worktree")
+    fingerprint = _run_fingerprint(provenance, sources)
     resumed = _compatible_partial(partial_path, fingerprint) if args.resume else None
     evidence: dict[str, Any] = resumed or {
         "schema_version": "1.0",

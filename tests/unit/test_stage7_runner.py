@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
+import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 
+import scripts.run_stage_7 as stage7_runner
 from gpu_dcopf_hpr.dcopf_model import build_dcopf_model, load_dcopf_config
 from gpu_dcopf_hpr.network_data import load_matpower_case
 from gpu_dcopf_hpr.preconditioning import precondition_lp
@@ -23,6 +27,7 @@ from scripts.run_stage_7 import (
     _atomic_write_json,
     _attempt,
     _audit_gpu_solver_transfers,
+    _canonical_git_blob_identity,
     _compatible_partial,
     _fresh_case_for_retry,
     _memory_guard,
@@ -31,10 +36,12 @@ from scripts.run_stage_7 import (
     _run_timed_track,
     _solve_cpu_hpr,
     _solve_highs,
+    _source_manifest,
     _symbolic_ledger,
     _timing_statistics,
     _transfer_delta,
     _validate_stage7_config,
+    _verify_provenance,
 )
 
 
@@ -131,6 +138,8 @@ def test_stage7_requirements_freeze_contains_execution_critical_pins() -> None:
     assert freeze["pins"]["numpy"] == "2.3.5"
     assert freeze["pins"]["scipy"] == "1.16.3"
     assert len(freeze["sha256"]) == 64
+    assert freeze["sha256"] == stage7_runner.FROZEN_REQUIREMENTS_SHA256
+    assert freeze["portable_identity"]["passed"] is True
 
 
 def test_memory_guard_is_explicit_and_fail_closed() -> None:
@@ -240,6 +249,214 @@ def test_atomic_json_and_resume_require_matching_fingerprint(tmp_path: Path) -> 
     }
     assert _compatible_partial(path, "different") is None
     assert list(tmp_path.glob("*.tmp")) == []
+
+
+def test_canonical_git_blob_identity_is_portable_across_lf_and_crlf(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "portable-git"
+    repository.mkdir()
+
+    def git(*arguments: str) -> bytes:
+        return subprocess.check_output(["git", *arguments], cwd=repository)
+
+    git("init", "--quiet")
+    git("config", "user.email", "stage7-test@example.invalid")
+    git("config", "user.name", "Stage 7 test")
+    git("config", "core.autocrlf", "true")
+    (repository / ".gitattributes").write_text("*.m text\n", encoding="utf-8")
+    relative = Path("case.m")
+    path = repository / relative
+    lf_content = b"function mpc = case_test\nmpc.version = '2';\nend\n"
+    crlf_content = lf_content.replace(b"\n", b"\r\n")
+    path.write_bytes(lf_content)
+    git("add", ".gitattributes", relative.as_posix())
+    git("commit", "--quiet", "-m", "fixture")
+    expected_blob = git("rev-parse", f"HEAD:{relative.as_posix()}").decode().strip()
+    canonical_bytes = git("cat-file", "blob", expected_blob)
+    expected_sha256 = hashlib.sha256(canonical_bytes).hexdigest()
+    monkeypatch.setattr(stage7_runner, "PROJECT_ROOT", repository)
+
+    lf_identity = _canonical_git_blob_identity(relative, path, expected_blob=expected_blob)
+    path.write_bytes(crlf_content)
+    git("add", relative.as_posix())
+    crlf_identity = _canonical_git_blob_identity(relative, path, expected_blob=expected_blob)
+
+    assert hashlib.sha256(lf_content).hexdigest() != hashlib.sha256(crlf_content).hexdigest()
+    assert lf_identity["passed"] is True
+    assert crlf_identity["passed"] is True
+    assert lf_identity["canonical_git_blob_sha256"] == expected_sha256
+    assert crlf_identity["canonical_git_blob_sha256"] == expected_sha256
+    assert lf_identity["worktree_raw_sha256"] != crlf_identity["worktree_raw_sha256"]
+
+
+def test_canonical_git_blob_identity_rejects_wrong_or_dirty_worktree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "dirty-git"
+    repository.mkdir()
+
+    def git(*arguments: str) -> bytes:
+        return subprocess.check_output(["git", *arguments], cwd=repository)
+
+    git("init", "--quiet")
+    git("config", "user.email", "stage7-test@example.invalid")
+    git("config", "user.name", "Stage 7 test")
+    (repository / ".gitattributes").write_text("*.m text eol=lf\n", encoding="utf-8")
+    relative = Path("case.m")
+    path = repository / relative
+    path.write_text("function mpc = case_test\nend\n", encoding="utf-8")
+    git("add", ".gitattributes", relative.as_posix())
+    git("commit", "--quiet", "-m", "fixture")
+    expected_blob = git("rev-parse", f"HEAD:{relative.as_posix()}").decode().strip()
+    monkeypatch.setattr(stage7_runner, "PROJECT_ROOT", repository)
+
+    path.write_text("function mpc = tampered_case\nend\n", encoding="utf-8")
+    dirty = _canonical_git_blob_identity(relative, path, expected_blob=expected_blob)
+    wrong_blob = _canonical_git_blob_identity(relative, path, expected_blob="0" * 40)
+    path.write_text("function mpc = case_test\nend\n", encoding="utf-8")
+    git("add", relative.as_posix())
+    git("update-index", "--chmod=+x", relative.as_posix())
+    staged_mode = _canonical_git_blob_identity(relative, path, expected_blob=expected_blob)
+
+    assert dirty["passed"] is False
+    assert dirty["checks"]["filtered_worktree_blob_matches"] is False
+    assert dirty["checks"]["worktree_clean"] is False
+    assert wrong_blob["passed"] is False
+    assert wrong_blob["checks"]["head_blob_matches"] is False
+    assert wrong_blob["errors"]
+    assert staged_mode["passed"] is False
+    assert staged_mode["checks"]["head_blob_matches"] is True
+    assert staged_mode["checks"]["filtered_worktree_blob_matches"] is True
+    assert staged_mode["checks"]["worktree_clean"] is False
+    assert staged_mode["worktree_status"]
+
+
+def test_frozen_config_hash_rejects_clean_committed_extra_field(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "config-git"
+    repository.mkdir()
+
+    def git(*arguments: str) -> bytes:
+        return subprocess.check_output(["git", *arguments], cwd=repository)
+
+    git("init", "--quiet")
+    git("config", "user.email", "stage7-test@example.invalid")
+    git("config", "user.name", "Stage 7 test")
+    git("config", "core.autocrlf", "false")
+    relative = Path("configs/benchmarks/stage_7_small_medium.json")
+    path = repository / relative
+    path.parent.mkdir(parents=True)
+    original = {"public_network_source": {"files": []}}
+    path.write_bytes((json.dumps(original) + "\n").encode())
+    git("add", relative.as_posix())
+    git("commit", "--quiet", "-m", "frozen config")
+    frozen_sha = hashlib.sha256(git("show", f"HEAD:{relative.as_posix()}")).hexdigest()
+    monkeypatch.setattr(stage7_runner, "PROJECT_ROOT", repository)
+    monkeypatch.setattr(stage7_runner, "FROZEN_CONFIG_SHA256", frozen_sha)
+
+    initial = _verify_provenance(original, path)
+    changed = {**original, "unreviewed_extra_field": True}
+    path.write_bytes((json.dumps(changed) + "\n").encode())
+    git("add", relative.as_posix())
+    git("commit", "--quiet", "-m", "drift config")
+    drifted = _verify_provenance(changed, path)
+
+    assert initial["config"]["passed"] is True
+    assert initial["config"]["sha256_matches_frozen"] is True
+    assert drifted["config"]["portable_identity"]["passed"] is True
+    assert drifted["config"]["sha256_matches_frozen"] is False
+    assert drifted["config"]["passed"] is False
+    assert any("canonical SHA-256" in error for error in drifted["errors"])
+
+
+def test_requirements_hash_rejects_clean_committed_comment_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "requirements-git"
+    repository.mkdir()
+
+    def git(*arguments: str) -> bytes:
+        return subprocess.check_output(["git", *arguments], cwd=repository)
+
+    git("init", "--quiet")
+    git("config", "user.email", "stage7-test@example.invalid")
+    git("config", "user.name", "Stage 7 test")
+    git("config", "core.autocrlf", "false")
+    relative = Path("environment/dgx_stage7_requirements.txt")
+    path = repository / relative
+    path.parent.mkdir(parents=True)
+    content = "cupy-cuda13x==14.1.1\nnumpy==2.3.5\nscipy==1.16.3\n"
+    path.write_bytes(content.encode())
+    git("add", relative.as_posix())
+    git("commit", "--quiet", "-m", "frozen requirements")
+    frozen_sha = hashlib.sha256(git("show", f"HEAD:{relative.as_posix()}")).hexdigest()
+    monkeypatch.setattr(stage7_runner, "PROJECT_ROOT", repository)
+    monkeypatch.setattr(stage7_runner, "FROZEN_REQUIREMENTS_SHA256", frozen_sha)
+
+    initial = _requirements_freeze(path)
+    path.write_bytes((content + "# unreviewed comment\n").encode())
+    git("add", relative.as_posix())
+    git("commit", "--quiet", "-m", "drift requirements")
+    drifted = _requirements_freeze(path)
+
+    assert initial["passed"] is True
+    assert drifted["portable_identity"]["passed"] is True
+    assert drifted["pins"] == initial["pins"]
+    assert drifted["passed"] is False
+    assert any("canonical SHA-256 drifted" in error for error in drifted["errors"])
+
+
+def test_in_repo_partial_remains_resume_compatible_with_scoped_source_cleanliness(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "resume-git"
+    repository.mkdir()
+
+    def git(*arguments: str) -> bytes:
+        return subprocess.check_output(["git", *arguments], cwd=repository)
+
+    git("init", "--quiet")
+    git("config", "user.email", "stage7-test@example.invalid")
+    git("config", "user.name", "Stage 7 test")
+    git("config", "core.autocrlf", "false")
+    runner_path = repository / "scripts/run_stage_7.py"
+    config_path = repository / "configs/benchmarks/stage_7_small_medium.json"
+    requirements_path = repository / "environment/dgx_stage7_requirements.txt"
+    package_path = repository / "src/gpu_dcopf_hpr/__init__.py"
+    for path, content in (
+        (runner_path, "# runner\n"),
+        (config_path, "{}\n"),
+        (requirements_path, "numpy==2.3.5\n"),
+        (package_path, "# package\n"),
+    ):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content.encode())
+    git("add", ".")
+    git("commit", "--quiet", "-m", "execution sources")
+    monkeypatch.setattr(stage7_runner, "PROJECT_ROOT", repository)
+    monkeypatch.setattr(stage7_runner, "SOURCE_ROOT", repository / "src")
+    monkeypatch.setattr(stage7_runner, "DEFAULT_REQUIREMENTS", requirements_path)
+    monkeypatch.setattr(stage7_runner, "__file__", str(runner_path))
+    partial_path = repository / "results/raw/stage_7/stage_7_validation.partial.json"
+    _atomic_write_json(partial_path, {"run_fingerprint": "resume-me", "cases": []})
+
+    manifest = _source_manifest(config_path)
+
+    assert _compatible_partial(partial_path, "resume-me") is not None
+    assert all(row["passed"] is True for row in manifest)
+    assert "?? results/" in git("status", "--porcelain=v1").decode()
+    runner_path.write_bytes(b"# tampered runner\n")
+    tampered = _source_manifest(config_path)
+    assert (
+        next(row for row in tampered if row["path"] == "scripts/run_stage_7.py")["passed"] is False
+    )
 
 
 def test_track_validates_before_warmup_and_five_measurements() -> None:

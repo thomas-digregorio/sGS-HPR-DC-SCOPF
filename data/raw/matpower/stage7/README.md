@@ -14,11 +14,17 @@ renewable, storage, reserve, or time-series data used by Wang et al.
 - Version DOI: <https://doi.org/10.5281/zenodo.15871662>
 - License: three-clause BSD; retained in `MATPOWER-LICENSE.txt`
 
-| Local file | Upstream Git blob | SHA-256 |
+| Local file | Upstream Git blob | Canonical Git-blob SHA-256 (LF bytes) |
 |---|---|---|
-| `case1354pegase.m` | `d6ede376f35af472b45b93ae771209c483427c26` | `9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103` |
-| `case2868rte.m` | `0223116b52b3bd10786ccd61a808c440826aacdc` | `07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101` |
-| `case9241pegase.m` | `cc9816b188ef38725c1e7c5b04cb9555b6b8a78e` | `d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01` |
+| `case1354pegase.m` | `d6ede376f35af472b45b93ae771209c483427c26` | `1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89` |
+| `case2868rte.m` | `0223116b52b3bd10786ccd61a808c440826aacdc` | `2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861` |
+| `case9241pegase.m` | `cc9816b188ef38725c1e7c5b04cb9555b6b8a78e` | `593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b` |
+
+The SHA-256 values are computed over the canonical Git blob bytes, whose text
+uses LF line endings. A Windows checkout may materialize CRLF working-tree
+bytes and therefore have a different raw-file SHA-256 without any source
+content drift; the recorded Git blob identity and canonical digest remain the
+portable provenance checks.
 
 No source case was edited. Stage 7 applies a separate, versioned structural
 reconstruction policy at model-construction time. In particular, the public

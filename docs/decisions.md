@@ -563,8 +563,10 @@ its original rationale should remain reviewable.
 - **Decision:** Use the official MATPOWER 8.1 files for case1354pegase,
   case2868rte, and case9241pegase at resolved commit
   `1a828c7af590714499284e36ee9c81273388c594`. Record the upstream Git blobs,
-  local SHA-256 hashes, release DOI, license, and retrieval date. Preserve the
-  files byte-for-byte.
+  SHA-256 hashes of their canonical LF Git-blob bytes, release DOI, license,
+  and retrieval date. Require the working-tree files to clean-filter back to
+  the recorded blobs instead of requiring platform-specific raw checkout
+  bytes to match.
 - **Reason:** A named case without a version and hash is not a reproducible
   benchmark input. Keeping transformations outside the source files separates
   public provenance from reconstruction choices.
@@ -577,8 +579,8 @@ its original rationale should remain reviewable.
   `configs/benchmarks/stage_7_small_medium.json`. It uses flat public load,
   deterministic generator-bus placement, fixed load-relative RG/ESS/reserve
   magnitudes, fixed storage efficiencies and duration, and deterministic ramp
-  proxies. The final pre-execution file SHA-256 is
-  `e539f34328f4b8bc28538113c42d68123a785021090a72dfab637a1e99280a94`;
+  proxies. The final pre-execution canonical Git-blob SHA-256 is
+  `06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062`;
   it also freezes the PTDF reference, numerical-zero threshold, selected-column
   batching, load definition, and zero-rate-line proof. Do not revise these
   choices in response to dimensions, convergence, or timing.
@@ -639,3 +641,18 @@ its original rationale should remain reviewable.
   repetition data, and it used different hardware. Repetition-level evidence
   is necessary for a defensible DGX benchmark while large-case execution
   remains outside Stage 7.
+
+## D-0055 - Make Stage 7 provenance portable across line endings
+
+- **Status:** accepted during Stage 7 preflight
+- **Stage:** 7
+- **Decision:** Define each MATPOWER input, frozen configuration, requirements,
+  and executable-source SHA-256 over canonical Git blob bytes with LF text
+  content. Verify both the recorded blob at the executed commit and the
+  clean-filtered working-tree blob, and fail closed on a dirty, missing, or
+  mismatched source path or source tree. Preserve the failed preflight evidence
+  produced before this correction as immutable historical evidence.
+- **Reason:** DGX preflight exposed that a raw Windows CRLF checkout has a
+  different byte hash from the same LF Git blob. The correction was made
+  before any model allocation or solver run, and it changes no Stage 7
+  construction, solver, stopping, precision, scaling, or timing policy.

@@ -12,6 +12,32 @@ import pytest
 
 from scripts import check_stage_7
 
+CONFIG_BLOB = "b" * 40
+REQUIREMENTS_BLOB = "c" * 40
+
+
+def _portable_identity(blob: str, sha256: str) -> dict[str, Any]:
+    return {
+        "sha256_definition": check_stage_7.CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+        "expected_git_blob": blob,
+        "head_git_blob": blob,
+        "filtered_worktree_git_blob": blob,
+        "worktree_status": "",
+        "worktree_diff": "",
+        "worktree_raw_sha256": sha256,
+        "canonical_git_blob_sha256": sha256,
+        "canonical_git_blob_size_bytes": 123,
+        "checks": {
+            "head_blob_matches": True,
+            "filtered_worktree_blob_matches": True,
+            "worktree_clean": True,
+            "canonical_blob_read": True,
+            "canonical_blob_uses_lf_text": True,
+        },
+        "errors": [],
+        "passed": True,
+    }
+
 
 def _statistics(samples: list[float]) -> dict[str, Any]:
     ordered = sorted(samples)
@@ -321,6 +347,7 @@ def _case(key: str, config: dict[str, Any], fingerprint: str) -> dict[str, Any]:
             "lp_fingerprint": {"sha256": "4" * 64, "blocks": {}},
             "policy_fingerprint": check_stage_7.POLICY_FINGERPRINT,
             "input_sha256": input_sha,
+            "input_sha256_definition": (check_stage_7.CANONICAL_GIT_BLOB_SHA256_DEFINITION),
         },
         "structural_reconciliation": {
             "dimension_match": True,
@@ -479,7 +506,26 @@ def _valid_evidence() -> tuple[dict[str, Any], dict[str, str]]:
     git_hashes = {
         path: str(check_stage_7._sha256(check_stage_7.PROJECT_ROOT / path)) for path in source_paths
     }
-    source_manifest = [{"path": path, "sha256": git_hashes[path]} for path in source_paths]
+    git_hashes["configs/benchmarks/stage_7_small_medium.json"] = check_stage_7.FROZEN_CONFIG_SHA256
+    git_hashes["environment/dgx_stage7_requirements.txt"] = check_stage_7.FROZEN_REQUIREMENTS_SHA256
+    source_manifest = [
+        {
+            "path": path,
+            "git_blob": (
+                CONFIG_BLOB
+                if path == "configs/benchmarks/stage_7_small_medium.json"
+                else (
+                    REQUIREMENTS_BLOB
+                    if path == "environment/dgx_stage7_requirements.txt"
+                    else "d" * 40
+                )
+            ),
+            "sha256": git_hashes[path],
+            "sha256_definition": check_stage_7.CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+            "passed": True,
+        }
+        for path in source_paths
+    ]
     provenance_rows = []
     for path, (case_name, sha256, blob) in check_stage_7.PROVENANCE.items():
         provenance_rows.append(
@@ -494,6 +540,7 @@ def _valid_evidence() -> tuple[dict[str, Any], dict[str, str]]:
                 "expected_git_blob": blob,
                 "actual_git_blob": blob,
                 "git_blob_matches": True,
+                "portable_identity": _portable_identity(blob, sha256),
                 "passed": True,
             }
         )
@@ -540,6 +587,11 @@ def _valid_evidence() -> tuple[dict[str, Any], dict[str, str]]:
         "requirements_freeze": {
             "path": "environment/dgx_stage7_requirements.txt",
             "sha256": check_stage_7.FROZEN_REQUIREMENTS_SHA256,
+            "sha256_definition": check_stage_7.CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+            "portable_identity": _portable_identity(
+                REQUIREMENTS_BLOB,
+                check_stage_7.FROZEN_REQUIREMENTS_SHA256,
+            ),
             "pins": {
                 "cupy-cuda13x": "14.1.1",
                 "numpy": "2.3.5",
@@ -557,6 +609,13 @@ def _valid_evidence() -> tuple[dict[str, Any], dict[str, str]]:
             "config": {
                 "path": str(check_stage_7.DEFAULT_CONFIG),
                 "sha256": check_stage_7.FROZEN_CONFIG_SHA256,
+                "sha256_matches_frozen": True,
+                "sha256_definition": check_stage_7.CANONICAL_GIT_BLOB_SHA256_DEFINITION,
+                "portable_identity": _portable_identity(
+                    CONFIG_BLOB,
+                    check_stage_7.FROZEN_CONFIG_SHA256,
+                ),
+                "passed": True,
             },
             "upstream": config["public_network_source"],
             "files": provenance_rows,
@@ -611,6 +670,8 @@ def _run(
     monkeypatch: pytest.MonkeyPatch,
     evidence: dict[str, Any],
     git_hashes: dict[str, str],
+    *,
+    worktree_overrides: dict[str, tuple[str | None, str | None, str | None]] | None = None,
 ) -> dict[str, Any]:
     evidence_path = tmp_path / "stage_7_validation.json"
     evidence_path.write_text(json.dumps(evidence), encoding="utf-8")
@@ -619,7 +680,30 @@ def _run(
     monkeypatch.setattr(
         check_stage_7,
         "_git_blob_sha256",
-        lambda _commit, path: git_hashes.get(path),
+        lambda _commit, path: (
+            git_hashes.get(path)
+            or next(
+                (value[1] for key, value in check_stage_7.PROVENANCE.items() if key == path),
+                None,
+            )
+        ),
+    )
+    blob_by_path = {
+        "configs/benchmarks/stage_7_small_medium.json": CONFIG_BLOB,
+        "environment/dgx_stage7_requirements.txt": REQUIREMENTS_BLOB,
+        **{path: value[2] for path, value in check_stage_7.PROVENANCE.items()},
+        **{str(row["path"]): str(row["git_blob"]) for row in evidence["source_manifest"]},
+    }
+    overrides = worktree_overrides or {}
+    monkeypatch.setattr(
+        check_stage_7,
+        "_git_blob_oid",
+        lambda _commit, path: blob_by_path.get(path),
+    )
+    monkeypatch.setattr(
+        check_stage_7,
+        "_git_worktree_identity",
+        lambda path: overrides.get(path, (blob_by_path.get(path), "", "")),
     )
     return check_stage_7.run_checks(evidence_path, check_stage_7.DEFAULT_CONFIG)
 
@@ -633,6 +717,59 @@ def test_checker_accepts_complete_recomputed_fixture(
 
     assert result["passed"] is True
     assert result["summary"].get("failed", 0) == 0
+
+
+def test_checker_rejects_wrong_and_dirty_matpower_worktree_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence, git_hashes = _valid_evidence()
+    path = next(iter(check_stage_7.PROVENANCE))
+
+    result = _run(
+        tmp_path,
+        monkeypatch,
+        evidence,
+        git_hashes,
+        worktree_overrides={path: ("0" * 40, path, f" M {path}")},
+    )
+
+    assert result["passed"] is False
+    assert _checks_by_name(result)["pinned_matpower_provenance_hashes"]["passed"] is False
+
+
+def test_checker_rejects_staged_only_input_status(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence, git_hashes = _valid_evidence()
+    path, (_, _, expected_blob) = next(iter(check_stage_7.PROVENANCE.items()))
+
+    result = _run(
+        tmp_path,
+        monkeypatch,
+        evidence,
+        git_hashes,
+        worktree_overrides={path: (expected_blob, "", f"M  {path}")},
+    )
+
+    assert result["passed"] is False
+    assert _checks_by_name(result)["pinned_matpower_provenance_hashes"]["passed"] is False
+
+
+def test_checker_allows_untracked_result_artifacts_when_sources_are_clean(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    evidence, git_hashes = _valid_evidence()
+    evidence["environment"]["git"]["status_porcelain"] = (
+        "?? results/raw/stage_7/stage_7_validation.partial.json"
+    )
+
+    result = _run(tmp_path, monkeypatch, evidence, git_hashes)
+
+    assert result["passed"] is True
+    assert (
+        _checks_by_name(result)["source_manifest_matches_exact_clean_executed_git_commit"]["passed"]
+        is True
+    )
 
 
 Mutation = Callable[[dict[str, Any]], None]

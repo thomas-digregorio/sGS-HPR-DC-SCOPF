@@ -1,0 +1,639 @@
+{
+  "all_passed": false,
+  "cases": [],
+  "completed_utc": "2026-08-03T17:28:19.726675+00:00",
+  "configuration": {
+    "acceptance": {
+      "gurobi_required_only_when_installed_and_licensed": true,
+      "maximum_dimension_difference_for_execution": 0,
+      "maximum_physical_violation": 0.01,
+      "maximum_scaled_objective_gap_to_highs": 0.0002,
+      "nonzero_nnz_difference_blocks_paper_time_comparability": true,
+      "paper_residual_tolerance": 5e-05,
+      "raw_kkt_tolerance": 0.01,
+      "required_solver_tracks": [
+        "highs",
+        "cpu_fp64_sgs_hpr",
+        "gpu_fp64_sgs_hpr"
+      ]
+    },
+    "algorithm": {
+      "adaptive_sigma": true,
+      "correctness_residual_check_interval": 1,
+      "initial_sigma": 1.0,
+      "mixed_precision_enabled": false,
+      "normalize_b_and_c": true,
+      "pock_chambolle": true,
+      "pock_chambolle_alpha": 1.0,
+      "policy_check_interval": 100,
+      "requested_spmv_algorithm": "CUSPARSE_SPMV_CSR_ALG2",
+      "restart": true,
+      "ruiz_iterations": 10
+    },
+    "author_data_availability": {
+      "exact_restart_and_penalty_code": "missing",
+      "generator_ramp_modifications": "missing",
+      "load_profiles": "missing",
+      "matrix_construction_code": "missing",
+      "renewable_locations": "missing",
+      "renewable_profiles": "missing",
+      "reserve_requirements": "missing",
+      "storage_locations": "missing",
+      "storage_parameters": "missing"
+    },
+    "cases": [
+      {
+        "branches": 1991,
+        "buses": 1354,
+        "case": "case1354pegase",
+        "generators": 260,
+        "renewables": 136,
+        "rows": [
+          {
+            "execute_stage_7": true,
+            "m": 20192,
+            "n": 4208,
+            "nnz": 7190640,
+            "paper_gurobi_seconds": 1.136,
+            "paper_sgs_hpr_seconds": 3.849,
+            "periods": 4
+          },
+          {
+            "execute_stage_7": true,
+            "m": 82124,
+            "n": 16832,
+            "nnz": 28791792,
+            "paper_gurobi_seconds": 1.945,
+            "paper_sgs_hpr_seconds": 4.113,
+            "periods": 16
+          },
+          {
+            "execute_stage_7": true,
+            "m": 247276,
+            "n": 50496,
+            "nnz": 86586352,
+            "paper_gurobi_seconds": 5.848,
+            "paper_sgs_hpr_seconds": 6.757,
+            "periods": 48
+          },
+          {
+            "execute_stage_7": true,
+            "m": 495004,
+            "n": 100992,
+            "nnz": 173800432,
+            "paper_gurobi_seconds": 15.231,
+            "paper_sgs_hpr_seconds": 7.857,
+            "periods": 96
+          }
+        ],
+        "storage": 68
+      },
+      {
+        "branches": 3808,
+        "buses": 2868,
+        "case": "case2868rte",
+        "generators": 600,
+        "renewables": 286,
+        "rows": [
+          {
+            "execute_stage_7": true,
+            "m": 40163,
+            "n": 9488,
+            "nnz": 30111616,
+            "paper_gurobi_seconds": 8.489,
+            "paper_sgs_hpr_seconds": 4.546,
+            "periods": 4
+          },
+          {
+            "execute_stage_7": true,
+            "m": 163823,
+            "n": 37952,
+            "nnz": 120508576,
+            "paper_gurobi_seconds": 34.659,
+            "paper_sgs_hpr_seconds": 7.695,
+            "periods": 16
+          },
+          {
+            "execute_stage_7": false,
+            "m": 493583,
+            "n": 113856,
+            "nnz": 295998240,
+            "paper_gurobi_seconds": 90.154,
+            "paper_sgs_hpr_seconds": 13.948,
+            "periods": 48
+          },
+          {
+            "execute_stage_7": false,
+            "m": 576023,
+            "n": 132832,
+            "nnz": 345459808,
+            "paper_gurobi_seconds": 104.152,
+            "paper_sgs_hpr_seconds": 15.988,
+            "periods": 56
+          },
+          {
+            "execute_stage_7": false,
+            "m": 658463,
+            "n": 151808,
+            "nnz": 394957984,
+            "paper_gurobi_seconds": 109.656,
+            "paper_sgs_hpr_seconds": 16.157,
+            "periods": 64
+          },
+          {
+            "execute_stage_7": false,
+            "m": 740903,
+            "n": 170784,
+            "nnz": 444492768,
+            "paper_gurobi_seconds": 115.025,
+            "paper_sgs_hpr_seconds": 16.808,
+            "periods": 72
+          },
+          {
+            "execute_stage_7": false,
+            "m": 823343,
+            "n": 189760,
+            "nnz": 494064160,
+            "paper_gurobi_seconds": 119.797,
+            "paper_sgs_hpr_seconds": 17.287,
+            "periods": 80
+          },
+          {
+            "execute_stage_7": false,
+            "m": 905783,
+            "n": 208736,
+            "nnz": 543672160,
+            "paper_gurobi_seconds": 124.926,
+            "paper_sgs_hpr_seconds": 17.538,
+            "periods": 88
+          },
+          {
+            "execute_stage_7": false,
+            "m": 988223,
+            "n": 227712,
+            "nnz": 593316768,
+            "paper_gurobi_seconds": 130.554,
+            "paper_sgs_hpr_seconds": 17.899,
+            "periods": 96
+          }
+        ],
+        "storage": 143
+      },
+      {
+        "branches": 16049,
+        "buses": 9241,
+        "case": "case9241pegase",
+        "generators": 1445,
+        "renewables": 920,
+        "rows": [
+          {
+            "execute_stage_7": false,
+            "m": 152774,
+            "n": 24700,
+            "nnz": 373238888,
+            "paper_gurobi_seconds": 66.904,
+            "paper_sgs_hpr_seconds": 8.04,
+            "periods": 4
+          },
+          {
+            "execute_stage_7": false,
+            "m": 230376,
+            "n": 37050,
+            "nnz": 559872262,
+            "paper_gurobi_seconds": 136.266,
+            "paper_sgs_hpr_seconds": 19.478,
+            "periods": 6
+          },
+          {
+            "execute_stage_7": false,
+            "m": 618386,
+            "n": 98800,
+            "nnz": 1493149532,
+            "paper_gurobi_seconds": null,
+            "paper_sgs_hpr_seconds": 59.784,
+            "periods": 16
+          },
+          {
+            "execute_stage_7": false,
+            "m": 928794,
+            "n": 148200,
+            "nnz": 2239903828,
+            "paper_gurobi_seconds": null,
+            "paper_sgs_hpr_seconds": 138.55,
+            "periods": 24
+          },
+          {
+            "execute_stage_7": false,
+            "m": 1239202,
+            "n": 197600,
+            "nnz": 2986775884,
+            "paper_gurobi_seconds": null,
+            "paper_sgs_hpr_seconds": 227.682,
+            "periods": 32
+          }
+        ],
+        "storage": 460
+      }
+    ],
+    "classification": "structural_reproduction",
+    "name": "stage_7_small_medium_structural_reconstruction",
+    "paper_source": {
+      "reported_cuda": "12.3",
+      "reported_gpu": "NVIDIA A100-SXM4-80GB",
+      "reported_time_limit_seconds": 3600,
+      "table": "Table II",
+      "title": "An Efficient GPU-based Halpern Accelerating Algorithm for Large-scale DC Optimal Power Flow"
+    },
+    "precision": "FP64",
+    "public_network_source": {
+      "files": [
+        {
+          "case": "case1354pegase",
+          "git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "path": "data/raw/matpower/stage7/case1354pegase.m",
+          "sha256": "9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103",
+          "upstream_path": "data/case1354pegase.m"
+        },
+        {
+          "case": "case2868rte",
+          "git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "path": "data/raw/matpower/stage7/case2868rte.m",
+          "sha256": "07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101",
+          "upstream_path": "data/case2868rte.m"
+        },
+        {
+          "case": "case9241pegase",
+          "git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "path": "data/raw/matpower/stage7/case9241pegase.m",
+          "sha256": "d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01",
+          "upstream_path": "data/case9241pegase.m"
+        }
+      ],
+      "license": "MATPOWER 8.1 three-clause BSD license",
+      "project": "MATPOWER",
+      "release": "8.1",
+      "release_doi": "10.5281/zenodo.15871662",
+      "repository": "https://github.com/MATPOWER/matpower",
+      "resolved_commit": "1a828c7af590714499284e36ee9c81273388c594",
+      "retrieved_utc_date": "2026-08-03",
+      "tag_object": "3f8ecfdbc79b07697d6b45f8d868ac1c2d27f788"
+    },
+    "reconstruction_protocol": {
+      "angle_limit_policy": "ignore MATPOWER angle-difference limits because they are absent from the paper model",
+      "frozen_before_benchmark_runs": true,
+      "generator_policy": "retain every MATPOWER generator row; originally offline rows are fixed at zero output and zero reserve",
+      "generator_ramp_fraction_of_pmax_per_hour": 0.1,
+      "inactive_branch_policy": "retain paper-count rows as zero-flow rows while excluding them from topology",
+      "interval_hours": 1.0,
+      "load_definition": "MATPOWER Pd + Gs treated as active withdrawal",
+      "load_profile": "flat MATPOWER active demand in every period",
+      "objective_policy": "use the linear and constant MATPOWER polynomial terms; reject nonzero higher-order terms",
+      "positive_rate_a_policy": "preserve the MATPOWER rateA value",
+      "ptdf_reference_policy": "use the public MATPOWER type-3 reference bus",
+      "ptdf_rhs_chunk_columns": 128,
+      "ptdf_zero_atol": 1e-12,
+      "renewable_availability_fraction": 1.0,
+      "renewable_minimum_fraction": 0.0,
+      "renewable_nameplate_distribution": "equal across reconstructed renewable rows",
+      "renewable_penalty_per_mwh": 1.0,
+      "renewable_placement": "cycle through MATPOWER generator buses in ascending generator-row order",
+      "renewable_total_nameplate_fraction_of_base_load": 0.1,
+      "reserve_down_fraction_of_base_load": 0.01,
+      "reserve_up_fraction_of_base_load": 0.01,
+      "seed": 20260803,
+      "storage_charge_efficiency": 0.95,
+      "storage_discharge_efficiency": 0.95,
+      "storage_duration_hours": 4.0,
+      "storage_initial_state_fraction": 0.5,
+      "storage_loss_penalty_per_mwh": 1.0,
+      "storage_minimum_energy_fraction": 0.0,
+      "storage_placement": "use every second reconstructed renewable location, cycling deterministically when required",
+      "storage_power_distribution": "equal across reconstructed storage rows",
+      "storage_total_power_fraction_of_base_load": 0.01,
+      "timing_tuning_prohibited": true,
+      "zero_rate_a_bound_proof": "outward-rounded triangle bound over the complete variable box",
+      "zero_rate_a_policy": "retain the paper-required branch rows with a finite bound derived to be redundant over the variable box"
+    },
+    "schema_version": "1.0",
+    "stage": 7,
+    "stage_boundary": {
+      "exact_paper_reproduction_claimed": false,
+      "n_minus_1_extension_enabled": false,
+      "paper_a100_timing_reproduction_claimed": false,
+      "stage_7_only": true,
+      "stage_8_large_runs_locked": true
+    },
+    "timing": {
+      "maximum_measured_runs_after_variability_escalation": 9,
+      "measured_runs": 5,
+      "per_solve_time_limit_seconds": 3600,
+      "relative_range_escalation_threshold": 0.2,
+      "report_first_run_separately": true,
+      "report_statistics": [
+        "median",
+        "minimum",
+        "maximum",
+        "standard_deviation",
+        "interquartile_range"
+      ],
+      "speedup_requires_matching_boundaries": true,
+      "warmup_runs": 1
+    }
+  },
+  "configuration_validation": {
+    "errors": [],
+    "passed": true
+  },
+  "environment": {
+    "captured_utc": "2026-08-03T17:28:19.720231+00:00",
+    "git": {
+      "branch": "",
+      "head": "71706ef076114bb3c42480d367e735e0b367828c",
+      "status_porcelain": ""
+    },
+    "host_memory": {
+      "available_bytes": 117613568000,
+      "source": "os.sysconf",
+      "total_bytes": 130663165952
+    },
+    "machine": "aarch64",
+    "numpy": "2.3.5",
+    "packages": {
+      "cupy-cuda13x": "14.1.1",
+      "gurobipy": null,
+      "numpy": "2.3.5",
+      "scipy": "1.16.3"
+    },
+    "platform": "Linux-6.17.0-1029-nvidia-aarch64-with-glibc2.39",
+    "processor": "aarch64",
+    "python": "3.12.3",
+    "python_executable": "/home/dgxsparktd/sGS-HPR-DC-SCOPF/.venv/bin/python",
+    "scipy": "1.16.3"
+  },
+  "failures": [
+    {
+      "message": "provenance mismatch for data/raw/matpower/stage7/case1354pegase.m; provenance mismatch for data/raw/matpower/stage7/case2868rte.m; provenance mismatch for data/raw/matpower/stage7/case9241pegase.m",
+      "phase": "stage7_runner",
+      "traceback": "Traceback (most recent call last):\n  File \"/home/dgxsparktd/sGS-HPR-DC-SCOPF-stage7-71706ef07611/scripts/run_stage_7.py\", line 2203, in main\n    raise Stage7ContractError(\"; \".join(provenance[\"errors\"]))\nStage7ContractError: provenance mismatch for data/raw/matpower/stage7/case1354pegase.m; provenance mismatch for data/raw/matpower/stage7/case2868rte.m; provenance mismatch for data/raw/matpower/stage7/case9241pegase.m\n",
+      "type": "Stage7ContractError",
+      "utc": "2026-08-03T17:28:19.726669+00:00"
+    }
+  ],
+  "policy_contract": {
+    "error": null,
+    "json_is_sole_authority": true,
+    "passed": true,
+    "policy_fingerprint": "e6911ef7e5ccab32a8392c917b892eeabbed3df16a44b1e342cd8ef664274dcf"
+  },
+  "provenance": {
+    "config": {
+      "path": "/home/dgxsparktd/sGS-HPR-DC-SCOPF-stage7-71706ef07611/configs/benchmarks/stage_7_small_medium.json",
+      "sha256": "e539f34328f4b8bc28538113c42d68123a785021090a72dfab637a1e99280a94"
+    },
+    "errors": [
+      "provenance mismatch for data/raw/matpower/stage7/case1354pegase.m",
+      "provenance mismatch for data/raw/matpower/stage7/case2868rte.m",
+      "provenance mismatch for data/raw/matpower/stage7/case9241pegase.m"
+    ],
+    "files": [
+      {
+        "actual_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+        "actual_sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+        "case_name": "case1354pegase",
+        "exists": true,
+        "expected_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+        "expected_sha256": "9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": false,
+        "path": "data/raw/matpower/stage7/case1354pegase.m",
+        "sha256_matches": false
+      },
+      {
+        "actual_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+        "actual_sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+        "case_name": "case2868rte",
+        "exists": true,
+        "expected_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+        "expected_sha256": "07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": false,
+        "path": "data/raw/matpower/stage7/case2868rte.m",
+        "sha256_matches": false
+      },
+      {
+        "actual_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+        "actual_sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+        "case_name": "case9241pegase",
+        "exists": true,
+        "expected_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+        "expected_sha256": "d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": false,
+        "path": "data/raw/matpower/stage7/case9241pegase.m",
+        "sha256_matches": false
+      }
+    ],
+    "passed": false,
+    "upstream": {
+      "files": [
+        {
+          "case": "case1354pegase",
+          "git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "path": "data/raw/matpower/stage7/case1354pegase.m",
+          "sha256": "9400ce5d5add70e654cf7513285920d4adc5dd87d649b0cc54f964bf5601a103",
+          "upstream_path": "data/case1354pegase.m"
+        },
+        {
+          "case": "case2868rte",
+          "git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "path": "data/raw/matpower/stage7/case2868rte.m",
+          "sha256": "07e5a9e26eacfc66730879c6959e7af621a97cb2697e68c26fbcc9bdcb78c101",
+          "upstream_path": "data/case2868rte.m"
+        },
+        {
+          "case": "case9241pegase",
+          "git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "path": "data/raw/matpower/stage7/case9241pegase.m",
+          "sha256": "d88aa6d3a280b4fadd8130463291bf3511e5d0c5dac91bc37383f1c711bc8d01",
+          "upstream_path": "data/case9241pegase.m"
+        }
+      ],
+      "license": "MATPOWER 8.1 three-clause BSD license",
+      "project": "MATPOWER",
+      "release": "8.1",
+      "release_doi": "10.5281/zenodo.15871662",
+      "repository": "https://github.com/MATPOWER/matpower",
+      "resolved_commit": "1a828c7af590714499284e36ee9c81273388c594",
+      "retrieved_utc_date": "2026-08-03",
+      "tag_object": "3f8ecfdbc79b07697d6b45f8d868ac1c2d27f788"
+    }
+  },
+  "requirements_freeze": {
+    "errors": [],
+    "expected_pins": {
+      "cupy-cuda13x": "14.1.1",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3"
+    },
+    "passed": true,
+    "path": "environment/dgx_stage7_requirements.txt",
+    "pins": {
+      "Pygments": "2.20.0",
+      "cuda-pathfinder": "1.6.0",
+      "cupy-cuda13x": "14.1.1",
+      "iniconfig": "2.3.0",
+      "numpy": "2.3.5",
+      "packaging": "26.2",
+      "pip": "26.2",
+      "pluggy": "1.6.0",
+      "pytest": "8.4.2",
+      "ruff": "0.16.0",
+      "scipy": "1.16.3"
+    },
+    "sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
+  },
+  "run_fingerprint": "459c90b46736b8bae47124051e13a1fb1ed69f36a73c064f10572671c6e51ba8",
+  "schema_version": "1.0",
+  "solver_availability": {
+    "cpu_fp64_sgs_hpr": {
+      "available": true,
+      "installed": true,
+      "reason": null
+    },
+    "gpu_fp64_sgs_hpr": {
+      "adapter_available": true,
+      "available": true,
+      "cupy_cuda13x_version": "14.1.1",
+      "installed": true,
+      "reason": null
+    },
+    "gurobi": {
+      "available": false,
+      "installed": false,
+      "licensed": false,
+      "reason": "ModuleNotFoundError: No module named 'gurobipy'"
+    },
+    "highs": {
+      "available": true,
+      "installed": true,
+      "provider": "scipy.optimize.linprog(method='highs-ds')",
+      "scipy_version": "1.16.3"
+    }
+  },
+  "source_manifest": [
+    {
+      "path": "scripts/run_stage_7.py",
+      "sha256": "f2ba6f8b465690539c7dfce6ce94b5038fabdaf82ae25acaf9e6193c6e3f418f"
+    },
+    {
+      "path": "configs/benchmarks/stage_7_small_medium.json",
+      "sha256": "e539f34328f4b8bc28538113c42d68123a785021090a72dfab637a1e99280a94"
+    },
+    {
+      "path": "environment/dgx_stage7_requirements.txt",
+      "sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/__init__.py",
+      "sha256": "9e09afe4e9cd4ea8f8250eeaa12760077d513dcf91905f67fe5234a6bb3ec92a"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/canonical_lp.py",
+      "sha256": "cdef660c36aa35f493e4735875493c11a9ab884e6f1c6a8974158913fc46f915"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/dcopf_model.py",
+      "sha256": "bc0ed66de29f7972a45b0ee37d636ea7a43cb5703b88c3062849df0285796144"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/gpu_backend.py",
+      "sha256": "8586729e75a630ac9dac76acd978787903969304ea27c32c8723311d5cad42af"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/gpu_sgs_hpr.py",
+      "sha256": "eceb2a9b10a0c1834e08c932e4364d93d98f276258f25bbc122fd6483b62a358"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/gpu_sparse.py",
+      "sha256": "8243bb28f2128fc17e80487cde55ca319e2f59b48d6c45cc01e0d992405eedbf"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/gpu_stage5_control.py",
+      "sha256": "3a15d45203fc3d27c8f12a67bf4209bd05f56735f0c636a35514a12b8c5fdd3a"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/hpr_generic.py",
+      "sha256": "2008c929b463bcf8d45a31428fa057e78a0be56b88c4d2f73154c1cbfbbe8d1e"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/network_data.py",
+      "sha256": "8da17c113726a785795fa76180dc59fa1e58b8f38f030bf4b13e5b42f9a608d4"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/preconditioning.py",
+      "sha256": "b37d32fe29eb4b8cc1feb8a520f30fd92a3dbc3f30016291ae3caf16be9bf06e"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/projections.py",
+      "sha256": "8fb40f9e269b81a098e088db78930de1f858a2853f3241a9ddc6eafa570d28d4"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/ptdf.py",
+      "sha256": "bc3c5487835e7a1d0ce5418f5c9b579e4343dc2d563e8266ad880e0e87437648"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/residuals.py",
+      "sha256": "55477250dc4e580729d7b2561bdfa4459ffcb6ffd21550c6c7f576b087c2e887"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/sgs_hpr.py",
+      "sha256": "27f3a02ed0819890c80d1ebfb19ae09840291e8a32cef26df896cf52cf38da15"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/stage5_control.py",
+      "sha256": "40f78e6b787de8d529e340ce1533ddc062d6cc59825b0116ccf28a994cdf85e1"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/stage7_scalable_model.py",
+      "sha256": "b406e4f158c170d696cd6d65165107e785ac7310bd81d66a39d1d0545fc59837"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/stage7_scaled_y1.py",
+      "sha256": "0813660e3be457b3800d2e617e00b2c18ecb471a28be3ab0ef80811c8c64d17f"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/stage7_spectral.py",
+      "sha256": "2097818f46f7b9ddbfd96f8812b6ffcdcf84a0c34f27757d5b88213218753c1b"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/structural_y1.py",
+      "sha256": "febbe9cbc5abb0bbaa896c053a7b90c2168a44c6320efbc3b67b348026db555b"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/toy_problems.py",
+      "sha256": "8c6ff27a067efa773971d8cb7ef69c0984ba77224cb6aba6e17d238eacac7608"
+    },
+    {
+      "path": "src/gpu_dcopf_hpr/validation.py",
+      "sha256": "5dd5aeff01adac8222a2160ec0467063a718f407fcba4ae75be279d29dc08109"
+    }
+  ],
+  "stage": 7,
+  "stage_boundary": {
+    "exact_paper_reproduction_claimed": false,
+    "n_minus_1_extension_enabled": false,
+    "paper_a100_timing_reproduction_claimed": false,
+    "stage_7_complete": false,
+    "stage_7_executed": false,
+    "stage_7_only": true,
+    "stage_8_allocation_count": 0,
+    "stage_8_large_runs_locked": true
+  },
+  "started_utc": "2026-08-03T17:28:19.720222+00:00",
+  "status": "FAIL",
+  "symbolic_ledger": [],
+  "updated_utc": "2026-08-03T17:28:19.726677+00:00"
+}
