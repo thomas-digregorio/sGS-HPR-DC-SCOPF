@@ -17,6 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from gpu_dcopf_hpr.stage7_scalable_model import all_stage7_preflights  # noqa: E402
 from scripts import check_stage_7 as stage7_checker  # noqa: E402
+from scripts import run_stage_7 as stage7_runner  # noqa: E402
 from scripts import run_stage_8 as stage8  # noqa: E402
 
 DEFAULT_CONFIG = stage8.DEFAULT_CONFIG
@@ -585,7 +586,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
 def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     result = run_checks(args.evidence.resolve(), args.config.resolve())
-    stage7_checker._atomic_write_json(args.output.resolve(), result)
+    stage7_runner._atomic_write_json(args.output.resolve(), result)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0 if result["all_passed"] else 1
 

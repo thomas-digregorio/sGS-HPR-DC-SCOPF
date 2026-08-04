@@ -671,7 +671,49 @@ its original rationale should remain reviewable.
 - **Reason:** Honest platform telemetry should pass under its true cumulative
   process-lifetime scope, while missing tracked executable source must never
   pass provenance preflight. Both changes strengthen integrity around the
-  accepted run without changing its model, samples, numerical thresholds, or
+ accepted run without changing its model, samples, numerical thresholds, or
   timing thresholds, so no numerical rerun is required. A later head with
   changed execution-source files must fail the accepted run's exact-source
   identity check rather than inherit its 19/19 result.
+
+## D-0057 - Scale Stage 8 by strict prefix under a unified-memory gate
+
+- **Status:** accepted before Stage 8 execution
+- **Stage:** 8
+- **Decision:** Attempt at most one new campaign row per invocation and require
+  every predecessor to pass. Before full LP allocation, require the sum of the
+  host assembly projection and device working-set projection to fit within 80%
+  of both observed host-available memory and observed CUDA-free memory. Stop
+  on the first numerical, time, or resource failure. Require an explicit retry
+  flag for any repeat attempt and preserve the prior record.
+- **Reason:** The DGX Spark CPU and GPU share one physical memory pool, so
+  independent host and device budgets can double-count capacity. Strict-prefix
+  execution prevents a later, larger row from being attempted after an earlier
+  failure and makes the first scale limit auditable.
+
+## D-0058 - Preserve the T6 CPU time limit as the terminal Stage 8 result
+
+- **Status:** accepted after Stage 8 execution
+- **Stage:** 8
+- **Decision:** Record campaign status `STOPPED_ON_FAILURE` after the
+  case9241pegase T6 CPU FP64 correctness attempt exceeded the frozen
+  3,600-second deadline. Preserve the successful T6 HiGHS and GPU tracks, but
+  do not mark the row passed, infer a CPU candidate, launch an automatic retry,
+  or allocate T16, T24, T32, or any Stage 9 workload.
+- **Reason:** Every allocated row requires all three tracks. A successful GPU
+  result cannot replace the timed-out CPU requirement, and the frozen campaign
+  contract requires the first failure to stop scale-up without threshold
+  relaxation or evidence replacement.
+
+## D-0059 - Separate checker integrity from scientific stage acceptance
+
+- **Status:** accepted after Stage 8 validation
+- **Stage:** 8
+- **Decision:** Report the independent checker's 12/12 PASS separately from
+  the campaign's `STOPPED_ON_FAILURE` status and the Stage 8 FAIL decision. The
+  initial CLI result-writer defect may be repaired without changing validation
+  logic; preserve the official checks JSON and its hash. Keep Stage 9 locked.
+- **Reason:** The checker answers whether order, provenance, resource rules,
+  terminal evidence, and reporting boundaries were honest. It does not answer
+  whether every required solver track succeeded. Conflating these decisions
+  would turn a correctly recorded failure into a false scientific pass.

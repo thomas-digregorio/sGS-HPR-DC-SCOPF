@@ -1,158 +1,138 @@
 # Project state
 
-Last updated: 2026-08-03
+Last updated: 2026-08-04
 
 ## Stage gate
 
-- Completed stage: **Stage 7 - small and medium benchmark reproduction**
-- Gate result: **PASS**
-- Previous gate: **Stage 6 approved**
-- Current state: **stopped at the Stage 8 approval gate**
-- Next proposed stage: **Stage 8 - large paper-scale benchmarks**
-- Required approval: `APPROVE STAGE 7 AND RUN STAGE 8`
+- Completed terminal campaign: **Stage 8 - large paper-scale benchmarks**
+- Campaign status: **`STOPPED_ON_FAILURE`**
+- Stage 8 acceptance: **FAIL**
+- Independent protocol checker: **PASS, 12/12 checks**
+- Current state: **Stage 9 locked**
+- Automatic retry: **not permitted**
 - Dashboard: private, owner-only Sites deployment; its URL and project
   identifier are intentionally omitted from the public repository.
 
-Stage 8 remains locked. Stage 7 allocated and solved exactly six cases and
-recorded zero Stage 8 allocations.
+The checker PASS and Stage 8 FAIL are intentionally separate decisions. The
+checker confirms that the campaign obeyed its frozen order, provenance,
+resource, timing, and failure-preservation rules. Stage 8 fails acceptance
+because `case9241pegase:T6` did not complete its required CPU FP64 track.
 
-## Stage 7 outcome
+## Stage 8 outcome
 
-The campaign ran these structural reconstructions on the DGX Spark:
+The campaign attempted five rows in strict order on the DGX Spark:
 
-- `case1354pegase`: T=4, T=16, T=48, and T=96;
-- `case2868rte`: T=4 and T=16.
+| Row | HiGHS | CPU FP64 sGS-HPR | GPU FP64 sGS-HPR | Final status |
+|---|---|---|---|---|
+| `case2868rte:T48` | PASS | PASS | PASS | PASS |
+| `case2868rte:T64` | PASS | PASS | PASS | PASS |
+| `case2868rte:T96` | PASS | PASS | PASS | PASS |
+| `case9241pegase:T4` | PASS | PASS | PASS | PASS |
+| `case9241pegase:T6` | PASS | `TIME_LIMIT` | PASS | FAIL |
 
-For every case, SciPy HiGHS, CPU FP64 sGS-HPR, and GPU FP64 sGS-HPR passed the
-frozen objective, stopping-residual, raw-KKT, and physical-validation gates.
-Gurobi was not installed or licensed and remained optional under the frozen
-protocol. The independent checker passed **19/19** checks.
+T6's CPU correctness attempt exceeded the frozen 3,600-second limit after
+`3,600.092739 s`. It produced no accepted CPU candidate, warm-up, or measured
+CPU timing. No retry was attempted. T16, T24, and T32 were not executed, and
+Stage 9 received zero allocations.
 
-The largest accepted values over all 18 required candidates were:
+The terminal evidence records five unique allocation attempts, a passing
+prefix of four, no retries, no reconciliation-only allocations, and no N-1
+extension work.
+
+## Successful timing tracks
+
+Each completed timing track includes a separate correctness run, one warm-up,
+and five measured repetitions. Solver-core medians are:
+
+| Row | HiGHS median s | CPU median s | GPU median s |
+|---|---:|---:|---:|
+| T48 | 76.239 | 804.863 | 49.968 |
+| T64 | 108.232 | 1,078.892 | 68.383 |
+| T96 | 163.593 | 1,621.905 | 105.022 |
+| T4 | 142.479 | 3,087.218 | 193.632 |
+| T6 | 963.957 | Not available | 357.544 |
+
+No speedup is claimed. Local CPU, GPU, complete-case, and paper timing
+boundaries remain separate, the reconstructed sparse workloads differ from
+Table II, and the DGX Spark GB10 is not the paper's A100.
+
+## Numerical boundary
+
+All completed candidates passed their frozen objective, stopping-residual,
+raw-KKT, and physical-validation gates. The largest accepted values among the
+completed Stage 8 candidates were:
 
 | Metric | Maximum | Gate |
 |---|---:|---:|
-| Normalized primal block | 2.01695e-8 | 5e-5 |
-| Normalized stationarity block | 4.17967e-6 | 5e-5 |
-| Normalized box block | 5.49412e-15 | 5e-5 |
-| Raw KKT norm | 0.0096347433 | 0.01 |
-| Physical violation | 0.0062210399 MW/MWh | 0.01 MW/MWh |
-| Scaled objective gap to HiGHS | 4.28499e-8 | 2e-4 |
+| Normalized primal block | `3.010269e-9` | `5e-5` |
+| Normalized stationarity block | `9.659299e-6` | `5e-5` |
+| Normalized box block | `8.830567e-13` | `5e-5` |
+| Raw KKT norm | `0.0093260531` | `0.01` |
+| Physical violation | `0.0063110950 MW/MWh` | `0.01 MW/MWh` |
+| Scaled objective gap to HiGHS | `1.202323e-8` | `2e-4` |
 
-CPU and GPU sGS-HPR reached the same iteration and restart counts in all six
-cases. The largest CPU/GPU objective difference was `6.06e-9`.
+These passing candidates do not override T6's missing required CPU result.
+
+## Memory and execution boundary
+
+All five reached rows passed the frozen live unified-memory gate before full LP
+allocation. The projected peaks ranged from 23.606 to 48.303 GiB for the four
+passing rows and were 35.410 GiB for T6. The corresponding live 80% host and
+device budgets remained at least 79.124 GiB.
+
+T16 has a static planning projection of 94.435 GiB, but its live gate was never
+evaluated because the campaign stopped at T6. T24 and T32 have signed-int32
+static block entries in the resource ledger; neither row was reached or
+allocated. The maximum recorded host high-water mark was a cumulative
+process-lifetime value, not an isolated per-solve peak.
 
 ## Reproduction classification
 
-This stage is a **structural reproduction**, not an exact paper-instance or
-paper-timing reproduction.
+Stage 8 remains a **structural reproduction**, not an exact author-instance or
+paper-timing reproduction. The pinned public MATPOWER networks and frozen
+deterministic reconstruction reproduce every published row and variable
+dimension, but every sparse nonzero count differs from the paper. The authors'
+resource placements, time series, physical modifications, exact construction
+code, CUDA implementation, and compatible timing boundary remain unavailable.
 
-The three public network files are pinned to MATPOWER 8.1 at commit
-`1a828c7af590714499284e36ee9c81273388c594`. The authors' renewable/storage
-locations, time series, physical modifications, and matrix-construction code
-remain unavailable, so Stage 7 uses one disclosed deterministic protocol that
-was frozen before execution and never tuned to the results.
+The successful large rows validate this repository's reconstruction on the
+DGX Spark. They do not recover the hidden paper instances or reproduce the
+paper's A100 timings.
 
-All 18 Table II rows have exactly matching row and variable dimensions. Every
-reconstructed sparse nonzero count differs from the paper by 8.136% to
-36.659%. Consequently, zero rows are paper-time comparable. The 12 large rows
-outside Stage 7 were reconciled by exact count-only analysis without allocating
-their LPs.
+## Provenance and checker
 
-## Timing and memory boundary
+The campaign ran from clean detached commit
+`f1fffc2adcba197040578695ba11dd27b0d1981f` with run fingerprint
+`4dcb61115fb60f49c5972839ac0c99585cf74de2d3d07b955e142bb4f0f8e7cd`.
+The 27-entry executed-source manifest, accepted Stage 7 identities, Stage 8
+configuration, and frozen requirements all passed preflight.
 
-Each required track completed:
-
-1. one correctness solve excluded from statistics;
-2. one warm-up; and
-3. at least five measured repetitions, extended to nine when the frozen
-   variability rule fired.
-
-The GPU solver-core medians were:
-
-| Case | Median seconds |
-|---|---:|
-| case1354pegase, T=4 | 1.013 |
-| case1354pegase, T=16 | 2.924 |
-| case1354pegase, T=48 | 9.481 |
-| case1354pegase, T=96 | 21.084 |
-| case2868rte, T=4 | 3.939 |
-| case2868rte, T=16 | 15.408 |
-
-No speedup is claimed. HiGHS, CPU, GPU, complete-case, and paper boundaries
-are kept separate. The sparse workloads also differ from Table II, and the DGX
-Spark GB10 is not the paper's A100.
-
-Memory planning, CUDA runtime snapshots, CuPy allocator state, cumulative
-process high-water marks, and transfer ledgers are preserved per case. Every
-transfer audit passed, and no full state moved to the host inside the resident
-iteration loop. The backend does not expose a true isolated per-solve GPU
-peak, so snapshots are not mislabeled as peak memory.
-
-## Provenance correction
-
-An initial attempt stopped during provenance preflight because configured
-SHA-256 values represented Windows CRLF working-tree bytes while the DGX
-checkout used canonical LF Git-blob bytes. It stopped before MATPOWER parsing,
-symbolic counting, model allocation, or solver execution. That failed attempt
-is preserved unchanged.
-
-The portable correction defines identities over canonical LF Git-blob content
-and verifies both the committed blobs and clean-filtered worktree. It changed
-no model, solver, threshold, precision, scaling, or timing rule. The successful
-campaign ran from clean detached commit
-`ff6f762a00463e4769861f6aaf6f6fbbad6cc8af`.
-
-After the run, integrity checks were tightened without changing accepted
-evidence or thresholds. The checker now accepts accurately scoped Linux
-`getrusage`-only cumulative-peak telemetry when `psutil` RSS is unavailable,
-with strict provenance and scope tests. Source-manifest preflight now also
-fails closed if a tracked Python source file is deleted. The accepted run
-remains tied to `ff6f762`; no numerical rerun was required. The accepted
-19/19 check is evaluated against that exact commit. Running the checker from a
-later head with changed execution-source files fails source identity by design,
-not because a numerical or timing gate changed. A clean detached `ff6f762`
-recheck with the hardened checker passed 19/19; the full repository suite passed
-269 tests with one expected local CuPy-version skip.
+The independent check routine passed 12/12 checks and preserved campaign
+status `STOPPED_ON_FAILURE`. Its initial command-line wrapper had a final JSON-
+writer reference defect. The writer was repaired without changing validation
+logic, and the official checks JSON was then produced. This affected reporting
+mechanics, not the checker result or Stage 8 acceptance decision.
 
 ## Evidence
 
-- `results/raw/stage_7/stage_7_validation.json`: complete machine-readable
-  Stage 7 evidence
-- `results/raw/stage_7/stage_7_checks.json`: independent 19-check result
-- `results/raw/stage_7/attempts/`: immutable failed-preflight history
-- `configs/benchmarks/stage_7_small_medium.json`: frozen protocol and gates
-- `environment/dgx_stage7_requirements.txt`: frozen DGX package set
-- `docs/stage_reports/stage_7_report.md`: detailed human-readable report
+- `results/raw/stage_8/stage_8_validation.json`: terminal Stage 8 evidence
+- `results/raw/stage_8/stage_8_checks.json`: independent 12-check result
+- `results/raw/stage_8/runs/stage8-f1fffc2adcba-20260803T225116Z/`: immutable
+  run archive
+- `configs/benchmarks/stage_8_large.json`: frozen Stage 8 contract
+- `docs/stage_reports/stage_8_report.md`: detailed human-readable report
 
-The successful environment was Linux/aarch64 with CPython 3.12.3, NVIDIA GB10
-compute capability 12.1, CuPy 14.1.1, NumPy 2.3.5, and SciPy 1.16.3. The GPU
-path used FP64, signed 32-bit CSR indices, the generalized scaled structural
-equality solve, and verified `CUSPARSE_SPMV_CSR_ALG2` sparse products.
+The final evidence SHA-256 is
+`f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254`.
+The checker-output SHA-256 is
+`ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b`.
 
-## Supported claim and limits
+## Next action
 
-Stage 7 supports this claim: the frozen public-data structural reconstruction
-passes independent LP, optimization, physical, CPU, and DGX GPU checks on the
-six approved small/medium horizons, with repeated timing and explicit memory
-and transfer evidence.
+The user's conditional Stage 9 approval required Stage 8 to look good after
+independent validation. That condition was not met because T6's CPU track hit
+the frozen time limit. Stage 9 therefore remains locked.
 
-It does not establish:
-
-- exact author-instance data, objectives, sparsity, or CUDA source;
-- direct reproduction of Table II timing;
-- Gurobi performance on the DGX;
-- a true isolated per-solve device peak;
-- behavior of Stage 8's locked large horizons;
-- an N-1 SCOPF model; or
-- platform equivalence between the GB10 and A100.
-
-## Next proposed stage
-
-Stage 8 may begin only after the exact approval command:
-
-```text
-APPROVE STAGE 7 AND RUN STAGE 8
-```
-
-Stage 8 remains locked until that command is received.
+No automatic retry is allowed. Any T6 retry, deadline change, or revised Stage
+8 contract requires a new explicit decision and must preserve this failed
+campaign unchanged.

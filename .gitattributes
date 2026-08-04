@@ -1,3 +1,10 @@
 # Preserve accepted Stage 7 evidence bytes and published SHA-256 values exactly.
 results/raw/stage_7/*.json binary
 results/raw/stage_7/**/*.json binary
+
+# Preserve terminal Stage 8 evidence bytes and published SHA-256 values exactly.
+results/raw/stage_8/*.json binary
+results/raw/stage_8/**/*.json binary
+results/raw/stage_8/**/*.log binary
+results/raw/stage_8/**/*.pid binary
+results/raw/stage_8/**/.stage_8.lock binary

@@ -208,3 +208,28 @@ def test_checker_accepts_honest_terminal_resource_stop_semantics() -> None:
     valid, detail = checker._terminal_campaign_valid(evidence)
 
     assert valid, detail
+
+
+def test_checker_main_writes_json_output(monkeypatch, tmp_path) -> None:
+    result = {
+        "checker_status": "PASS",
+        "all_passed": True,
+        "campaign_status": "STOPPED_ON_FAILURE",
+        "checks": [],
+    }
+    monkeypatch.setattr(checker, "run_checks", lambda evidence, config: result)
+    output = tmp_path / "stage_8_checks.json"
+
+    exit_code = checker.main(
+        [
+            "--evidence",
+            str(tmp_path / "evidence.json"),
+            "--config",
+            str(tmp_path / "config.json"),
+            "--output",
+            str(output),
+        ]
+    )
+
+    assert exit_code == 0
+    assert json.loads(output.read_text(encoding="utf-8")) == result

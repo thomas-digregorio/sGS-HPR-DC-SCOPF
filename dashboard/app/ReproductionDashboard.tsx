@@ -5,8 +5,8 @@ import type { CSSProperties } from "react";
 import {
   artifacts,
   learningNotes,
+  stageEightDashboard,
   stages,
-  stageSevenTimings,
   type StageStatus,
 } from "./project-data";
 
@@ -14,7 +14,8 @@ type Filter = "all" | StageStatus;
 
 const filterLabels: Array<{ key: Filter; label: string }> = [
   { key: "all", label: "All stages" },
-  { key: "active", label: "Current" },
+  { key: "active", label: "Running" },
+  { key: "stopped", label: "Stopped" },
   { key: "complete", label: "Passed" },
   { key: "locked", label: "Locked" },
   { key: "optional", label: "Optional" },
@@ -23,9 +24,29 @@ const filterLabels: Array<{ key: Filter; label: string }> = [
 const statusLabels: Record<StageStatus, string> = {
   complete: "Passed",
   active: "In progress",
+  stopped: "Stopped",
   locked: "Locked",
   optional: "Optional",
 };
+
+const stageEightStatusLabels = {
+  queued: "Queued",
+  running: "Running",
+  passed: "Passed",
+  locked: "Locked / not run",
+  "memory-blocked": "Memory-blocked",
+  "index-blocked": "Index-blocked",
+  failed: "Failed",
+} as const;
+
+const correctnessLabels = {
+  pending: "Pending",
+  passed: "Passed",
+  "not-run": "Not run",
+  failed: "Failed",
+} as const;
+
+const timingValue = (value: string | null) => value ?? "—";
 
 export function ReproductionDashboard() {
   const [filter, setFilter] = useState<Filter>("all");
@@ -33,17 +54,40 @@ export function ReproductionDashboard() {
 
   const coreStages = stages.filter((stage) => stage.id <= 9);
   const activeStage = coreStages.find((stage) => stage.status === "active");
+  const stoppedStage = coreStages.find((stage) => stage.status === "stopped");
   const latestPassedStage = [...coreStages]
     .reverse()
     .find((stage) => stage.status === "complete");
-  const currentStage = activeStage ?? latestPassedStage ?? stages[0];
+  const currentStage = activeStage ?? stoppedStage ?? latestPassedStage ?? stages[0];
   const nextLockedStage = coreStages.find(
     (stage) => stage.id > currentStage.id && stage.status === "locked",
   );
   const currentDone = currentStage.tasks.filter((task) => task.status === "complete").length;
   const currentProgress = Math.round((currentDone / currentStage.tasks.length) * 100);
+  const stageEightPassedRows = stageEightDashboard.rows.filter(
+    (row) => row.status === "passed",
+  );
+  const stageEightFailedRows = stageEightDashboard.rows.filter(
+    (row) => row.status === "failed",
+  );
+  const stageEightAttemptedRows = stageEightDashboard.rows.filter(
+    (row) => row.status === "passed" || row.status === "failed",
+  );
+  const stageEightLockedRows = stageEightDashboard.rows.filter(
+    (row) => row.status === "locked",
+  );
+  const stageEightRecordedRows = stageEightDashboard.rows.filter(
+    (row) => !["queued", "running", "locked"].includes(row.status),
+  );
+  const checkerScore =
+    stageEightDashboard.acceptance.checkerPassed === null ||
+    stageEightDashboard.acceptance.checkerTotal === null
+      ? "Pending"
+      : `${stageEightDashboard.acceptance.checkerPassed} / ${stageEightDashboard.acceptance.checkerTotal}`;
   const stageFocusLabel = activeStage
     ? `Now running / Stage ${currentStage.id}`
+    : stoppedStage
+      ? `Stage ${currentStage.id} stopped / Stage 9 locked`
     : nextLockedStage
       ? `Stage ${currentStage.id} passed / Stage ${nextLockedStage.id} awaits approval`
       : `Stage ${currentStage.id} passed`;
@@ -86,12 +130,8 @@ export function ReproductionDashboard() {
         <div className="hero">
           <div>
             <p className="eyebrow">DGX Spark research program / stage-gated</p>
-            <h1 id="hero-title">Six benchmark runs, structurally verified.</h1>
-            <p className="hero-copy">
-              Stage 7 completed the predeclared small and medium DGX Spark campaign
-              across HiGHS, CPU FP64 sGS-HPR, and GPU FP64 sGS-HPR. Every correctness
-              gate passed; structural differences keep the paper&apos;s timings contextual.
-            </p>
+            <h1 id="hero-title">{stageEightDashboard.headline}</h1>
+            <p className="hero-copy">{stageEightDashboard.summary}</p>
             <div className="hero-actions">
               <button
                 className="primary-action"
@@ -123,28 +163,36 @@ export function ReproductionDashboard() {
 
         <div className="metric-strip" aria-label="Project summary">
           <div className="metric-card">
-            <div className="metric-label">Accepted benchmark rows</div>
-            <div className="metric-value">6 / 6</div>
-            <div className="metric-note">All three required solver tracks passed.</div>
+            <div className="metric-label">Correctness rows passed</div>
+            <div className="metric-value">
+              {stageEightPassedRows.length} / {stageEightAttemptedRows.length}
+            </div>
+            <div className="metric-note">
+              T6 failed its CPU correctness gate; HiGHS and GPU FP64 passed.
+            </div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-label">Attempted campaign rows</div>
+            <div className="metric-value">
+              {stageEightRecordedRows.length} / {stageEightDashboard.rows.length}
+            </div>
+            <div className="metric-note">
+              {stageEightLockedRows.length} later rows remain locked and were not executed.
+            </div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-label">Live unified-memory budget</div>
+            <div className="metric-value">
+              {stageEightDashboard.guard.liveGuardBudgetGiB ?? "Pending"}
+            </div>
+            <div className="metric-note">
+              {stageEightDashboard.guard.liveGuardBudgetGiB ? "GiB at the final DGX preflight." : "Captured immediately before allocation."}
+            </div>
           </div>
           <div className="metric-card">
             <div className="metric-label">Independent checker</div>
-            <div className="metric-value">19 / 19</div>
-            <div className="metric-note">Every evidence and boundary check passed.</div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">Reconstructed nnz matches</div>
-            <div className="metric-value">0 / 18</div>
-            <div className="metric-note">
-              Dimensions match, but all 18 sparse nonzero counts differ from the paper.
-            </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-label">Longest measured solve</div>
-            <div className="metric-value">537.835392 s</div>
-            <div className="metric-note">
-              Preserved CPU FP64 sample; it is not a solver-core median.
-            </div>
+            <div className="metric-value">{checkerScore}</div>
+            <div className="metric-note">{stageEightDashboard.acceptance.note}</div>
           </div>
         </div>
       </section>
@@ -184,7 +232,11 @@ export function ReproductionDashboard() {
                 className="stage-card"
                 data-status={stage.status}
                 key={stage.id}
-                open={stage.status === "active" || stage.id === currentStage.id}
+                open={
+                  stage.status === "active" ||
+                  stage.status === "stopped" ||
+                  stage.id === currentStage.id
+                }
               >
                 <summary className="stage-summary">
                   <span className="stage-number">S{String(stage.id).padStart(2, "0")}</span>
@@ -222,107 +274,149 @@ export function ReproductionDashboard() {
         <aside className="side-rail">
           <section className="rail-card dark" aria-labelledby="gate-title">
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
-            <p className="rail-copy">
-              Stage 7 passed its six-case correctness and timing campaign plus the
-              independent 19-check audit. Stage 8 large runs remain locked until you
-              send the exact approval phrase.
-            </p>
-            <div className="gate-command">APPROVE STAGE 7 AND RUN STAGE 8</div>
+            <p className="rail-copy">{stageEightDashboard.gate.intro}</p>
+            <div className={`gate-state ${stageEightDashboard.gate.state}`}>
+              {stageEightDashboard.acceptance.result === "fail"
+                ? "Locked after terminal failure"
+                : stageEightDashboard.gate.state === "held"
+                  ? "Held until acceptance"
+                  : "Available"}
+            </div>
+            <div className="gate-command">{stageEightDashboard.gate.command}</div>
+            <p className="gate-note">{stageEightDashboard.gate.note}</p>
           </section>
 
-          <section className="rail-card" aria-labelledby="stage-seven-title">
-            <h2 className="rail-title" id="stage-seven-title">Stage 7 structural benchmark brief</h2>
+          <section className="rail-card stage-eight-card" aria-labelledby="stage-eight-title">
+            <div className="chip">Frozen order / failure-preserving</div>
+            <h2 className="rail-title" id="stage-eight-title">Stage 8 large-case campaign</h2>
             <p className="rail-copy">
-              Six predeclared rows completed required HiGHS, CPU FP64, and GPU FP64
-              correctness solves before any measured repetitions were accepted.
+              One new scale is admitted at a time. A failed correctness gate, timeout,
+              live-memory block, or sparse-index block is a recorded result and stops
+              unsafe allocation.
             </p>
             <div className="machine-list">
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Accepted campaign</span>
-                  <span className="machine-state">6 / 6</span>
+                  <span className="machine-name">Campaign evidence</span>
+                  <span className="machine-state">
+                    {stageEightRecordedRows.length} / {stageEightDashboard.rows.length}
+                  </span>
                 </div>
                 <div className="machine-detail">
-                  Four case1354pegase horizons and two case2868rte horizons passed
-                  every solver, precision, objective, residual, and physical gate.
+                  {stageEightPassedRows.length} rows passed, {stageEightFailedRows.length} failed,
+                  and {stageEightLockedRows.length} later rows were never executed.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
-                  <span className="machine-name">Structural ledger</span>
-                  <span className="machine-state">18 / 18 differ</span>
+                  <span className="machine-name">Protocol state</span>
+                  <span className="machine-state">{stageEightDashboard.phaseLabel}</span>
                 </div>
                 <div className="machine-detail">
-                  Published row and variable counts are reproduced exactly, while all
-                  reconstructed nonzero counts differ from the paper.
+                  Stage 9 stays locked. Count-only horizons T56, T72, T80, and T88 do not
+                  enter this allocation campaign.
                 </div>
               </div>
             </div>
-            <div className="ablation-panel" aria-label="Stage 7 numerical maxima">
-              <div className="ablation-heading">Maximum across accepted candidates</div>
-              <div className="ablation-grid">
-                <div className="ablation-cell">
-                  <span>Normalized stopping block</span>
-                  <strong>4.1797236508e-6</strong>
-                </div>
-                <div className="ablation-cell">
-                  <span>Raw KKT norm</span>
-                  <strong>0.0096347433</strong>
-                </div>
-                <div className="ablation-cell">
-                  <span>Physical violation</span>
-                  <strong>0.00622103995</strong>
-                </div>
-                <div className="ablation-cell">
-                  <span>Objective gap</span>
-                  <strong>4.2849939e-8</strong>
-                </div>
-              </div>
+            <div className="guard-panel" aria-label="DGX Spark unified-memory guard">
+              <div className="ablation-heading">Unified-memory guard / smaller live budget wins</div>
+              <p className="guard-formula">{stageEightDashboard.guard.formula}</p>
+              <p className="ablation-note">{stageEightDashboard.guard.note}</p>
             </div>
-            <div className="timing-panel" aria-labelledby="timing-title">
-              <div className="ablation-heading" id="timing-title">
-                Solver-core median seconds
+            <div className="timing-panel" aria-labelledby="campaign-title">
+              <div className="ablation-heading" id="campaign-title">
+                Ordered preallocation ledger / GiB
               </div>
               <div className="timing-table-wrap">
-                <table className="timing-table">
+                <table className="timing-table campaign-table">
                   <thead>
                     <tr>
-                      <th scope="col">Benchmark</th>
-                      <th scope="col">HiGHS</th>
-                      <th scope="col">CPU FP64</th>
-                      <th scope="col">GPU FP64</th>
+                      <th scope="col">Order / benchmark</th>
+                      <th scope="col">Host</th>
+                      <th scope="col">GPU</th>
+                      <th scope="col">Combined</th>
+                      <th scope="col">Outcome</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {stageSevenTimings.map((timing) => (
-                      <tr key={timing.caseName + "-" + timing.horizon}>
+                    {stageEightDashboard.rows.map((row) => (
+                      <tr key={`${row.order}-${row.caseName}-${row.horizon}`}>
                         <th scope="row">
-                          <span>{timing.caseName}</span>
-                          <small>{timing.horizon}</small>
+                          <span>{row.order}. {row.caseName}</span>
+                          <small>{row.horizon} / {row.role}</small>
+                          <small>nnz {row.reconstructedNnz}</small>
                         </th>
-                        <td>{timing.highsMedian}</td>
-                        <td>{timing.cpuMedian}</td>
-                        <td>{timing.gpuMedian}</td>
+                        <td>{row.estimatedHostGiB}</td>
+                        <td>{row.estimatedDeviceGiB}</td>
+                        <td>{row.estimatedCombinedGiB}</td>
+                        <td>
+                          <span className={`row-state ${row.status}`}>
+                            {stageEightStatusLabels[row.status]}
+                          </span>
+                          {!["queued", "running", "passed"].includes(row.status) && (
+                            <small className="row-note">{row.note}</small>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
               <p className="ablation-note">
-                These are separate local medians with named inclusion boundaries. No
-                timing ratio or speedup is computed, and paper timings are context only.
+                Combined planning footprint adds the host assembly peak and GPU plan.
+                T16, T24, and T32 remain planning-only estimates: the frozen campaign
+                stopped at T6 before any of those rows were evaluated live or allocated.
+              </p>
+            </div>
+
+            <div className="timing-panel" aria-labelledby="stage-eight-timing-title">
+              <div className="ablation-heading" id="stage-eight-timing-title">
+                Correctness and solver-core median seconds
+              </div>
+              <div className="timing-table-wrap">
+                <table className="timing-table result-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Benchmark</th>
+                      <th scope="col">Check</th>
+                      <th scope="col">HiGHS</th>
+                      <th scope="col">CPU</th>
+                      <th scope="col">GPU</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stageEightDashboard.rows.map((row) => (
+                      <tr key={`result-${row.order}-${row.caseName}-${row.horizon}`}>
+                        <th scope="row">
+                          <span>{row.caseName}</span>
+                          <small>{row.horizon}</small>
+                        </th>
+                        <td>{correctnessLabels[row.correctness]}</td>
+                        <td>{timingValue(row.highsMedianSeconds)}</td>
+                        <td>{timingValue(row.cpuMedianSeconds)}</td>
+                        <td>{timingValue(row.gpuMedianSeconds)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="ablation-note">
+                T6 has no CPU median because its first CPU correctness solve returned
+                SolveTimeLimit at 3,600 seconds during the included final original-space
+                residual evaluation. Its passing HiGHS and GPU medians are retained, but
+                they do not make the overall row pass. Local and paper timings stay
+                separate; no formal speedup is computed across unmatched sparse workloads.
               </p>
             </div>
           </section>
 
           <section className="rail-card source-boundary" aria-labelledby="source-boundary-title">
             <div className="chip">Claim boundary</div>
-            <h2 className="rail-title" id="source-boundary-title">Structure before comparison</h2>
+            <h2 className="rail-title" id="source-boundary-title">Local evidence stays local</h2>
             <p className="rail-copy">
-              The authors&apos; resource placements, time series, and matrix-construction
-              code remain unavailable. Exact dimensions therefore coexist with different
-              sparse support in all 18 rows. The paper&apos;s timings are context only, not
-              directly comparable values for the DGX Spark reconstruction.
+              The reconstructed matrices do not share the paper&apos;s nonzero counts.
+              Table II therefore presents local timings beside paper context without
+              converting that difference into an algorithmic or paper speedup claim.
             </p>
           </section>
 
@@ -332,6 +426,7 @@ export function ReproductionDashboard() {
               <li>CPU correctness before GPU optimization.</li>
               <li>FP64 first; reduced precision is an experiment.</li>
               <li>No invented data or unstated N-1 constraints.</li>
+              <li>Unified host and GPU plans must fit the smaller live budget.</li>
               <li>No direct timing comparison across different sparse workloads.</li>
             </ul>
           </section>
@@ -345,18 +440,18 @@ export function ReproductionDashboard() {
                   <span className="machine-state">CPU reference</span>
                 </div>
                 <div className="machine-detail">
-                  The FP64 path passed all six Stage 7 benchmark rows and supplies the
-                  original-coordinate correctness reference for each GPU cross-check.
+                  Stage 7&apos;s accepted FP64 path remains the original-coordinate
+                  correctness reference for every safe Stage 8 GPU allocation.
                 </div>
               </div>
               <div className="machine">
                 <div className="machine-head">
                   <span className="machine-name">DGX Spark</span>
-                  <span className="machine-state">Stage 7 PASS</span>
+                  <span className="machine-state">{stageEightDashboard.phaseLabel}</span>
                 </div>
                 <div className="machine-detail">
-                  NVIDIA GB10; six resident FP64 GPU tracks passed the numerical,
-                  physical, memory, transfer, and timing evidence gates.
+                  NVIDIA GB10; T6 cleared the memory guard, then stopped on the independent
+                  CPU correctness time limit. No later Stage 8 allocation was attempted.
                 </div>
               </div>
             </div>
@@ -366,6 +461,14 @@ export function ReproductionDashboard() {
             <h2 className="rail-title" id="evidence-title">Evidence register</h2>
             <p className="rail-copy">Versioned artifacts make each decision reviewable.</p>
             <div className="evidence-grid">
+              {stageEightDashboard.evidence.map((artifact) => (
+                <div className="artifact" key={artifact.name} data-availability={artifact.availability}>
+                  <div className="artifact-label">
+                    {artifact.label} / {artifact.availability}
+                  </div>
+                  <div className="artifact-name">{artifact.name}</div>
+                </div>
+              ))}
               {artifacts.map((artifact) => (
                 <div className="artifact" key={artifact.name}>
                   <div className="artifact-label">{artifact.label}</div>

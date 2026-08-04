@@ -1,0 +1,75 @@
+{
+  "all_passed": true,
+  "campaign_status": "STOPPED_ON_FAILURE",
+  "checker_status": "PASS",
+  "checks": [
+    {
+      "detail": "evidence=loaded, config=loaded",
+      "name": "evidence_and_configuration_load",
+      "passed": true
+    },
+    {
+      "detail": "canonical_sha256=ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+      "name": "frozen_stage8_configuration",
+      "passed": true
+    },
+    {
+      "detail": "hashes={'configuration': '06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062', 'evidence': '180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae', 'requirements': '827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf'}",
+      "name": "accepted_stage7_artifacts_preserved",
+      "passed": true
+    },
+    {
+      "detail": "manifest_rows=27",
+      "name": "executed_source_identity",
+      "passed": true
+    },
+    {
+      "detail": "rows=18",
+      "name": "all_18_rows_have_preallocation_resource_estimates",
+      "passed": true
+    },
+    {
+      "detail": "blocked=['case9241pegase:T24', 'case9241pegase:T32']",
+      "name": "t24_t32_signed_int32_blocks_recorded_without_allocation",
+      "passed": true
+    },
+    {
+      "detail": "attempts=5, unique=['case2868rte:T48', 'case2868rte:T64', 'case2868rte:T96', 'case9241pegase:T4', 'case9241pegase:T6']",
+      "name": "one_case_per_invocation_strict_prefix_and_no_locked_allocations",
+      "passed": true
+    },
+    {
+      "detail": "terminal_cases=5",
+      "name": "terminal_success_failure_and_memory_evidence_is_honest",
+      "passed": true
+    },
+    {
+      "detail": "status=STOPPED_ON_FAILURE, passing_prefix=4",
+      "name": "stage8_campaign_reached_an_honest_terminal_protocol_state",
+      "passed": true
+    },
+    {
+      "detail": "successful tracks retain separate timing boundaries",
+      "name": "no_unsupported_speedup_computed",
+      "passed": true
+    },
+    {
+      "detail": "status=STOPPED_ON_FAILURE",
+      "name": "structural_claim_and_stage9_boundary_preserved",
+      "passed": true
+    },
+    {
+      "detail": "terminal_failures=1, failure_records=1",
+      "name": "terminal_failures_preserved",
+      "passed": true
+    }
+  ],
+  "configuration": "configs/benchmarks/stage_8_large.json",
+  "evidence": "results/raw/stage_8/stage_8_validation.json",
+  "schema_version": "1.0",
+  "stage": 8,
+  "summary": {
+    "passed": 12,
+    "total": 12
+  }
+}

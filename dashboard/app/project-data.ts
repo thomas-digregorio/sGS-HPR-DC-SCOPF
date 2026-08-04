@@ -1,5 +1,5 @@
-export type StageStatus = "complete" | "active" | "locked" | "optional";
-export type TaskStatus = "complete" | "working" | "queued" | "locked";
+export type StageStatus = "complete" | "active" | "stopped" | "locked" | "optional";
+export type TaskStatus = "complete" | "working" | "queued" | "failed" | "locked";
 
 export type ResearchTask = {
   id: string;
@@ -13,6 +13,250 @@ export type ResearchStage = {
   purpose: string;
   status: StageStatus;
   tasks: ResearchTask[];
+};
+
+export type StageEightRowStatus =
+  | "queued"
+  | "running"
+  | "passed"
+  | "locked"
+  | "memory-blocked"
+  | "index-blocked"
+  | "failed";
+
+export type StageEightCorrectness = "pending" | "passed" | "not-run" | "failed";
+
+export type StageEightCampaignRow = {
+  order: number;
+  caseName: string;
+  horizon: string;
+  role: "frozen" | "conditional";
+  estimatedDeviceGiB: string;
+  estimatedHostGiB: string;
+  estimatedCombinedGiB: string;
+  reconstructedNnz: string;
+  status: StageEightRowStatus;
+  correctness: StageEightCorrectness;
+  highsMedianSeconds: string | null;
+  cpuMedianSeconds: string | null;
+  gpuMedianSeconds: string | null;
+  note: string;
+};
+
+export type EvidenceAvailability = "available" | "pending";
+
+export type EvidenceArtifact = {
+  label: string;
+  name: string;
+  availability: EvidenceAvailability;
+};
+
+const stageEightTasks: ResearchTask[] = [
+  {
+    id: "8.1",
+    title: "Freeze ordered campaign and preallocation resource estimates",
+    status: "complete",
+  },
+  {
+    id: "8.2",
+    title: "Run each safe scale until the first frozen failure boundary",
+    status: "failed",
+  },
+  {
+    id: "8.3",
+    title: "Preserve numerical, timeout, memory, and index failures",
+    status: "complete",
+  },
+  { id: "8.4", title: "Reconstruct Table II beyond the terminal row", status: "locked" },
+  { id: "8.5", title: "Interpret timings only across fair boundaries", status: "complete" },
+];
+
+/**
+ * Stage 8 has one intentionally centralized terminal evidence model. The component
+ * derives all counters and tables from this immutable campaign summary.
+ */
+export const stageEightDashboard = {
+  stageStatus: "stopped" as StageStatus,
+  phaseLabel: "STOPPED_ON_FAILURE",
+  headline: "Stage 8 stopped at the first frozen failure boundary.",
+  summary:
+    "Four large rows passed. At T6, the CPU FP64 correctness solve reached the frozen 3,600-second time limit; HiGHS and GPU FP64 passed, but the row and campaign did not.",
+  gate: {
+    command: "STAGE 9 LOCKED",
+    state: "held" as "held" | "available",
+    intro:
+      "The frozen Stage 8 campaign terminated on the T6 CPU correctness failure. A passing evidence audit preserves that result; it does not authorize the next stage.",
+    note: "Stage 9 remains locked. T16, T24, and T32 were not executed.",
+  },
+  acceptance: {
+    result: "fail" as "running" | "pass" | "fail",
+    checkerPassed: 12 as number | null,
+    checkerTotal: 12 as number | null,
+    note:
+      "12 / 12 independent checks validate the protocol and evidence; the campaign still ends STOPPED_ON_FAILURE.",
+  },
+  guard: {
+    usableFraction: "80%",
+    formula:
+      "min(0.8 × live host available, 0.8 × live CUDA free) ≥ host assembly peak + GPU planning footprint",
+    liveGuardBudgetGiB: "79.12" as string | null,
+    note:
+      "At the final executed preflight, the device budget was 79.12 GiB and the host budget was 79.41 GiB. T6 projected 35.410 GiB and cleared the guard before its solver timeout.",
+  },
+  tasks: stageEightTasks,
+  rows: [
+    {
+      order: 1,
+      caseName: "case2868rte",
+      horizon: "T48",
+      role: "frozen",
+      estimatedDeviceGiB: "12.110",
+      estimatedHostGiB: "12.004",
+      estimatedCombinedGiB: "24.114",
+      reconstructedNnz: "229,507,104",
+      status: "passed",
+      correctness: "passed",
+      highsMedianSeconds: "76.238645",
+      cpuMedianSeconds: "804.863493",
+      gpuMedianSeconds: "49.968351",
+      note: "All required solver tracks passed.",
+    },
+    {
+      order: 2,
+      caseName: "case2868rte",
+      horizon: "T64",
+      role: "frozen",
+      estimatedDeviceGiB: "16.155",
+      estimatedHostGiB: "16.013",
+      estimatedCombinedGiB: "32.169",
+      reconstructedNnz: "306,303,136",
+      status: "passed",
+      correctness: "passed",
+      highsMedianSeconds: "108.232479",
+      cpuMedianSeconds: "1078.891699",
+      gpuMedianSeconds: "68.383103",
+      note: "All required solver tracks passed.",
+    },
+    {
+      order: 3,
+      caseName: "case2868rte",
+      horizon: "T96",
+      role: "frozen",
+      estimatedDeviceGiB: "24.258",
+      estimatedHostGiB: "24.045",
+      estimatedCombinedGiB: "48.303",
+      reconstructedNnz: "460,334,496",
+      status: "passed",
+      correctness: "passed",
+      highsMedianSeconds: "163.592526",
+      cpuMedianSeconds: "1621.905045",
+      gpuMedianSeconds: "105.022444",
+      note: "All required solver tracks passed.",
+    },
+    {
+      order: 4,
+      caseName: "case9241pegase",
+      horizon: "T4",
+      role: "frozen",
+      estimatedDeviceGiB: "11.818",
+      estimatedHostGiB: "11.788",
+      estimatedCombinedGiB: "23.606",
+      reconstructedNnz: "342,863,272",
+      status: "passed",
+      correctness: "passed",
+      highsMedianSeconds: "142.478889",
+      cpuMedianSeconds: "3087.217721",
+      gpuMedianSeconds: "193.631896",
+      note: "All required solver tracks passed.",
+    },
+    {
+      order: 5,
+      caseName: "case9241pegase",
+      horizon: "T6",
+      role: "frozen",
+      estimatedDeviceGiB: "17.727",
+      estimatedHostGiB: "17.682",
+      estimatedCombinedGiB: "35.410",
+      reconstructedNnz: "514,308,838",
+      status: "failed",
+      correctness: "failed",
+      highsMedianSeconds: "963.956952",
+      cpuMedianSeconds: null,
+      gpuMedianSeconds: "357.543837",
+      note:
+        "CPU FP64 correctness returned SolveTimeLimit after 3,600.093 s during its included final original-space residual evaluation; CPU warm-up and measurements were not run. HiGHS and GPU FP64 passed.",
+    },
+    {
+      order: 6,
+      caseName: "case9241pegase",
+      horizon: "T16",
+      role: "frozen",
+      estimatedDeviceGiB: "47.278",
+      estimatedHostGiB: "47.157",
+      estimatedCombinedGiB: "94.435",
+      reconstructedNnz: "1,371,647,068",
+      status: "locked",
+      correctness: "not-run",
+      highsMedianSeconds: null,
+      cpuMedianSeconds: null,
+      gpuMedianSeconds: null,
+      note: "Not executed: the frozen campaign stopped at the preceding T6 failure.",
+    },
+    {
+      order: 7,
+      caseName: "case9241pegase",
+      horizon: "T24",
+      role: "conditional",
+      estimatedDeviceGiB: "70.922",
+      estimatedHostGiB: "70.741",
+      estimatedCombinedGiB: "141.663",
+      reconstructedNnz: "2,057,650,132",
+      status: "locked",
+      correctness: "not-run",
+      highsMedianSeconds: null,
+      cpuMedianSeconds: null,
+      gpuMedianSeconds: null,
+      note: "Not executed: the frozen campaign stopped at T6 before this conditional row.",
+    },
+    {
+      order: 8,
+      caseName: "case9241pegase",
+      horizon: "T32",
+      role: "conditional",
+      estimatedDeviceGiB: "94.569",
+      estimatedHostGiB: "94.328",
+      estimatedCombinedGiB: "188.897",
+      reconstructedNnz: "2,743,770,956",
+      status: "locked",
+      correctness: "not-run",
+      highsMedianSeconds: null,
+      cpuMedianSeconds: null,
+      gpuMedianSeconds: null,
+      note: "Not executed: the frozen campaign stopped at T6 before this conditional row.",
+    },
+  ] satisfies StageEightCampaignRow[],
+  evidence: [
+    {
+      label: "Frozen Stage 8 protocol",
+      name: "configs/benchmarks/stage_8_large.json",
+      availability: "available",
+    },
+    {
+      label: "Stage 8 report",
+      name: "docs/stage_reports/stage_8_report.md",
+      availability: "available",
+    },
+    {
+      label: "Terminal Stage 8 evidence",
+      name: "results/raw/stage_8/stage_8_validation.json",
+      availability: "available",
+    },
+    {
+      label: "Independent 12-check audit",
+      name: "results/raw/stage_8/stage_8_checks.json",
+      availability: "available",
+    },
+  ] satisfies EvidenceArtifact[],
 };
 
 const locked = (id: string, title: string): ResearchTask => ({
@@ -158,14 +402,8 @@ export const stages: ResearchStage[] = [
     id: 8,
     title: "Large paper-scale benchmarks",
     purpose: "Scale incrementally, estimate memory first, and preserve every failure as data.",
-    status: "locked",
-    tasks: [
-      locked("8.1", "Memory and resource estimate"),
-      locked("8.2", "Incremental scale-up"),
-      locked("8.3", "Failure preservation"),
-      locked("8.4", "Table II reconstruction"),
-      locked("8.5", "Careful speedup interpretation"),
-    ],
+    status: stageEightDashboard.stageStatus,
+    tasks: stageEightDashboard.tasks,
   },
   {
     id: 9,
@@ -353,6 +591,12 @@ export const learningNotes = [
     title: "Matching dimensions does not match sparse work",
     body:
       "All 18 Table II rows reproduce the published row and variable counts, but every reconstructed nonzero count differs. Sparse support changes memory traffic and runtime, so the paper's timings remain context rather than a direct comparison.",
+  },
+  {
+    label: "Stage 8 safety",
+    title: "Unified memory must be budgeted once",
+    body:
+      "DGX Spark lets the CPU and GPU share one memory pool. Adding the host assembly peak to the GPU planning footprint, then comparing that sum with the smaller live budget, prevents the same physical memory from being promised twice.",
   },
   {
     label: "Source boundary",

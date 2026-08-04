@@ -415,6 +415,12 @@ a {
   box-shadow: 0 10px 35px rgba(23, 63, 53, 0.08);
 }
 
+.stage-card[data-status="stopped"] {
+  background: #fff8f6;
+  border-color: #c98278;
+  box-shadow: 0 10px 35px rgba(122, 44, 37, 0.08);
+}
+
 .stage-card[data-status="complete"] {
   border-color: #8fc4ad;
 }
@@ -481,6 +487,11 @@ a {
   color: #6d4313;
 }
 
+.status-badge.stopped {
+  background: #f2d8d4;
+  color: #7a2c25;
+}
+
 .status-badge.locked {
   background: #e8e7e1;
   color: #6e716b;
@@ -545,6 +556,11 @@ a {
 .task-signal.working {
   background: var(--amber);
   border-color: var(--amber);
+}
+
+.task-signal.failed {
+  background: #a63f35;
+  border-color: #a63f35;
 }
 
 .task-code {
@@ -620,6 +636,26 @@ a {
   margin-top: 18px;
   overflow-wrap: anywhere;
   padding: 13px;
+}
+
+.gate-state {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  margin-top: 16px;
+  text-transform: uppercase;
+}
+
+.gate-state.available {
+  color: var(--mint);
+}
+
+.gate-note {
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 11px;
+  line-height: 1.55;
+  margin: 10px 0 0;
 }
 
 .rule-list {
@@ -750,6 +786,23 @@ a {
   margin: 10px 0 0;
 }
 
+.guard-panel {
+  background: #f4eadb;
+  border: 1px solid #e0c59f;
+  border-radius: 12px;
+  margin-top: 18px;
+  padding: 15px;
+}
+
+.guard-formula {
+  color: var(--green);
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  line-height: 1.65;
+  margin: 11px 0 0;
+  overflow-wrap: anywhere;
+}
+
 .timing-panel {
   border-top: 1px solid var(--line);
   margin-top: 18px;
@@ -811,6 +864,67 @@ a {
   font-size: 9px;
 }
 
+.campaign-table th:first-child {
+  width: 29%;
+}
+
+.campaign-table th:last-child {
+  width: 24%;
+}
+
+.result-table th:first-child {
+  width: 29%;
+}
+
+.row-state {
+  border-radius: 999px;
+  display: inline-block;
+  font-family: "Segoe UI", Inter, Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1.25;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.row-state.queued,
+.row-state.locked {
+  background: #e8e7e1;
+  color: #6e716b;
+}
+
+.row-state.running {
+  background: var(--amber-soft);
+  color: #6d4313;
+}
+
+.row-state.passed {
+  background: var(--mint);
+  color: var(--green);
+}
+
+.row-state.memory-blocked,
+.row-state.index-blocked {
+  background: #f4eadb;
+  color: #795326;
+}
+
+.row-state.failed {
+  background: #f2d8d4;
+  color: #7a2c25;
+}
+
+.row-note {
+  color: var(--ink-soft);
+  display: block;
+  font-family: "Segoe UI", Inter, Arial, sans-serif;
+  font-size: 8px;
+  line-height: 1.35;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
 .timing-table tbody tr:last-child th,
 .timing-table tbody tr:last-child td {
   border-bottom: 0;
@@ -835,6 +949,11 @@ a {
   border: 1px solid var(--line);
   border-radius: 11px;
   padding: 12px;
+}
+
+.artifact[data-availability="pending"] {
+  border-style: dashed;
+  opacity: 0.76;
 }
 
 .artifact-label {

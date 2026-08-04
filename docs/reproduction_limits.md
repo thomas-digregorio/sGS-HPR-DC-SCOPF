@@ -230,7 +230,9 @@ the primary target for Stages 1-6.**
 Uses pinned public base cases plus a published, deterministic protocol for
 placing and parameterizing RGs/ESSs and time series; compares dimensions,
 sparsity, correctness, and scaling without claiming identical instances.
-**This is the accepted Stage 7 classification.**
+**This is the accepted Stage 7 and Stage 8 classification.** Stage 8's
+terminal CPU time limit does not upgrade or invalidate the classification; it
+limits how far the validated structural campaign reached.
 
 ### Approximate benchmark reconstruction
 
@@ -238,7 +240,7 @@ Attempts to approach published dimensions or timing trends with disclosed
 differences. It must never be presented as an exact timing or data
 reproduction.
 
-## 8. What Stages 6 and 7 resolve for this project
+## 8. What Stages 6 through 8 resolve for this project
 
 Stage 6 makes several project-side choices observable and reproducible:
 
@@ -272,25 +274,34 @@ Stage 7 additionally makes the benchmark boundary observable:
   directly comparable;
 - exactly six small/medium cases pass HiGHS, CPU FP64, GPU FP64, raw-KKT,
   physical, objective, memory, and transfer gates;
-- the other 12 rows are count-only and record zero Stage 8 allocations; and
+- at the end of Stage 7, the other 12 rows were count-only and had received
+  zero Stage 8 allocations; and
 - first runs, warm-ups, measured repetitions, variability, and complete-case
   walls are reported separately.
 
 These observations still do not identify the authors' hidden additions or
 make the DGX Spark GB10 equivalent to the paper's A100.
 
+Stage 8 subsequently allocated five strict-prefix large rows. T48, T64, T96,
+and case9241pegase T4 passed all required tracks. Case9241pegase T6 passed
+HiGHS and GPU FP64 but its required CPU correctness attempt exceeded the
+frozen 3,600-second limit. The campaign stopped there without retry. T16, T24,
+and T32 were not executed. This establishes a larger validated prefix for the
+structural reconstruction, not a complete large-case pass.
+
 ## 9. Locked follow-up plan
 
-1. Keep Stage 8 allocations and solves locked until the exact approval gate.
-2. Preserve the Stage 7 structural classification and sparse-count differences
-   when large cases are authorized.
-3. Validate optimization residuals and physical constraints before timing any
-   new case.
-4. Keep first-run, warm-up, solver-core, transfer, and end-to-end boundaries
+1. Preserve the terminal Stage 8 evidence and T6 CPU time limit unchanged.
+2. Keep Stage 9 locked because the conditional Stage 9 gate was not satisfied.
+3. Do not retry T6 or revise its deadline without a new explicit decision and
+   a separately identified campaign.
+4. Continue to preserve the structural classification and sparse-count
+   differences in any authorized follow-up.
+5. Keep first-run, warm-up, solver-core, transfer, and end-to-end boundaries
    separate.
-5. Do not compare DGX timing directly with Table II unless sparse workload and
+6. Do not compare DGX timing directly with Table II unless sparse workload and
    inclusion boundaries are shown to be compatible.
-6. Continue to preserve missing author items as missing rather than tuning
+7. Continue to preserve missing author items as missing rather than tuning
    synthetic values to match the paper's times.
 
 ## 10. Stage 7 public-data result
@@ -329,3 +340,28 @@ They changed no accepted evidence or threshold and required no numerical
 rerun. The accepted 19/19 check is evaluated against `ff6f762`; checking a
 later head with changed execution-source files fails source identity by design,
 not a numerical or timing gate.
+
+## 11. Stage 8 terminal result
+
+Stage 8 ran from clean detached commit
+`f1fffc2adcba197040578695ba11dd27b0d1981f` and preserved the Stage 7
+construction, precision, numerical thresholds, and timing protocol. The first
+four rows passed all required tracks. The fifth row, case9241pegase T6, passed
+its memory gate, HiGHS reference, and GPU FP64 track, but its CPU FP64
+correctness attempt reached `TIME_LIMIT` after `3,600.092739 s`.
+
+That outcome has several important limits:
+
+- the completed T6 GPU candidate is valid, but T6 as a required three-track row
+  is not a pass;
+- the interrupted CPU attempt supplies neither an accepted objective nor a
+  timing median;
+- T16's 94.435 GiB planning projection was not tested against a live budget;
+- T24 and T32 retain static signed-int32 ledger blocks but were not executed;
+- no Stage 8 speedup is supported; and
+- Stage 9 remains locked.
+
+The independent checker passed 12/12 protocol and evidence checks while
+retaining campaign status `STOPPED_ON_FAILURE`. This distinction is essential:
+checker PASS means the failure was recorded honestly, not that Stage 8 met its
+scientific acceptance gate.

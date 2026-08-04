@@ -1,0 +1,5 @@
+usage: run_stage_8.py [-h] [--config CONFIG] [--output-dir OUTPUT_DIR]
+                      [--device-id DEVICE_ID] [--run-next | --plan-only]
+                      [--approval-token APPROVAL_TOKEN]
+                      [--resume | --no-resume] [--retry-failed]
+run_stage_8.py: error: unrecognized arguments: STAGE 7 AND RUN STAGE 8
