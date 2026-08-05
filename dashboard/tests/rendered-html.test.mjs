@@ -22,11 +22,11 @@ test("server-renders the research dashboard", async () => {
   const html = await response.text();
   const renderedText = html.replaceAll("<!-- -->", "");
   assert.match(html, /<title>HPR Reproduction Control Room<\/title>/i);
-  assert.match(html, /Stage 8 sequences 6--8 are resolved at the safety boundary/);
+  assert.match(html, /Stage 9 concludes: structural reproduction/);
   assert.match(html, /Research roadmap/);
-  assert.match(html, /CONTINUATION_RESOURCE_LIMITS/);
-  assert.match(html, /STAGE 9 LOCKED/);
-  assert.match(html, /Locked after terminal failure/);
+  assert.match(html, /STAGE_9_COMPLETE/);
+  assert.match(html, /STAGE 10 LOCKED/);
+  assert.match(html, /Held for separate approval/);
   assert.match(renderedText, /4 \/ 5/);
   assert.match(renderedText, /8 \/ 8/);
   assert.match(html, /13 \/ 13/);
@@ -65,7 +65,11 @@ test("server-renders the research dashboard", async () => {
   assert.match(html, /zero[\s\S]*new allocations/i);
   assert.match(html, /paper timings stay[\s\S]*separate/i);
   assert.match(html, /no formal speedup is computed/i);
-  assert.match(html, /Stage 9 remains locked/i);
+  assert.match(html, /Stage 9 complete/i);
+  assert.match(html, /Stage 10[\s\S]*?locked/i);
+  assert.match(html, /D - structural reproduction/i);
+  assert.match(html, /docs\/final_reproduction_report\.tex/);
+  assert.match(html, /results\/stage_9_result_index\.json/);
   assert.match(html, /configs\/benchmarks\/stage_8_large\.json/);
   assert.match(html, /docs\/stage_reports\/stage_8_report\.md/);
   assert.match(html, /results\/raw\/stage_8\/stage_8_validation\.json/);
@@ -98,7 +102,7 @@ test("starter preview is removed and product metadata is present", async () => {
   );
   assert.match(page, /ReproductionDashboard/);
   assert.match(layout, /HPR Reproduction Control Room/);
-  assert.match(layout, /\/(?:og-stage7|og-stage8|og)\.png/);
+  assert.match(layout, /\/og-stage9\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton|site-creator-vinext-starter/);
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);
 });

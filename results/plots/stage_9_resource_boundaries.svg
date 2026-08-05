@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="630" viewBox="0 0 1280 630">
+<rect width="100%" height="100%" fill="#FFFFFF"/>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#1F2937}.title{font-size:24px;font-weight:700}.sub{font-size:18px;font-weight:700}.label{font-size:15px}.note{font-size:14px;fill:#4B5563}.grid{stroke:#D1D5DB;stroke-width:1}</style>
+<text x="640" y="34" text-anchor="middle" class="title">Stage 8 fail-closed resource boundaries</text>
+<text x="315" y="74" text-anchor="middle" class="sub">T16 unified-memory gate</text>
+<text x="960" y="74" text-anchor="middle" class="sub">T24/T32 signed-int32 CSR gate</text>
+<text x="95" y="148" text-anchor="end" class="label">Projected</text>
+<rect x="110" y="125" width="430" height="36" fill="#EEF2F7"/>
+<rect x="110" y="125" width="386.73" height="36" fill="#E67E22"/>
+<text x="506.73" y="149" class="label">94.435 GiB</text>
+<text x="95" y="238" text-anchor="end" class="label">Host budget</text>
+<rect x="110" y="215" width="430" height="36" fill="#EEF2F7"/>
+<rect x="110" y="215" width="269.40" height="36" fill="#2A6FBB"/>
+<text x="389.40" y="239" class="label">65.784 GiB</text>
+<text x="95" y="328" text-anchor="end" class="label">CUDA budget</text>
+<rect x="110" y="305" width="430" height="36" fill="#EEF2F7"/>
+<rect x="110" y="305" width="268.22" height="36" fill="#4B5563"/>
+<text x="388.22" y="329" class="label">65.496 GiB</text>
+<text x="750" y="148" text-anchor="end" class="label">T24 planning nnz</text>
+<rect x="765" y="125" width="430" height="36" fill="#EEF2F7"/>
+<rect x="765" y="125" width="302.39" height="36" fill="#E67E22"/>
+<text x="1077.39" y="149" class="label">2.532 billion</text>
+<text x="750" y="238" text-anchor="end" class="label">T32 planning nnz</text>
+<rect x="765" y="215" width="430" height="36" fill="#EEF2F7"/>
+<rect x="765" y="215" width="403.21" height="36" fill="#B45309"/>
+<text x="1178.21" y="239" class="label">3.376 billion</text>
+<text x="750" y="328" text-anchor="end" class="label">signed-int32 max</text>
+<rect x="765" y="305" width="430" height="36" fill="#EEF2F7"/>
+<rect x="765" y="305" width="256.50" height="36" fill="#2A6FBB"/>
+<text x="1031.50" y="329" class="label">2.147 billion</text>
+<text x="315" y="454" text-anchor="middle" class="note">94.435 GiB exceeded both unchanged 80% live budgets.</text>
+<text x="960" y="454" text-anchor="middle" class="note">Both planning envelopes exceed 2,147,483,647.</text>
+<rect x="72" y="500" width="1136" height="82" rx="8" fill="#F3F4F6"/>
+<text x="640" y="531" text-anchor="middle" class="sub">Scientific interpretation</text>
+<text x="640" y="558" text-anchor="middle" class="label">The guards stopped before LP construction or solver allocation; these are measured safety outcomes, not OOM crashes.</text>
+</svg>

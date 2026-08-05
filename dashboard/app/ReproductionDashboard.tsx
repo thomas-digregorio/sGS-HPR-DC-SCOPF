@@ -58,7 +58,12 @@ export function ReproductionDashboard() {
   const latestPassedStage = [...coreStages]
     .reverse()
     .find((stage) => stage.status === "complete");
-  const currentStage = activeStage ?? stoppedStage ?? latestPassedStage ?? stages[0];
+  const currentStage =
+    activeStage ??
+    (latestPassedStage && (!stoppedStage || latestPassedStage.id > stoppedStage.id)
+      ? latestPassedStage
+      : stoppedStage) ??
+    stages[0];
   const nextLockedStage = coreStages.find(
     (stage) => stage.id > currentStage.id && stage.status === "locked",
   );
@@ -86,11 +91,13 @@ export function ReproductionDashboard() {
       : `${stageEightDashboard.acceptance.checkerPassed} / ${stageEightDashboard.acceptance.checkerTotal}`;
   const stageFocusLabel = activeStage
     ? `Now running / Stage ${currentStage.id}`
-    : stoppedStage
-      ? `Stage ${currentStage.id} stopped / Stage 9 locked`
-    : nextLockedStage
-      ? `Stage ${currentStage.id} passed / Stage ${nextLockedStage.id} awaits approval`
-      : `Stage ${currentStage.id} passed`;
+    : currentStage.id === 9
+      ? "Stage 9 complete / Stage 10 locked"
+      : currentStage.status === "stopped"
+        ? `Stage ${currentStage.id} stopped`
+        : nextLockedStage
+          ? `Stage ${currentStage.id} passed / Stage ${nextLockedStage.id} awaits approval`
+          : `Stage ${currentStage.id} passed`;
 
   const filteredStages = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -276,7 +283,9 @@ export function ReproductionDashboard() {
             <h2 className="rail-title" id="gate-title">Approval gate</h2>
             <p className="rail-copy">{stageEightDashboard.gate.intro}</p>
             <div className={`gate-state ${stageEightDashboard.gate.state}`}>
-              {stageEightDashboard.acceptance.result === "fail"
+              {stageEightDashboard.gate.command === "STAGE 10 LOCKED"
+                ? "Held for separate approval"
+                : stageEightDashboard.acceptance.result === "fail"
                 ? "Locked after terminal failure"
                 : stageEightDashboard.gate.state === "held"
                   ? "Held until acceptance"
@@ -313,8 +322,9 @@ export function ReproductionDashboard() {
                   <span className="machine-state">{stageEightDashboard.phaseLabel}</span>
                 </div>
                 <div className="machine-detail">
-                  Stage 9 stays locked. Count-only horizons T56, T72, T80, and T88 do not
-                  enter this allocation campaign.
+                  Stage 9 reports the terminal campaign without new allocation. Stage 10
+                  remains locked; count-only horizons T56, T72, T80, and T88 never entered
+                  the allocation campaign.
                 </div>
               </div>
             </div>

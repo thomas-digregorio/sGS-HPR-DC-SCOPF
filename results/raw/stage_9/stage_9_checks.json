@@ -1,0 +1,100 @@
+{
+  "all_passed": true,
+  "checker_status": "PASS",
+  "checks": [
+    {
+      "detail": "missing=[]",
+      "name": "required_artifacts",
+      "passed": true
+    },
+    {
+      "detail": "{\"code\": \"D\", \"decision_rule\": \"docs/stage_9_contract.md\", \"exact_reproduction\": false, \"label\": \"structural reproduction\", \"local_speedup_claimed\": false, \"paper_timing_reproduced\": false}",
+      "name": "classification_D",
+      "passed": true
+    },
+    {
+      "detail": "{\"byte_size\": 9157238, \"file_name\": \"AnEfficientGPU-basedHalpernAccelerating.pdf\", \"page_count\": 17, \"pdf_metadata\": {\"/Author\": \"\", \"/CreationDate\": \"D:20251119030428Z\", \"/Creator\": \"LaTeX with hyperref\", \"/Keywords\": \"\", \"/ModDate\": \"D:20251119030428Z\", \"/PTEX.Fullbanner\": \"This is pdfTeX, Version 3.141592653-2.6-1.40.27 (TeX Live 2025) kpathsea version 6.4.1\", \"/Producer\": \"pdfTeX-1.40.27\", \"/Subject\": \"\", \"/Title\": \"\", \"/Trapped\": \"/False\"}, \"sha256\": \"7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4\"}",
+      "name": "paper_identity",
+      "passed": true
+    },
+    {
+      "detail": "totals=[10, 6, 9, 12, 20, 23, 21, 19, 12, 13], checker_passes=10",
+      "name": "checker_ledger",
+      "passed": true
+    },
+    {
+      "detail": "status=STOPPED_ON_FAILURE, prefix=4",
+      "name": "stage_8_terminal_semantics",
+      "passed": true
+    },
+    {
+      "detail": "status=COMPLETE_WITH_RESOURCE_LIMITS, allocations=0",
+      "name": "continuation_semantics",
+      "passed": true
+    },
+    {
+      "detail": "rows=14, allocated=11, gpu_pass=11",
+      "name": "benchmark_aggregation",
+      "passed": true
+    },
+    {
+      "detail": "rows=18, dimension_matches=18, nnz_matches=0",
+      "name": "structural_reconciliation",
+      "passed": true
+    },
+    {
+      "detail": "T16 memory-blocked; T24/T32 signed-int32-blocked before allocation",
+      "name": "resource_boundaries",
+      "passed": true
+    },
+    {
+      "detail": "missing=[]",
+      "name": "required_report_subjects",
+      "passed": true
+    },
+    {
+      "detail": "classification, failure, caveat, and resource phrases",
+      "name": "report_semantics",
+      "passed": true
+    },
+    {
+      "detail": "IEEEtran, abstract, equations, figures, appendices, bibliography",
+      "name": "latex_scientific_structure",
+      "passed": true
+    },
+    {
+      "detail": "errors=[]",
+      "name": "result_index_hashes",
+      "passed": true
+    },
+    {
+      "detail": "{\"allocated_benchmark_rows\": 11, \"dimension_matches\": 18, \"nnz_matches\": 0, \"resource_resolved_without_allocation\": 3, \"symbolic_table_ii_rows\": 18, \"validated_cpu_rows\": 10, \"validated_gpu_rows\": 11}",
+      "name": "result_index_coverage",
+      "passed": true
+    },
+    {
+      "detail": "bytes=599725, page_objects=6, sha256=a39410d4084e006d3433be8a4a990500452a82091b93257535b6e706b4d12860",
+      "name": "compiled_pdf",
+      "passed": true
+    },
+    {
+      "detail": "{\"n_minus_1_work_performed\": false, \"status\": \"LOCKED\"}",
+      "name": "stage_10_locked",
+      "passed": true
+    },
+    {
+      "detail": "{\n  \"classification\": {\n    \"code\": \"D\",\n    \"label\": \"structural reproduction\",\n    \"decision_rule\": \"docs/stage_9_contract.md\",\n    \"exact_reproduction\": false,\n    \"paper_timing_reproduced\": false,\n    \"local_speedup_claimed\": false\n  },\n  \"generated\": [\n    \"results/stage_9_result_index.json\",\n    \"results/tables/stage_9_stage_checks.csv\",\n    \"results/tables/stage_9_benchmarks.csv\",\n    \"results/tables/stage_9_structural_reconciliation.csv\",\n    \"results/tables/stage_9_resource_boundaries.csv\",\n    \"results/tables/stage_9_timing_decomposition.csv\",\n    \"results/plots/stage_9_solver_timings.svg\",\n    \"results/plots/stage_9_resource_boundaries.svg\"\n  ]\n}",
+      "name": "generated_outputs_current",
+      "passed": true
+    }
+  ],
+  "classification": "D - structural reproduction",
+  "schema_version": 1,
+  "stage": 9,
+  "stage_10_status": "LOCKED",
+  "stage_8_scientific_result": "FAIL",
+  "summary": {
+    "passed": 17,
+    "total": 17
+  }
+}

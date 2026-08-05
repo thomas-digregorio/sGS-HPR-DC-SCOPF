@@ -717,3 +717,41 @@ its original rationale should remain reviewable.
   terminal evidence, and reporting boundaries were honest. It does not answer
   whether every required solver track succeeded. Conflating these decisions
   would turn a correctly recorded failure into a false scientific pass.
+
+## D-0060 - Classify the completed study as a structural reproduction
+
+- **Status:** accepted for the Stage 9 final report
+- **Stage:** 9
+- **Decision:** Select classification D, structural reproduction. Reject exact
+  and near-exact classifications because the authors' numerical instances,
+  sparse supports, source code, hardware, and timing boundary were not
+  reproduced. Do not use partial reproduction because the canonical
+  mathematics, implementation, CPU/GPU parity, 18-row dimension ledger, and
+  validated benchmark pipeline were completed.
+- **Reason:** The classification must describe the evidence boundary rather
+  than average stage outcomes. Every `(m,n)` pair matches, every nnz count
+  differs, and Stage 8 retains an honest acceptance failure.
+
+## D-0061 - Make the LaTeX paper the primary Stage 9 reader artifact
+
+- **Status:** accepted for Stage 9
+- **Stage:** 9
+- **Decision:** Maintain a formal IEEE-style LaTeX source and compiled PDF as
+  the primary scientific narrative, with `docs/final_reproduction_report.md`
+  as the required archival companion. Put detailed evidence hashes,
+  reproducibility checks, regeneration commands, full ledgers, and Git-state
+  boundaries in appendices or linked machine-readable artifacts.
+- **Reason:** A concise scientific paper makes the main conclusion readable
+  while appendices preserve the audit trail needed for independent review.
+
+## D-0062 - Keep performance descriptive and Stage 10 locked
+
+- **Status:** accepted for Stage 9
+- **Stage:** 9
+- **Decision:** Plot local HiGHS, CPU FP64, and GPU FP64 times without computing
+  a formal speedup. Explicitly retain solver-boundary, sparse-workload, and
+  hardware caveats. Stop after Stage 9 and perform no N-1 model or contingency
+  work.
+- **Reason:** Ratios across different timing boundaries, matrices, or hardware
+  would not isolate an algorithmic effect. The user authorized Stage 9, not the
+  optional Stage 10 research extension.

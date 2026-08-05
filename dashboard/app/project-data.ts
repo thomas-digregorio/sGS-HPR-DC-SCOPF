@@ -81,16 +81,16 @@ const stageEightTasks: ResearchTask[] = [
  */
 export const stageEightDashboard = {
   stageStatus: "stopped" as StageStatus,
-  phaseLabel: "CONTINUATION_RESOURCE_LIMITS",
-  headline: "Stage 8 sequences 6--8 are resolved at the safety boundary.",
+  phaseLabel: "STAGE_9_COMPLETE",
+  headline: "Stage 9 concludes: structural reproduction.",
   summary:
-    "The original campaign still fails at T6. A separate HiGHS/GPU-only continuation made zero allocations: T16 was memory-blocked, while T24 and T32 were signed-int32 index-blocked.",
+    "The final scientific paper reconciles every stage without hiding the Stage 8 failure: 18 dimension matches, zero sparse-nnz matches, 11 validated GPU rows, one CPU timeout, and three fail-closed resource outcomes.",
   gate: {
-    command: "STAGE 9 LOCKED",
+    command: "STAGE 10 LOCKED",
     state: "held" as "held" | "available",
     intro:
-      "The original T6 CPU failure is preserved. The separately authorized sequence 6--8 continuation resolved every row before allocation without changing the frozen safety thresholds.",
-    note: "Stage 9 remains locked with zero allocations, as requested.",
+      "Stage 9 is the completed reporting boundary. The optional N-1 SCOPF extension is a separate research program and was not started.",
+    note: "The final classification is D - structural reproduction. Stage 10 requires separate explicit approval.",
   },
   acceptance: {
     result: "fail" as "running" | "pass" | "fail",
@@ -243,6 +243,26 @@ export const stageEightDashboard = {
     },
   ] satisfies StageEightCampaignRow[],
   evidence: [
+    {
+      label: "Final scientific report",
+      name: "docs/final_reproduction_report.tex",
+      availability: "available",
+    },
+    {
+      label: "Archival report",
+      name: "docs/final_reproduction_report.md",
+      availability: "available",
+    },
+    {
+      label: "Machine-readable result index",
+      name: "results/stage_9_result_index.json",
+      availability: "available",
+    },
+    {
+      label: "Reproducibility checklist",
+      name: "docs/reproducibility_checklist.md",
+      availability: "available",
+    },
     {
       label: "Frozen Stage 8 protocol",
       name: "configs/benchmarks/stage_8_large.json",
@@ -433,12 +453,12 @@ export const stages: ResearchStage[] = [
     id: 9,
     title: "Final reproduction report",
     purpose: "State exactly what was reproduced, what was reconstructed, and what remains unknown.",
-    status: "locked",
+    status: "complete",
     tasks: [
-      locked("9.1", "Synthesize mathematical and implementation record"),
-      locked("9.2", "Classify reproduction fidelity"),
-      locked("9.3", "Create reproducibility checklist and command index"),
-      locked("9.4", "Publish machine-readable result index"),
+      { id: "9.1", title: "Synthesize mathematical and implementation record", status: "complete" },
+      { id: "9.2", title: "Classify reproduction fidelity", status: "complete" },
+      { id: "9.3", title: "Create reproducibility checklist and command index", status: "complete" },
+      { id: "9.4", title: "Publish machine-readable result index", status: "complete" },
     ],
   },
   {

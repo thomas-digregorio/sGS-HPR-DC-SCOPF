@@ -46,39 +46,31 @@ Only one stage is executed at a time:
 | 10 | Optional N-1 SCOPF research extension |
 
 Every stage ends with tests, a report, preserved evidence, and an acceptance
-decision. Stage 8 reached a terminal `STOPPED_ON_FAILURE` state. Its evidence
-protocol passed independent review, but Stage 8 itself failed because the T6
-CPU correctness track exceeded the frozen per-solve deadline. Stage 9 remains
-locked. A separately authorized GPU-only continuation later resolved sequences
-6--8 at unchanged preallocation safety boundaries without modifying or
-retrying that terminal campaign.
+decision. Stage 9 is complete. It preserves Stage 8's terminal
+`STOPPED_ON_FAILURE` result, the separate GPU-only resource continuation, and
+the distinction between protocol integrity and scientific acceptance. Stage
+10 remains a separately locked N-1 extension.
 
 ## Current status
 
-Stage 8 is terminal with **FAIL** and campaign status
-`STOPPED_ON_FAILURE`. Four large structural rows passed in order:
-case2868rte at T=48, 64, and 96, followed by case9241pegase at T=4. The fifth
-row, case9241pegase T=6, passed HiGHS and GPU FP64 sGS-HPR but its required CPU
-FP64 correctness attempt hit the frozen 3,600-second limit. It has no accepted
-CPU candidate or CPU timing median.
+**Stage 9 is complete with final classification D - structural reproduction.**
+The LaTeX paper, compiled PDF, archival Markdown report, reproducibility
+checklist, regeneration commands, deterministic tables/figures, and
+machine-readable result index are versioned in the repository.
 
-The independent Stage 8 checker passed **12/12** protocol and evidence checks.
-That checker PASS verifies the honest terminal record; it does not convert the
-T6 failure into a Stage 8 acceptance pass. Five unique rows were allocated,
-the passing prefix is four, and no retry occurred.
+Stages 0--7 passed. Stage 8 remains **FAIL** with campaign status
+`STOPPED_ON_FAILURE`: four large rows passed, while the required T6 CPU FP64
+correctness attempt exceeded 3,600 seconds. Its HiGHS and GPU FP64 tracks
+passed. The 12/12 Stage 8 checker validates the terminal protocol but does not
+turn the row into a pass.
 
-The later GPU-only sequence 6--8 continuation passed its independent **13/13**
-evidence audit. T16 was `MEMORY_BLOCKED` before allocation because its 94.435
-GiB unified projection exceeded both live 80% budgets. T24 and T32 were
-`INDEX_BLOCKED` before allocation because their planning nonzero counts exceed
-signed-int32 CSR capacity. The continuation made zero allocations, ran no new
-HiGHS or GPU solves, and explicitly skipped CPU sGS-HPR and Gurobi. Stage 9
-still records zero allocations and remains locked.
+The later GPU-only continuation resolved T16 as `MEMORY_BLOCKED` and T24/T32
+as `INDEX_BLOCKED`, all before allocation; its checker passed 13/13. Across the
+paper's 18 Table II rows, all reproduced `(m,n)` dimensions match and no sparse
+nonzero count matches. Eleven benchmark rows have validated GPU candidates and
+ten have validated CPU candidates. No speedup is claimed.
 
-All Table II rows still have exact row and variable dimensions while every
-reconstructed sparse nonzero count differs from the paper. The result remains
-a structural reproduction, not an exact instance or paper-timing
-reproduction. No speedup is claimed.
+Stage 10 remains locked, and no N-1 work was performed.
 
 Validated capabilities now include:
 
@@ -136,11 +128,14 @@ Validated capabilities now include:
 - repeated HiGHS, CPU FP64, and GPU FP64 timing with first-run, warm-up,
   measured-sample, variability, memory, and transfer evidence; and
 - independent enforcement of the Stage 8 strict-prefix allocation order,
-  unified-memory preflight, terminal-failure preservation, and locked Stage 9
-  boundary.
+  unified-memory preflight, terminal-failure preservation, and the Stage 9
+  reporting boundary; and
+- a final IEEE-style LaTeX paper, compiled PDF, reproducibility checklist,
+  generated tables/figures, and machine-readable result index.
 
-See `docs/project_state.md` for the authoritative gate state and
-`docs/stage_reports/stage_8_report.md` for the terminal Stage 8 evidence.
+See `docs/project_state.md` for the authoritative gate state,
+`docs/stage_reports/stage_9_report.md` for the final handoff, and
+`docs/stage_reports/stage_8_report.md` for the terminal benchmark evidence.
 
 ## Environment snapshot
 
@@ -195,10 +190,9 @@ timing ledger defines this project's measurement boundaries; it does not make
 those boundaries or sparse workloads identical to the unpublished paper
 experiment.
 
-Stage 8 preserves that classification. Its four passing large rows validate
-the frozen structural reconstruction at larger scale; the T6 CPU time limit
-prevents a complete Stage 8 pass. The later zero-allocation GPU-only
-continuation does not change that decision, so Stage 9 remains locked.
+Stage 9 freezes that classification. Its report incorporates the four passing
+large Stage 8 rows, the T6 CPU time limit, and the later zero-allocation
+resource continuation without changing any prior decision.
 
 Until the required inputs are recovered, this project will not claim exact
 numerical reproduction. Stage 7 is explicitly labeled a structural
@@ -226,7 +220,7 @@ gpu-dcopf-hpr/
 Production solver logic belongs in `src/gpu_dcopf_hpr/`, not only in notebooks.
 Raw validation outputs are preserved under `results/raw/stage_N/`.
 
-## Stage 7 and Stage 8 checks
+## Stage 7 through Stage 9 checks
 
 From this directory:
 
@@ -236,6 +230,8 @@ From this directory:
 ./.venv/Scripts/ruff.exe format --check .
 ./.venv/Scripts/python.exe scripts/check_stage_7.py
 ./.venv/Scripts/python.exe scripts/check_stage_8.py
+./.venv/Scripts/python.exe scripts/generate_stage_9_artifacts.py --check
+./.venv/Scripts/python.exe scripts/check_stage_9.py
 ```
 
 The Stage 7 experiment itself runs on the DGX Spark from the pinned

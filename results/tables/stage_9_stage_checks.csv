@@ -1,0 +1,11 @@
+scope,scientific_result,checker_result,passed_checks,total_checks,interpretation,artifact,sha256
+Stage 0,PASS,PASS,10,10,Stage acceptance passed,results/raw/stage_0/stage_0_checks.json,2e42f5b11206fe762b7059751ba31b6fba06e737b9a06bb4a69d9e7b089380d1
+Stage 1,PASS,PASS,6,6,Stage acceptance passed,results/raw/stage_1/stage_1_checks.json,c8f516fc52bd5889ccd5c3a94bbae45591d8970a1196949ad1b914bb1ba8c8ab
+Stage 2,PASS,PASS,9,9,Stage acceptance passed,results/raw/stage_2/stage_2_checks.json,b22b936bd15b7ed83b5a031181d885f3a1c185e3e90ea793ae9c053d4d6d59cc
+Stage 3,PASS,PASS,12,12,Stage acceptance passed,results/raw/stage_3/stage_3_checks.json,dcce298bb1752f87c16626a60f02ee491817cba528696566d83a33694bab5594
+Stage 4,PASS,PASS,20,20,Stage acceptance passed,results/raw/stage_4/stage_4_checks.json,3e0dbed0f54f7f24e66b22c15eada0b8fd790664b878a7ce2ac69ec4be2e5c80
+Stage 5,PASS,PASS,23,23,Stage acceptance passed,results/raw/stage_5/stage_5_checks.json,ff21b6a3e6933dd3bb3e978c1a6ed0fbf7c52d49e7dcef90de89d83f509e79fa
+Stage 6,PASS,PASS,21,21,Stage acceptance passed,results/raw/stage_6/stage_6_checks.json,e7dd1008ba2245f1fc8ae985fccdf6a9d987218423454ad8904fef6a6855995a
+Stage 7,PASS,PASS,19,19,Stage acceptance passed,results/raw/stage_7/stage_7_checks.json,0b28d028021b049393ed3c9a6019406558b3e3cbb96213d0ead8cbb9f95d7972
+Stage 8,FAIL,PASS,12,12,Protocol valid; required T6 CPU track timed out,results/raw/stage_8/stage_8_checks.json,ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b
+Stage 8 continuation,COMPLETE_WITH_RESOURCE_LIMITS,PASS,13,13,Sequences 6--8 resolved without allocation,results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json,8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65

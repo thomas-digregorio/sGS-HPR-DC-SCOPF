@@ -1,0 +1,11 @@
+boundary,seconds,status,method
+CUDA initialization,0.4046467309817672,measured,"Host monotonic clock around backend/device initialization, ending with an explicit device synchronization."
+CPU matrix construction and preprocessing,0.00802083796588704,measured,Host monotonic clock around DCOPF construction and Stage 5 preprocessing.
+first-run compilation and warm-up,0.010212827997747809,measured,Host monotonic clock around the first completed one-step GPU run; the run's GPU and transfer boundaries synchronize before return.
+allocation,,reported but not independently timed,Not independently timed; included in synchronized GPU solver initialization.
+host-to-device transfer,0.0041706173797138035,measured with synchronized explicit transfers,Host monotonic clock around synchronized explicit transfers.
+GPU solver initialization,0.07447846396826208,measured,"Host monotonic clock around resident problem preparation, ending with an explicit device synchronization; includes allocation."
+iteration loop,1.828999267578125,measured,"Synchronized CUDA events for the resident 1,000-step diagnostics, summed across the two frozen cases."
+residual checks,0.008027327984571456,measured,"Synchronized CUDA event pairs nested within the resident loop, summed across scheduled checks and the two frozen cases."
+device-to-host transfer,0.024863698112312704,measured with synchronized explicit transfers,Host monotonic clock around synchronized explicit transfers.
+complete end-to-end wall time,6.7168476020451635,measured by monotonic host clock,Host monotonic clock around the complete Stage 6 runner.

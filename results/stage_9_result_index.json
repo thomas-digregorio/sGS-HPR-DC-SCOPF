@@ -1,0 +1,315 @@
+{
+  "coverage": {
+    "allocated_benchmark_rows": 11,
+    "dimension_matches": 18,
+    "nnz_matches": 0,
+    "resource_resolved_without_allocation": 3,
+    "symbolic_table_ii_rows": 18,
+    "validated_cpu_rows": 10,
+    "validated_gpu_rows": 11
+  },
+  "environment": {
+    "cupy": "14.1.1",
+    "gpu": {
+      "compute_capability": [
+        12,
+        1
+      ],
+      "csr_index_bits": 32,
+      "csr_index_dtype": "int32",
+      "csr_indptr_dtype": "int32",
+      "cuda_driver_version": 13000,
+      "cuda_runtime_version": 13020,
+      "cupy_version": "14.1.1",
+      "device_id": 0,
+      "device_name": "NVIDIA GB10",
+      "fp64_itemsize_bytes": 8,
+      "fp64_supported": true,
+      "integrated": true,
+      "multiprocessor_count": 48,
+      "total_global_memory_bytes": 130663165952
+    },
+    "machine": "aarch64",
+    "numpy": "2.3.5",
+    "platform": "Linux-6.17.0-1029-nvidia-aarch64-with-glibc2.39",
+    "python": "3.12.3",
+    "scipy": "1.16.3",
+    "total_unified_memory_bytes": 130663165952
+  },
+  "evidence": [
+    {
+      "bytes": 602,
+      "path": "results/raw/stage_0/paper_metadata.json",
+      "sha256": "8b9f66a3f933c92c2ddcaf80dbe7ddd3cb23c1501a3afb479bece7d6bdf72191"
+    },
+    {
+      "bytes": 215974,
+      "path": "results/raw/stage_6/stage_6_validation.json",
+      "sha256": "435bb1eed72a0efd993e72299665bb267ee38b184f120f2af2cac17078c08ca3"
+    },
+    {
+      "bytes": 1759021,
+      "path": "results/raw/stage_7/stage_7_validation.json",
+      "sha256": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae"
+    },
+    {
+      "bytes": 1341596,
+      "path": "results/raw/stage_8/stage_8_validation.json",
+      "sha256": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254"
+    },
+    {
+      "bytes": 47638,
+      "path": "results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_validation.json",
+      "sha256": "edf18f6cda959c47fe5d7c38370c5f88619ee08a8ee4f9dbb480756ff1d34f7b"
+    },
+    {
+      "bytes": 1254,
+      "path": "results/raw/stage_0/stage_0_checks.json",
+      "sha256": "2e42f5b11206fe762b7059751ba31b6fba06e737b9a06bb4a69d9e7b089380d1"
+    },
+    {
+      "bytes": 882,
+      "path": "results/raw/stage_1/stage_1_checks.json",
+      "sha256": "c8f516fc52bd5889ccd5c3a94bbae45591d8970a1196949ad1b914bb1ba8c8ab"
+    },
+    {
+      "bytes": 1765,
+      "path": "results/raw/stage_2/stage_2_checks.json",
+      "sha256": "b22b936bd15b7ed83b5a031181d885f3a1c185e3e90ea793ae9c053d4d6d59cc"
+    },
+    {
+      "bytes": 2062,
+      "path": "results/raw/stage_3/stage_3_checks.json",
+      "sha256": "dcce298bb1752f87c16626a60f02ee491817cba528696566d83a33694bab5594"
+    },
+    {
+      "bytes": 4932,
+      "path": "results/raw/stage_4/stage_4_checks.json",
+      "sha256": "3e0dbed0f54f7f24e66b22c15eada0b8fd790664b878a7ce2ac69ec4be2e5c80"
+    },
+    {
+      "bytes": 6130,
+      "path": "results/raw/stage_5/stage_5_checks.json",
+      "sha256": "ff21b6a3e6933dd3bb3e978c1a6ed0fbf7c52d49e7dcef90de89d83f509e79fa"
+    },
+    {
+      "bytes": 5066,
+      "path": "results/raw/stage_6/stage_6_checks.json",
+      "sha256": "e7dd1008ba2245f1fc8ae985fccdf6a9d987218423454ad8904fef6a6855995a"
+    },
+    {
+      "bytes": 4094,
+      "path": "results/raw/stage_7/stage_7_checks.json",
+      "sha256": "0b28d028021b049393ed3c9a6019406558b3e3cbb96213d0ead8cbb9f95d7972"
+    },
+    {
+      "bytes": 2426,
+      "path": "results/raw/stage_8/stage_8_checks.json",
+      "sha256": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b"
+    },
+    {
+      "bytes": 2730,
+      "path": "results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json",
+      "sha256": "8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65"
+    }
+  ],
+  "figures": [
+    {
+      "path": "results/plots/stage_9_solver_timings.svg",
+      "sha256": "17cd2f7ea4d5d2cbdd2a5ae6c817d1a4dabdf51aa251c9fb290af27800ffe6e2"
+    },
+    {
+      "path": "results/plots/stage_9_resource_boundaries.svg",
+      "sha256": "3cfddac7c1f9fe015c65df22f5ec71628bb8ae4e148696b3096b0fff61900dfc"
+    }
+  ],
+  "final_classification": {
+    "code": "D",
+    "decision_rule": "docs/stage_9_contract.md",
+    "exact_reproduction": false,
+    "label": "structural reproduction",
+    "local_speedup_claimed": false,
+    "paper_timing_reproduced": false
+  },
+  "frozen_gates": {
+    "correctness_runs": 1,
+    "csr_index_max": 2147483647,
+    "device_memory_safety_fraction": 0.8,
+    "host_memory_safety_fraction": 0.8,
+    "measured_repetitions": 5,
+    "normalized_stopping_block_max": 5e-05,
+    "per_solve_deadline_seconds": 3600,
+    "physical_violation_max": 0.01,
+    "raw_kkt_max": 0.01,
+    "scaled_objective_gap_max": 0.0002,
+    "warmup_runs": 1
+  },
+  "generated_utc": "2026-08-05T00:00:00Z",
+  "generator": "scripts/generate_stage_9_artifacts.py",
+  "paper": {
+    "doi": "10.1109/TPWRS.2025.3635652",
+    "local_pdf": {
+      "bytes": 9157238,
+      "pages": 17,
+      "path": "references/AnEfficientGPU-basedHalpernAccelerating.pdf",
+      "sha256": "7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4"
+    },
+    "title": "An Efficient GPU-based Halpern Accelerating Algorithm for Large-scale DC Optimal Power Flow"
+  },
+  "schema_version": 1,
+  "source_git": {
+    "branch": "main",
+    "self_reference_note": "The final Stage 9 commit is reported after commit creation; it cannot be embedded in its own tree without changing that commit.",
+    "stage_9_base_commit": "c08c53b7ef5d2bde006728c76fb43fe621685e20"
+  },
+  "stage": 9,
+  "stage_10": {
+    "n_minus_1_work_performed": false,
+    "status": "LOCKED"
+  },
+  "stage_8": {
+    "allocated_rows": 5,
+    "campaign_status": "STOPPED_ON_FAILURE",
+    "checker_checks": "12/12",
+    "checker_result": "PASS",
+    "continuation": {
+      "allocation_attempts": 0,
+      "checker_checks": "13/13",
+      "checker_result": "PASS",
+      "resolved_rows": [
+        "case9241pegase:T16",
+        "case9241pegase:T24",
+        "case9241pegase:T32"
+      ],
+      "status": "COMPLETE_WITH_RESOURCE_LIMITS"
+    },
+    "cpu_timeout_seconds": 3600.092738645966,
+    "passing_prefix_length": 4,
+    "scientific_result": "FAIL",
+    "terminal_failure": "case9241pegase:T6 CPU FP64 correctness TIME_LIMIT"
+  },
+  "stage_decisions": [
+    {
+      "artifact": "results/raw/stage_0/stage_0_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 10,
+      "scientific_result": "PASS",
+      "scope": "Stage 0",
+      "sha256": "2e42f5b11206fe762b7059751ba31b6fba06e737b9a06bb4a69d9e7b089380d1",
+      "total_checks": 10
+    },
+    {
+      "artifact": "results/raw/stage_1/stage_1_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 6,
+      "scientific_result": "PASS",
+      "scope": "Stage 1",
+      "sha256": "c8f516fc52bd5889ccd5c3a94bbae45591d8970a1196949ad1b914bb1ba8c8ab",
+      "total_checks": 6
+    },
+    {
+      "artifact": "results/raw/stage_2/stage_2_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 9,
+      "scientific_result": "PASS",
+      "scope": "Stage 2",
+      "sha256": "b22b936bd15b7ed83b5a031181d885f3a1c185e3e90ea793ae9c053d4d6d59cc",
+      "total_checks": 9
+    },
+    {
+      "artifact": "results/raw/stage_3/stage_3_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 12,
+      "scientific_result": "PASS",
+      "scope": "Stage 3",
+      "sha256": "dcce298bb1752f87c16626a60f02ee491817cba528696566d83a33694bab5594",
+      "total_checks": 12
+    },
+    {
+      "artifact": "results/raw/stage_4/stage_4_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 20,
+      "scientific_result": "PASS",
+      "scope": "Stage 4",
+      "sha256": "3e0dbed0f54f7f24e66b22c15eada0b8fd790664b878a7ce2ac69ec4be2e5c80",
+      "total_checks": 20
+    },
+    {
+      "artifact": "results/raw/stage_5/stage_5_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 23,
+      "scientific_result": "PASS",
+      "scope": "Stage 5",
+      "sha256": "ff21b6a3e6933dd3bb3e978c1a6ed0fbf7c52d49e7dcef90de89d83f509e79fa",
+      "total_checks": 23
+    },
+    {
+      "artifact": "results/raw/stage_6/stage_6_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 21,
+      "scientific_result": "PASS",
+      "scope": "Stage 6",
+      "sha256": "e7dd1008ba2245f1fc8ae985fccdf6a9d987218423454ad8904fef6a6855995a",
+      "total_checks": 21
+    },
+    {
+      "artifact": "results/raw/stage_7/stage_7_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Stage acceptance passed",
+      "passed_checks": 19,
+      "scientific_result": "PASS",
+      "scope": "Stage 7",
+      "sha256": "0b28d028021b049393ed3c9a6019406558b3e3cbb96213d0ead8cbb9f95d7972",
+      "total_checks": 19
+    },
+    {
+      "artifact": "results/raw/stage_8/stage_8_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Protocol valid; required T6 CPU track timed out",
+      "passed_checks": 12,
+      "scientific_result": "FAIL",
+      "scope": "Stage 8",
+      "sha256": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+      "total_checks": 12
+    },
+    {
+      "artifact": "results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json",
+      "checker_result": "PASS",
+      "interpretation": "Sequences 6--8 resolved without allocation",
+      "passed_checks": 13,
+      "scientific_result": "COMPLETE_WITH_RESOURCE_LIMITS",
+      "scope": "Stage 8 continuation",
+      "sha256": "8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65",
+      "total_checks": 13
+    }
+  ],
+  "tables": [
+    {
+      "path": "results/tables/stage_9_stage_checks.csv",
+      "sha256": "3a76cb58997f07b5bfe1acc8bfe93e3ecaba860cd5389bbf21be9c02ec696491"
+    },
+    {
+      "path": "results/tables/stage_9_benchmarks.csv",
+      "sha256": "959549a7e67db09fea2ab71a98149bc3bf4eeca90e91f40362487a177792fa65"
+    },
+    {
+      "path": "results/tables/stage_9_structural_reconciliation.csv",
+      "sha256": "5f5b6913455a6d0337729c7d8ab96d716397569e5e9fce316319ed4b84974d10"
+    },
+    {
+      "path": "results/tables/stage_9_resource_boundaries.csv",
+      "sha256": "18c7b11bde1709f01ec972625ccdf8d72936467874bf507f1708e5ed3aaaf0ed"
+    },
+    {
+      "path": "results/tables/stage_9_timing_decomposition.csv",
+      "sha256": "a1bbec2e8a786a0f4ce6fbc60359a417507accb599bba3b1849c62cce290da00"
+    }
+  ]
+}

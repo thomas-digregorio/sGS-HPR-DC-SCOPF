@@ -112,9 +112,7 @@ def _resource_ledger_valid(
 
 
 def _static_cases_valid(evidence: Mapping[str, Any]) -> bool:
-    cases = {
-        str(row.get("key")): _mapping(row) for row in _sequence(evidence.get("cases"))
-    }
+    cases = {str(row.get("key")): _mapping(row) for row in _sequence(evidence.get("cases"))}
     history = _sequence(evidence.get("allocation_history"))
     for key in runner.STATIC_BLOCK_KEYS:
         case = cases.get(key, {})
@@ -194,9 +192,7 @@ def _successful_t16_valid(
     tracks = _mapping(case.get("solver_tracks"))
     highs = _mapping(tracks.get("highs"))
     gpu = _mapping(tracks.get("gpu_fp64_sgs_hpr"))
-    reference = _mapping(_mapping(highs.get("correctness")).get("candidate")).get(
-        "objective"
-    )
+    reference = _mapping(_mapping(highs.get("correctness")).get("candidate")).get("objective")
     timing = _mapping(case.get("timing_boundaries"))
     expected_m, expected_n, paper_nnz, expected_nnz, _ = stage7_checker.EXPECTED_ROWS[
         runner.REQUESTED_KEYS[0]
@@ -229,9 +225,7 @@ def _successful_t16_valid(
         set(tracks) == set(runner.REQUIRED_TRACKS)
         and isinstance(reference, (int, float))
         and math.isfinite(float(reference))
-        and stage7_checker._track_valid(
-            highs, track_name="highs", reference_objective=None
-        )
+        and stage7_checker._track_valid(highs, track_name="highs", reference_objective=None)
         and stage7_checker._track_valid(
             gpu,
             track_name="gpu_fp64_sgs_hpr",
@@ -240,9 +234,7 @@ def _successful_t16_valid(
         and _mapping(gpu.get("kernel_checks")).get("passed") is True
         and _mapping(gpu.get("kernel_checks")).get("FP64") is True
         and all(
-            stage7_checker._kernel_selection_valid(
-                _mapping(gpu.get("kernel_selection")).get(name)
-            )
+            stage7_checker._kernel_selection_valid(_mapping(gpu.get("kernel_selection")).get(name))
             for name in ("A1", "A2")
         )
         and stage7_checker._gpu_memory_report_valid(gpu.get("memory_before"))
@@ -269,8 +261,11 @@ def _successful_t16_valid(
         and timing.get("speedup_computed") is False
         and base_config.get("timing", {}).get("measured_runs") == 5
     )
-    return structure_valid and tracks_valid and timing_valid and _skip_policy_valid(
-        case, resource_blocked=False
+    return (
+        structure_valid
+        and tracks_valid
+        and timing_valid
+        and _skip_policy_valid(case, resource_blocked=False)
     )
 
 
@@ -345,9 +340,7 @@ def _allocation_valid(evidence: Mapping[str, Any]) -> tuple[bool, str]:
 
 
 def _terminal_valid(evidence: Mapping[str, Any]) -> tuple[bool, str]:
-    cases = {
-        str(row.get("key")): _mapping(row) for row in _sequence(evidence.get("cases"))
-    }
+    cases = {str(row.get("key")): _mapping(row) for row in _sequence(evidence.get("cases"))}
     t16_status = cases.get(runner.REQUESTED_KEYS[0], {}).get("status")
     expected = {
         "PASS": "COMPLETE_WITH_STATIC_RESOURCE_LIMITS",

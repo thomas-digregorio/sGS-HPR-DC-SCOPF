@@ -31,9 +31,7 @@ from scripts import check_stage_8 as stage8_checker  # noqa: E402
 from scripts import run_stage_7 as stage7  # noqa: E402
 from scripts import run_stage_8 as stage8  # noqa: E402
 
-DEFAULT_CONFIG = (
-    PROJECT_ROOT / "configs" / "benchmarks" / "stage_8_gpu_only_completion.json"
-)
+DEFAULT_CONFIG = PROJECT_ROOT / "configs" / "benchmarks" / "stage_8_gpu_only_completion.json"
 DEFAULT_OUTPUT = PROJECT_ROOT / "results" / "raw" / "stage_8" / "gpu_only_completion"
 PARTIAL_NAME = "stage_8_gpu_only_completion.partial.json"
 FINAL_NAME = "stage_8_gpu_only_completion_validation.json"
@@ -516,9 +514,7 @@ def _run_gpu_only_case(
             for item in base_config["public_network_source"]["files"]
             if item["case"] == key.case_name
         ),
-        "input_sha256_definition": base_config["public_network_source"][
-            "sha256_definition"
-        ],
+        "input_sha256_definition": base_config["public_network_source"]["sha256_definition"],
     }
     count_only = stage7.stage7_reconstructed_nnz_ledger(
         model.normalized,
@@ -626,9 +622,7 @@ def _run_gpu_only_case(
                 host_memory=stage7._host_memory(),
                 device_total_bytes=int(device["total_global_memory_bytes"]),
             )
-            free_budget = int(
-                stage7.DEVICE_SAFETY_FRACTION * int(memory["free_device_bytes"])
-            )
+            free_budget = int(stage7.DEVICE_SAFETY_FRACTION * int(memory["free_device_bytes"]))
             free_check = preflight.gpu_planning_bytes <= free_budget
             gpu["device"] = device
             gpu["memory_before"] = memory
@@ -650,9 +644,7 @@ def _run_gpu_only_case(
             )
             gpu["workspace_setup_wall_seconds"] = perf_counter() - setup_started
             ledger_after = backend.ledger.summary()
-            gpu["preparation_transfer_delta"] = stage7._transfer_delta(
-                ledger_before, ledger_after
-            )
+            gpu["preparation_transfer_delta"] = stage7._transfer_delta(ledger_before, ledger_after)
             kernels = {
                 "A1": problem.workspace.A1_resident.kernel.as_dict(),
                 "A2": problem.workspace.A2_resident.kernel.as_dict(),
@@ -699,9 +691,7 @@ def _run_gpu_only_case(
             gpu.update(
                 {
                     "status": (
-                        "UNAVAILABLE"
-                        if isinstance(error, stage7.GPUBackendUnavailable)
-                        else "FAIL"
+                        "UNAVAILABLE" if isinstance(error, stage7.GPUBackendUnavailable) else "FAIL"
                     ),
                     "failure": stage7._exception_record("gpu_preparation", error),
                     "passed": False,
@@ -733,11 +723,7 @@ def _run_gpu_only_case(
 
 
 def _case_index(evidence: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
-    return {
-        str(row.get("key")): row
-        for row in evidence.get("cases", [])
-        if isinstance(row, dict)
-    }
+    return {str(row.get("key")): row for row in evidence.get("cases", []) if isinstance(row, dict)}
 
 
 def _update_status(evidence: dict[str, Any]) -> None:
@@ -763,9 +749,7 @@ def _update_status(evidence: dict[str, Any]) -> None:
     )
     evidence["executable_scope_passed"] = status == "PASS"
     boundary = evidence["stage_boundary"]
-    boundary["stage_8_gpu_only_continuation_complete"] = evidence[
-        "all_requested_rows_resolved"
-    ]
+    boundary["stage_8_gpu_only_continuation_complete"] = evidence["all_requested_rows_resolved"]
     boundary["stage_9_locked"] = True
     boundary["stage_9_allocation_count"] = 0
 
@@ -803,9 +787,7 @@ def _run_main(args: argparse.Namespace) -> int:
     config_sha256 = config_identity.get("canonical_git_blob_sha256")
     if config_sha256 != FROZEN_CONFIG_SHA256:
         errors.append("GPU-only continuation configuration SHA-256 drifted")
-    errors.extend(
-        f"configuration identity: {item}" for item in config_identity.get("errors", [])
-    )
+    errors.extend(f"configuration identity: {item}" for item in config_identity.get("errors", []))
     original_contract, original = _original_contract(config)
     errors.extend(original_contract["errors"])
     base_contract, base = stage8._base_contract(original["configuration"])

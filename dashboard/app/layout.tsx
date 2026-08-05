@@ -4,7 +4,7 @@ import "./globals.css";
 
 const title = "HPR Reproduction Control Room";
 const description =
-  "A stage-gated research dashboard for reproducing the GPU-based sGS-HPR DCOPF paper on an NVIDIA DGX Spark.";
+  "Stage 9 scientific report and evidence dashboard for the structural reproduction of the GPU-based sGS-HPR DCOPF paper on NVIDIA DGX Spark.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const protocol =
     requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const metadataBase = new URL(`${protocol}://${host}`);
-  const imageUrl = new URL("/og-stage8.png", metadataBase).toString();
+  const imageUrl = new URL("/og-stage9.png", metadataBase).toString();
 
   return {
     metadataBase,
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       type: "website",
-      images: [{ url: imageUrl, width: 1536, height: 1024, alt: title }],
+      images: [{ url: imageUrl, width: 1672, height: 941, alt: title }],
     },
     twitter: {
       card: "summary_large_image",

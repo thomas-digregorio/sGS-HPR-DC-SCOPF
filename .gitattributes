@@ -8,3 +8,10 @@ results/raw/stage_8/**/*.json binary
 results/raw/stage_8/**/*.log binary
 results/raw/stage_8/**/*.pid binary
 results/raw/stage_8/**/.stage_8.lock binary
+
+# Keep generated scientific-report tables and figures reviewable as text.
+results/tables/stage_9_*.csv text eol=lf
+results/plots/stage_9_*.svg text eol=lf
+
+# Treat the compiled Stage 9 paper as a binary artifact.
+output/pdf/*.pdf binary

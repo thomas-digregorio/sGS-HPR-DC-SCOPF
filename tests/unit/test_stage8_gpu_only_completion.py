@@ -34,13 +34,9 @@ def test_frozen_continuation_config_has_exact_scope_and_hash() -> None:
     config = _config()
 
     assert runner._validate_config(config) == []
-    assert [row["key"] for row in config["requested_sequence"]] == list(
-        runner.REQUESTED_KEYS
-    )
+    assert [row["key"] for row in config["requested_sequence"]] == list(runner.REQUESTED_KEYS)
     assert config["track_policy"]["required_solver_tracks"] == list(runner.REQUIRED_TRACKS)
-    assert config["track_policy"]["explicitly_skipped_solver_tracks"] == list(
-        runner.SKIPPED_TRACKS
-    )
+    assert config["track_policy"]["explicitly_skipped_solver_tracks"] == list(runner.SKIPPED_TRACKS)
     canonical_lf = runner.DEFAULT_CONFIG.read_bytes().replace(b"\r\n", b"\n")
     assert hashlib.sha256(canonical_lf).hexdigest() == runner.FROZEN_CONFIG_SHA256
 
@@ -64,9 +60,10 @@ def test_resource_ledger_is_frozen_to_sequences_6_8() -> None:
 
     assert list(indexed) == list(runner.REQUESTED_KEYS)
     assert indexed["case9241pegase:T16"]["campaign_sequence"] == 6
-    assert indexed["case9241pegase:T16"]["resource_estimate"][
-        "projected_unified_peak_bytes"
-    ] == 101_398_781_000
+    assert (
+        indexed["case9241pegase:T16"]["resource_estimate"]["projected_unified_peak_bytes"]
+        == 101_398_781_000
+    )
     for key in runner.STATIC_BLOCK_KEYS:
         assert indexed[key]["static_preallocation_status"] == "BLOCKED"
         assert indexed[key]["resource_estimate"]["signed_int32_csr_supported"] is False
