@@ -1,0 +1,1205 @@
+{
+  "all_passed": false,
+  "all_requested_rows_resolved": true,
+  "allocation_history": [],
+  "approval": {
+    "gate": "for stage 8, proceed with completing sequence 6,7,8 but only do HiGHS and GPU (i.e. skip CPU which was timing out). then give an updated report. stop before proceeding to stage 9.",
+    "provided_for_allocation": true
+  },
+  "base_stage_7_contract": {
+    "errors": [],
+    "expected_sha256": {
+      "configuration": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+      "evidence": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+      "requirements": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
+    },
+    "passed": true,
+    "paths": {
+      "configuration": "configs/benchmarks/stage_7_small_medium.json",
+      "evidence": "results/raw/stage_7/stage_7_validation.json",
+      "requirements": "environment/dgx_stage7_requirements.txt"
+    },
+    "portable_identities": {
+      "configuration": {
+        "canonical_git_blob_sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+        "canonical_git_blob_size_bytes": 9462,
+        "checks": {
+          "canonical_blob_read": true,
+          "canonical_blob_uses_lf_text": true,
+          "filtered_worktree_blob_matches": true,
+          "head_blob_matches": true,
+          "worktree_clean": true
+        },
+        "errors": [],
+        "expected_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "filtered_worktree_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "head_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "passed": true,
+        "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+        "worktree_diff": "",
+        "worktree_raw_sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+        "worktree_status": ""
+      },
+      "evidence": {
+        "canonical_git_blob_sha256": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+        "canonical_git_blob_size_bytes": 1759021,
+        "checks": {
+          "canonical_blob_read": true,
+          "canonical_blob_uses_lf_text": true,
+          "filtered_worktree_blob_matches": true,
+          "head_blob_matches": true,
+          "worktree_clean": true
+        },
+        "errors": [],
+        "expected_git_blob": "5e7dd8c9d2bb830f09cceab915fc778ae0210fda",
+        "filtered_worktree_git_blob": "5e7dd8c9d2bb830f09cceab915fc778ae0210fda",
+        "head_git_blob": "5e7dd8c9d2bb830f09cceab915fc778ae0210fda",
+        "passed": true,
+        "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+        "worktree_diff": "",
+        "worktree_raw_sha256": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+        "worktree_status": ""
+      },
+      "requirements": {
+        "canonical_git_blob_sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+        "canonical_git_blob_size_bytes": 386,
+        "checks": {
+          "canonical_blob_read": true,
+          "canonical_blob_uses_lf_text": true,
+          "filtered_worktree_blob_matches": true,
+          "head_blob_matches": true,
+          "worktree_clean": true
+        },
+        "errors": [],
+        "expected_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+        "filtered_worktree_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+        "head_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+        "passed": true,
+        "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+        "worktree_diff": "",
+        "worktree_raw_sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+        "worktree_status": ""
+      }
+    },
+    "sha256": {
+      "configuration": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+      "evidence": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+      "requirements": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf"
+    }
+  },
+  "base_stage_7_provenance": {
+    "config": {
+      "passed": true,
+      "path": "/home/dgxsparktd/sGS-HPR-DC-SCOPF-stage8-gpu-1cf9da6/configs/benchmarks/stage_7_small_medium.json",
+      "portable_identity": {
+        "canonical_git_blob_sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+        "canonical_git_blob_size_bytes": 9462,
+        "checks": {
+          "canonical_blob_read": true,
+          "canonical_blob_uses_lf_text": true,
+          "filtered_worktree_blob_matches": true,
+          "head_blob_matches": true,
+          "worktree_clean": true
+        },
+        "errors": [],
+        "expected_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "filtered_worktree_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "head_git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+        "passed": true,
+        "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+        "worktree_diff": "",
+        "worktree_raw_sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+        "worktree_status": ""
+      },
+      "sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+      "sha256_matches_frozen": true
+    },
+    "errors": [],
+    "files": [
+      {
+        "actual_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+        "actual_sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+        "case_name": "case1354pegase",
+        "exists": true,
+        "expected_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+        "expected_sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": true,
+        "path": "data/raw/matpower/stage7/case1354pegase.m",
+        "portable_identity": {
+          "canonical_git_blob_sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+          "canonical_git_blob_size_bytes": 214622,
+          "checks": {
+            "canonical_blob_read": true,
+            "canonical_blob_uses_lf_text": true,
+            "filtered_worktree_blob_matches": true,
+            "head_blob_matches": true,
+            "worktree_clean": true
+          },
+          "errors": [],
+          "expected_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "filtered_worktree_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "head_git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "passed": true,
+          "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+          "worktree_diff": "",
+          "worktree_raw_sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+          "worktree_status": ""
+        },
+        "sha256_matches": true
+      },
+      {
+        "actual_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+        "actual_sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+        "case_name": "case2868rte",
+        "exists": true,
+        "expected_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+        "expected_sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": true,
+        "path": "data/raw/matpower/stage7/case2868rte.m",
+        "portable_identity": {
+          "canonical_git_blob_sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+          "canonical_git_blob_size_bytes": 439970,
+          "checks": {
+            "canonical_blob_read": true,
+            "canonical_blob_uses_lf_text": true,
+            "filtered_worktree_blob_matches": true,
+            "head_blob_matches": true,
+            "worktree_clean": true
+          },
+          "errors": [],
+          "expected_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "filtered_worktree_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "head_git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "passed": true,
+          "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+          "worktree_diff": "",
+          "worktree_raw_sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+          "worktree_status": ""
+        },
+        "sha256_matches": true
+      },
+      {
+        "actual_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+        "actual_sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+        "case_name": "case9241pegase",
+        "exists": true,
+        "expected_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+        "expected_sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+        "git_blob_matches": true,
+        "inside_project": true,
+        "passed": true,
+        "path": "data/raw/matpower/stage7/case9241pegase.m",
+        "portable_identity": {
+          "canonical_git_blob_sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+          "canonical_git_blob_size_bytes": 1530051,
+          "checks": {
+            "canonical_blob_read": true,
+            "canonical_blob_uses_lf_text": true,
+            "filtered_worktree_blob_matches": true,
+            "head_blob_matches": true,
+            "worktree_clean": true
+          },
+          "errors": [],
+          "expected_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "filtered_worktree_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "head_git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "passed": true,
+          "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+          "worktree_diff": "",
+          "worktree_raw_sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+          "worktree_status": ""
+        },
+        "sha256_matches": true
+      }
+    ],
+    "passed": true,
+    "upstream": {
+      "files": [
+        {
+          "case": "case1354pegase",
+          "git_blob": "d6ede376f35af472b45b93ae771209c483427c26",
+          "path": "data/raw/matpower/stage7/case1354pegase.m",
+          "sha256": "1b08b25a2f6c1d540d090009dfaff41ff2b05784a2d8d302a7ad695821557b89",
+          "upstream_path": "data/case1354pegase.m"
+        },
+        {
+          "case": "case2868rte",
+          "git_blob": "0223116b52b3bd10786ccd61a808c440826aacdc",
+          "path": "data/raw/matpower/stage7/case2868rte.m",
+          "sha256": "2b30e8943daf84ccb111cee30f19f4917afc9c3772cab3ce9eaf6193988a6861",
+          "upstream_path": "data/case2868rte.m"
+        },
+        {
+          "case": "case9241pegase",
+          "git_blob": "cc9816b188ef38725c1e7c5b04cb9555b6b8a78e",
+          "path": "data/raw/matpower/stage7/case9241pegase.m",
+          "sha256": "593a58ecddb5af509ff94410a6630f81021b48fa31da0694ff516acfa9ea5f3b",
+          "upstream_path": "data/case9241pegase.m"
+        }
+      ],
+      "license": "MATPOWER 8.1 three-clause BSD license",
+      "project": "MATPOWER",
+      "release": "8.1",
+      "release_doi": "10.5281/zenodo.15871662",
+      "repository": "https://github.com/MATPOWER/matpower",
+      "resolved_commit": "1a828c7af590714499284e36ee9c81273388c594",
+      "retrieved_utc_date": "2026-08-03",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+      "tag_object": "3f8ecfdbc79b07697d6b45f8d868ac1c2d27f788"
+    }
+  },
+  "campaign": "gpu_only_sequence_6_8_completion",
+  "cases": [
+    {
+      "case_name": "case9241pegase",
+      "completed_utc": "2026-08-05T20:32:04.167349+00:00",
+      "failure": {
+        "full_lp_allocated": false,
+        "message": "within_host_safety_budget, within_device_safety_budget",
+        "phase": "preallocation:case9241pegase:T16",
+        "recorded_utc": "2026-08-05T20:32:04.167343+00:00",
+        "type": "MemorySafetyBlock"
+      },
+      "full_lp_allocation_attempted": false,
+      "key": "case9241pegase:T16",
+      "passed": false,
+      "periods": 16,
+      "required_solver_track_disposition": {
+        "gpu_fp64_sgs_hpr": "NOT_RUN_MEMORY_SAFETY_BLOCK",
+        "highs": "NOT_RUN_MEMORY_SAFETY_BLOCK"
+      },
+      "resolved": true,
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 98800,
+        "conservative_planning_nnz": 1687613820,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 20253839392,
+        "csr_transpose_bytes": 20253839392,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 1371647068,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 103667232,
+        "paper_nnz": 1493149532,
+        "periods": 16,
+        "projected_device_bytes": 50764182520,
+        "projected_host_assembly_peak_bytes": 50634598480,
+        "projected_unified_peak_bytes": 101398781000,
+        "row_count": 618386,
+        "signed_int32_csr_supported": true,
+        "temporary_buffers_and_headroom_bytes": 10152836504
+      },
+      "run_fingerprint": "238231a3ac6f648c57bee8551bb4755b9d58a5d05be951bff085a22c6f5a70b0",
+      "sequence": 6,
+      "skipped_solver_tracks": {
+        "cpu_fp64_sgs_hpr": {
+          "executed": false,
+          "gating": false,
+          "name": "cpu_fp64_sgs_hpr",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        },
+        "gurobi": {
+          "executed": false,
+          "gating": false,
+          "name": "gurobi",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        }
+      },
+      "solver_tracks": {},
+      "stage8_resource_gate": {
+        "block_reasons": [
+          "within_host_safety_budget",
+          "within_device_safety_budget"
+        ],
+        "checks": {
+          "dimensions_match_table": true,
+          "observation_available": true,
+          "signed_int32_csr_supported": true,
+          "within_device_safety_budget": false,
+          "within_host_safety_budget": false
+        },
+        "device_safety_budget_bytes": 70325918105,
+        "evaluated_before_full_lp_allocation": true,
+        "host_safety_budget_bytes": 70635057971,
+        "observation": {
+          "device": {
+            "compute_capability": [
+              12,
+              1
+            ],
+            "csr_index_bits": 32,
+            "csr_index_dtype": "int32",
+            "csr_indptr_dtype": "int32",
+            "cuda_driver_version": 13000,
+            "cuda_runtime_version": 13020,
+            "cupy_version": "14.1.1",
+            "device_id": 0,
+            "device_name": "NVIDIA GB10",
+            "fp64_itemsize_bytes": 8,
+            "fp64_supported": true,
+            "integrated": true,
+            "multiprocessor_count": 48,
+            "total_global_memory_bytes": 130663165952
+          },
+          "device_free_bytes": 87907397632,
+          "device_total_bytes": 130663165952,
+          "errors": [],
+          "host": {
+            "available_bytes": 88293822464,
+            "source": "os.sysconf",
+            "total_bytes": 130663165952
+          },
+          "passed": true
+        },
+        "observed_device_free_bytes": 87907397632,
+        "observed_device_total_bytes": 130663165952,
+        "passed": false,
+        "projected_unified_peak_bytes": 101398781000
+      },
+      "status": "MEMORY_BLOCKED"
+    },
+    {
+      "case_name": "case9241pegase",
+      "completed_utc": "2026-08-05T20:32:03.106275+00:00",
+      "failure": {
+        "full_lp_allocated": false,
+        "message": "signed_int32_csr_nnz_limit",
+        "phase": "preallocation:case9241pegase:T24",
+        "recorded_utc": "2026-08-05T20:32:03.106247+00:00",
+        "type": "SparseIndexSafetyBlock"
+      },
+      "full_lp_allocation_attempted": false,
+      "key": "case9241pegase:T24",
+      "passed": false,
+      "periods": 24,
+      "required_solver_track_disposition": {
+        "gpu_fp64_sgs_hpr": "NOT_RUN_STATIC_RESOURCE_BLOCK",
+        "highs": "NOT_RUN_STATIC_RESOURCE_BLOCK"
+      },
+      "resolved": true,
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 148200,
+        "conservative_planning_nnz": 2531600260,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 30382918304,
+        "csr_transpose_bytes": 30382918304,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 2057650132,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 155650848,
+        "paper_nnz": 2239903828,
+        "periods": 24,
+        "projected_device_bytes": 76151859320,
+        "projected_host_assembly_peak_bytes": 75957295760,
+        "projected_unified_peak_bytes": 152109155080,
+        "row_count": 928794,
+        "signed_int32_csr_supported": false,
+        "temporary_buffers_and_headroom_bytes": 15230371864
+      },
+      "sequence": 7,
+      "skipped_solver_tracks": {
+        "cpu_fp64_sgs_hpr": {
+          "executed": false,
+          "gating": false,
+          "name": "cpu_fp64_sgs_hpr",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        },
+        "gurobi": {
+          "executed": false,
+          "gating": false,
+          "name": "gurobi",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        }
+      },
+      "solver_tracks": {},
+      "stage8_resource_gate": {
+        "block_reasons": [
+          "signed_int32_csr_nnz_limit"
+        ],
+        "evaluated_before_full_lp_allocation": true,
+        "evaluation_kind": "static_signed_int32_csr_guard",
+        "passed": false
+      },
+      "status": "INDEX_BLOCKED"
+    },
+    {
+      "case_name": "case9241pegase",
+      "completed_utc": "2026-08-05T20:32:03.106296+00:00",
+      "failure": {
+        "full_lp_allocated": false,
+        "message": "signed_int32_csr_nnz_limit",
+        "phase": "preallocation:case9241pegase:T32",
+        "recorded_utc": "2026-08-05T20:32:03.106281+00:00",
+        "type": "SparseIndexSafetyBlock"
+      },
+      "full_lp_allocation_attempted": false,
+      "key": "case9241pegase:T32",
+      "passed": false,
+      "periods": 32,
+      "required_solver_track_disposition": {
+        "gpu_fp64_sgs_hpr": "NOT_RUN_STATIC_RESOURCE_BLOCK",
+        "highs": "NOT_RUN_STATIC_RESOURCE_BLOCK"
+      },
+      "resolved": true,
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 197600,
+        "conservative_planning_nnz": 3375704460,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 40513410336,
+        "csr_transpose_bytes": 40513410336,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 2743770956,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 207634464,
+        "paper_nnz": 2986775884,
+        "periods": 32,
+        "projected_device_bytes": 101543068920,
+        "projected_host_assembly_peak_bytes": 101283525840,
+        "projected_unified_peak_bytes": 202826594760,
+        "row_count": 1239202,
+        "signed_int32_csr_supported": false,
+        "temporary_buffers_and_headroom_bytes": 20308613784
+      },
+      "sequence": 8,
+      "skipped_solver_tracks": {
+        "cpu_fp64_sgs_hpr": {
+          "executed": false,
+          "gating": false,
+          "name": "cpu_fp64_sgs_hpr",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        },
+        "gurobi": {
+          "executed": false,
+          "gating": false,
+          "name": "gurobi",
+          "passed": null,
+          "reason": "not reached because the unchanged preallocation resource guard blocked the row",
+          "status": "SKIPPED_BY_USER_SCOPE"
+        }
+      },
+      "solver_tracks": {},
+      "stage8_resource_gate": {
+        "block_reasons": [
+          "signed_int32_csr_nnz_limit"
+        ],
+        "evaluated_before_full_lp_allocation": true,
+        "evaluation_kind": "static_signed_int32_csr_guard",
+        "passed": false
+      },
+      "status": "INDEX_BLOCKED"
+    }
+  ],
+  "completed_utc": "2026-08-05T20:32:04.167362+00:00",
+  "configuration": {
+    "approval_gate": "for stage 8, proceed with completing sequence 6,7,8 but only do HiGHS and GPU (i.e. skip CPU which was timing out). then give an updated report. stop before proceeding to stage 9.",
+    "classification": "structural_reproduction",
+    "execution_policy": {
+      "do_not_replace_failures_with_estimates": true,
+      "interrupted_run_requires_new_user_direction": true,
+      "one_new_full_lp_allocation_per_invocation": true,
+      "only_sequence_6_is_allocation_eligible": true,
+      "record_sequence_7_8_static_blocks_without_allocation": true,
+      "resume_by_run_fingerprint": true,
+      "stop_after_runtime_or_numerical_failure": true
+    },
+    "expected_preallocation_blocks": {
+      "case9241pegase:T24": "signed_int32_csr_nnz_limit",
+      "case9241pegase:T32": "signed_int32_csr_nnz_limit"
+    },
+    "inherited_acceptance": {
+      "correctness_run_count": 1,
+      "minimum_measured_run_count": 5,
+      "per_solve_time_limit_seconds": 3600,
+      "reuse_algorithm_without_changes": true,
+      "reuse_numerical_thresholds_without_changes": true,
+      "reuse_reconstruction_protocol_without_changes": true,
+      "reuse_timing_repetitions_without_changes": true,
+      "speedup_computed": false,
+      "warmup_run_count": 1
+    },
+    "name": "stage_8_gpu_only_sequence_6_8_completion",
+    "original_stage_8": {
+      "checker_path": "results/raw/stage_8/stage_8_checks.json",
+      "checker_sha256": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+      "configuration_path": "configs/benchmarks/stage_8_large.json",
+      "configuration_sha256": "ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+      "do_not_reclassify_t6_cpu_timeout": true,
+      "evidence_path": "results/raw/stage_8/stage_8_validation.json",
+      "evidence_sha256": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254",
+      "preserve_unchanged": true,
+      "terminal_status": "STOPPED_ON_FAILURE"
+    },
+    "requested_sequence": [
+      {
+        "disposition": "live_preallocation_gate_then_highs_and_gpu",
+        "key": "case9241pegase:T16",
+        "sequence": 6
+      },
+      {
+        "disposition": "static_preallocation_classification_only",
+        "key": "case9241pegase:T24",
+        "sequence": 7
+      },
+      {
+        "disposition": "static_preallocation_classification_only",
+        "key": "case9241pegase:T32",
+        "sequence": 8
+      }
+    ],
+    "resource_policy": {
+      "device_safety_fraction": 0.8,
+      "estimate_before_every_allocation": true,
+      "host_safety_fraction": 0.8,
+      "memory_projection_unchanged_by_cpu_waiver": true,
+      "require_observed_device_free_bytes": true,
+      "require_observed_device_total_bytes": true,
+      "require_observed_host_available_bytes": true,
+      "required_sparse_index_bits": 32,
+      "stop_before_allocation_if_unsafe": true,
+      "unified_memory_accounting": "sum_host_assembly_peak_and_device_planning"
+    },
+    "schema_version": "1.0",
+    "stage": 8,
+    "stage_boundary": {
+      "exact_paper_reproduction_claimed": false,
+      "n_minus_1_extension_enabled": false,
+      "paper_a100_timing_reproduction_claimed": false,
+      "stage_8_only": true,
+      "stage_9_allocation_count": 0,
+      "stage_9_locked": true
+    },
+    "track_policy": {
+      "cpu_skip_is_not_a_cpu_pass": true,
+      "cpu_skip_reason": "explicit_user_instruction_after_preserved_T6_CPU_time_limit",
+      "cpu_skip_scope": "sequence_6_7_8_only",
+      "explicitly_skipped_solver_tracks": [
+        "cpu_fp64_sgs_hpr",
+        "gurobi"
+      ],
+      "fp64_required": true,
+      "required_solver_tracks": [
+        "highs",
+        "gpu_fp64_sgs_hpr"
+      ]
+    }
+  },
+  "configuration_validation": {
+    "errors": [],
+    "passed": true
+  },
+  "environment": {
+    "captured_utc": "2026-08-05T20:32:03.703008+00:00",
+    "git": {
+      "branch": "",
+      "head": "1cf9da62e263a1fb8cc7e68e6cecc4958e602a22",
+      "status_porcelain": ""
+    },
+    "host_memory": {
+      "available_bytes": 88294281216,
+      "source": "os.sysconf",
+      "total_bytes": 130663165952
+    },
+    "machine": "aarch64",
+    "numpy": "2.3.5",
+    "packages": {
+      "cupy-cuda13x": "14.1.1",
+      "gurobipy": null,
+      "numpy": "2.3.5",
+      "scipy": "1.16.3"
+    },
+    "platform": "Linux-6.17.0-1029-nvidia-aarch64-with-glibc2.39",
+    "processor": "aarch64",
+    "python": "3.12.3",
+    "python_executable": "/home/dgxsparktd/sGS-HPR-DC-SCOPF/.venv/bin/python",
+    "scipy": "1.16.3"
+  },
+  "executable_scope_passed": false,
+  "failures": [
+    {
+      "full_lp_allocated": false,
+      "message": "signed_int32_csr_nnz_limit",
+      "phase": "preallocation:case9241pegase:T24",
+      "recorded_utc": "2026-08-05T20:32:03.106247+00:00",
+      "type": "SparseIndexSafetyBlock"
+    },
+    {
+      "full_lp_allocated": false,
+      "message": "signed_int32_csr_nnz_limit",
+      "phase": "preallocation:case9241pegase:T32",
+      "recorded_utc": "2026-08-05T20:32:03.106281+00:00",
+      "type": "SparseIndexSafetyBlock"
+    },
+    {
+      "full_lp_allocated": false,
+      "message": "within_host_safety_budget, within_device_safety_budget",
+      "phase": "preallocation:case9241pegase:T16",
+      "recorded_utc": "2026-08-05T20:32:04.167343+00:00",
+      "type": "MemorySafetyBlock"
+    }
+  ],
+  "invocations": [
+    {
+      "allocated_keys": [],
+      "approval_token_matched": false,
+      "completed_utc": "2026-08-05T20:32:03.128329+00:00",
+      "cpu_hpr_called": false,
+      "device_id": 0,
+      "gurobi_called": false,
+      "id": "2026-08-05T20:32:03.110780+00:00",
+      "mode": "plan_only",
+      "outcome": "PLANNED",
+      "started_utc": "2026-08-05T20:32:03.110780+00:00"
+    },
+    {
+      "allocated_keys": [],
+      "approval_token_matched": true,
+      "completed_utc": "2026-08-05T20:32:04.167360+00:00",
+      "cpu_hpr_called": false,
+      "device_id": 0,
+      "gurobi_called": false,
+      "id": "2026-08-05T20:32:03.712196+00:00",
+      "mode": "run_next",
+      "outcome": "COMPLETE_WITH_RESOURCE_LIMITS",
+      "started_utc": "2026-08-05T20:32:03.712196+00:00"
+    }
+  ],
+  "original_stage_8_contract": {
+    "actual_sha256": {
+      "checker": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+      "configuration": "ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+      "evidence": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254"
+    },
+    "errors": [],
+    "expected_sha256": {
+      "checker": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+      "configuration": "ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+      "evidence": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254"
+    },
+    "passed": true,
+    "paths": {
+      "checker": "results/raw/stage_8/stage_8_checks.json",
+      "configuration": "configs/benchmarks/stage_8_large.json",
+      "evidence": "results/raw/stage_8/stage_8_validation.json"
+    },
+    "replayed_checker_summary": {
+      "passed": 12,
+      "total": 12
+    },
+    "stored_checker_summary": {
+      "passed": 12,
+      "total": 12
+    },
+    "t6_status": "FAIL",
+    "terminal_status": "STOPPED_ON_FAILURE"
+  },
+  "policy_contract": {
+    "error": null,
+    "json_is_sole_authority": true,
+    "passed": true,
+    "policy_fingerprint": "e6911ef7e5ccab32a8392c917b892eeabbed3df16a44b1e342cd8ef664274dcf"
+  },
+  "requirements_freeze": {
+    "errors": [],
+    "expected_pins": {
+      "cupy-cuda13x": "14.1.1",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3"
+    },
+    "passed": true,
+    "path": "environment/dgx_stage7_requirements.txt",
+    "pins": {
+      "Pygments": "2.20.0",
+      "cuda-pathfinder": "1.6.0",
+      "cupy-cuda13x": "14.1.1",
+      "iniconfig": "2.3.0",
+      "numpy": "2.3.5",
+      "packaging": "26.2",
+      "pip": "26.2",
+      "pluggy": "1.6.0",
+      "pytest": "8.4.2",
+      "ruff": "0.16.0",
+      "scipy": "1.16.3"
+    },
+    "portable_identity": {
+      "canonical_git_blob_sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+      "canonical_git_blob_size_bytes": 386,
+      "checks": {
+        "canonical_blob_read": true,
+        "canonical_blob_uses_lf_text": true,
+        "filtered_worktree_blob_matches": true,
+        "head_blob_matches": true,
+        "worktree_clean": true
+      },
+      "errors": [],
+      "expected_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+      "filtered_worktree_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+      "head_git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+      "passed": true,
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content",
+      "worktree_diff": "",
+      "worktree_raw_sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+      "worktree_status": ""
+    },
+    "sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+    "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+  },
+  "resource_ledger": [
+    {
+      "allocation_permitted_this_invocation": true,
+      "campaign_sequence": 6,
+      "continuation_scope": "gpu_only_sequences_6_8",
+      "disposition": "stage8_campaign",
+      "explicitly_skipped_solver_tracks": [
+        "cpu_fp64_sgs_hpr",
+        "gurobi"
+      ],
+      "key": "case9241pegase:T16",
+      "required_solver_tracks_if_allocated": [
+        "highs",
+        "gpu_fp64_sgs_hpr"
+      ],
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 98800,
+        "conservative_planning_nnz": 1687613820,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 20253839392,
+        "csr_transpose_bytes": 20253839392,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 1371647068,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 103667232,
+        "paper_nnz": 1493149532,
+        "periods": 16,
+        "projected_device_bytes": 50764182520,
+        "projected_host_assembly_peak_bytes": 50634598480,
+        "projected_unified_peak_bytes": 101398781000,
+        "row_count": 618386,
+        "signed_int32_csr_supported": true,
+        "temporary_buffers_and_headroom_bytes": 10152836504
+      },
+      "static_block_reasons": [],
+      "static_preallocation_status": "ELIGIBLE"
+    },
+    {
+      "allocation_permitted_this_invocation": false,
+      "campaign_sequence": 7,
+      "continuation_scope": "gpu_only_sequences_6_8",
+      "disposition": "stage8_campaign",
+      "explicitly_skipped_solver_tracks": [
+        "cpu_fp64_sgs_hpr",
+        "gurobi"
+      ],
+      "key": "case9241pegase:T24",
+      "required_solver_tracks_if_allocated": [
+        "highs",
+        "gpu_fp64_sgs_hpr"
+      ],
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 148200,
+        "conservative_planning_nnz": 2531600260,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 30382918304,
+        "csr_transpose_bytes": 30382918304,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 2057650132,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 155650848,
+        "paper_nnz": 2239903828,
+        "periods": 24,
+        "projected_device_bytes": 76151859320,
+        "projected_host_assembly_peak_bytes": 75957295760,
+        "projected_unified_peak_bytes": 152109155080,
+        "row_count": 928794,
+        "signed_int32_csr_supported": false,
+        "temporary_buffers_and_headroom_bytes": 15230371864
+      },
+      "static_block_reasons": [
+        "signed_int32_csr_nnz_limit"
+      ],
+      "static_preallocation_status": "BLOCKED"
+    },
+    {
+      "allocation_permitted_this_invocation": false,
+      "campaign_sequence": 8,
+      "continuation_scope": "gpu_only_sequences_6_8",
+      "disposition": "stage8_campaign",
+      "explicitly_skipped_solver_tracks": [
+        "cpu_fp64_sgs_hpr",
+        "gurobi"
+      ],
+      "key": "case9241pegase:T32",
+      "required_solver_tracks_if_allocated": [
+        "highs",
+        "gpu_fp64_sgs_hpr"
+      ],
+      "resource_estimate": {
+        "case_name": "case9241pegase",
+        "column_count": 197600,
+        "conservative_planning_nnz": 3375704460,
+        "csr_index_bits": 32,
+        "csr_matrix_bytes": 40513410336,
+        "csr_transpose_bytes": 40513410336,
+        "dimensions_match_table": true,
+        "estimate_kind": "conservative_dense_support_bound_with_stage7_headroom",
+        "exact_reconstructed_nnz": 2743770956,
+        "full_lp_allocated": false,
+        "iterate_and_workspace_vector_bytes": 207634464,
+        "paper_nnz": 2986775884,
+        "periods": 32,
+        "projected_device_bytes": 101543068920,
+        "projected_host_assembly_peak_bytes": 101283525840,
+        "projected_unified_peak_bytes": 202826594760,
+        "row_count": 1239202,
+        "signed_int32_csr_supported": false,
+        "temporary_buffers_and_headroom_bytes": 20308613784
+      },
+      "static_block_reasons": [
+        "signed_int32_csr_nnz_limit"
+      ],
+      "static_preallocation_status": "BLOCKED"
+    }
+  ],
+  "resource_observations": [
+    {
+      "device": {
+        "compute_capability": [
+          12,
+          1
+        ],
+        "csr_index_bits": 32,
+        "csr_index_dtype": "int32",
+        "csr_indptr_dtype": "int32",
+        "cuda_driver_version": 13000,
+        "cuda_runtime_version": 13020,
+        "cupy_version": "14.1.1",
+        "device_id": 0,
+        "device_name": "NVIDIA GB10",
+        "fp64_itemsize_bytes": 8,
+        "fp64_supported": true,
+        "integrated": true,
+        "multiprocessor_count": 48,
+        "total_global_memory_bytes": 130663165952
+      },
+      "device_free_bytes": 87907397632,
+      "device_total_bytes": 130663165952,
+      "errors": [],
+      "host": {
+        "available_bytes": 88293822464,
+        "source": "os.sysconf",
+        "total_bytes": 130663165952
+      },
+      "key": "case9241pegase:T16",
+      "observed_utc": "2026-08-05T20:32:04.153076+00:00",
+      "passed": true
+    }
+  ],
+  "run_fingerprint": "238231a3ac6f648c57bee8551bb4755b9d58a5d05be951bff085a22c6f5a70b0",
+  "schema_version": "1.0",
+  "solver_availability": {
+    "cpu_fp64_sgs_hpr": {
+      "available": null,
+      "probed": false,
+      "status": "SKIPPED_BY_USER_SCOPE"
+    },
+    "gpu_fp64_sgs_hpr": {
+      "adapter_available": true,
+      "available": true,
+      "cupy_cuda13x_version": "14.1.1",
+      "installed": true,
+      "reason": null
+    },
+    "gurobi": {
+      "available": null,
+      "probed": false,
+      "status": "SKIPPED_BY_USER_SCOPE"
+    },
+    "highs": {
+      "available": true,
+      "installed": true,
+      "provider": "scipy.optimize.linprog(method='highs-ds')",
+      "scipy_version": "1.16.3"
+    }
+  },
+  "source_manifest": [
+    {
+      "git_blob": "d91b3fcb0aa98c39939b3b9f7bf55c50e6ee3cbc",
+      "passed": true,
+      "path": "scripts/run_stage_8_gpu_only_completion.py",
+      "sha256": "f841b0ce7a844ec5e4b8d60804fc9d34c5347867ad76b71cadfbf204b5d7a1c3",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "b64c37d8502858f9b618d008a9ec204402758197",
+      "passed": true,
+      "path": "scripts/check_stage_8_gpu_only_completion.py",
+      "sha256": "0d64485ca5699c81854b3a61966eb4909f8763617cdd4e0a347c0cc284c24094",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "a9ad6a9555539fcb5ebfcea9e80755273d439261",
+      "passed": true,
+      "path": "scripts/run_stage_8.py",
+      "sha256": "35740c45ab84a1261ec0f81201fd78af47319036f08bcf67cf6b38049f8af165",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "4de52d0658b9eaf91ff76a228131c86a0c8fd864",
+      "passed": true,
+      "path": "scripts/check_stage_8.py",
+      "sha256": "e2bc487adaaa61a62621b4fb417d2195ed37a20364e0b560d72da1d24db5939d",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "84db6ca16f6317805e48f4738abb80dd42cc496e",
+      "passed": true,
+      "path": "scripts/run_stage_7.py",
+      "sha256": "88ba69ef63497c18cb695801429589263e3aa783ff8fa3138fb3fe059f9afdd3",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "5847ec7fd8b6dab12eaa568104f03120ac3a79e5",
+      "passed": true,
+      "path": "scripts/check_stage_7.py",
+      "sha256": "7e0e3d83d0d6c49dd9773b581d73b95e4ba2f51ee1d46506b8654136850ca7d9",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "4032204a63a5479399060ca4a6e1cbc217164aec",
+      "passed": true,
+      "path": "configs/benchmarks/stage_8_gpu_only_completion.json",
+      "sha256": "76ff7cb76f70ff104d1691a152b57ebabaade3e26b784091b888c1d5918cc64c",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "3c0c5d24d6f66acf68ce9348334aa312e0440328",
+      "passed": true,
+      "path": "configs/benchmarks/stage_8_large.json",
+      "sha256": "ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "ca418467e54e6816fbf66befa74f32cd61ea923f",
+      "passed": true,
+      "path": "configs/benchmarks/stage_7_small_medium.json",
+      "sha256": "06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "96e22c76dc27e96d28b5ad969ddcf877eea09d4f",
+      "passed": true,
+      "path": "results/raw/stage_8/stage_8_validation.json",
+      "sha256": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "50b022669e519ba498cdc7d5ef59abf3a15bf01f",
+      "passed": true,
+      "path": "results/raw/stage_8/stage_8_checks.json",
+      "sha256": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "5e7dd8c9d2bb830f09cceab915fc778ae0210fda",
+      "passed": true,
+      "path": "results/raw/stage_7/stage_7_validation.json",
+      "sha256": "180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "f41e1e434c33f8cbb49abf30176302ef5b57c227",
+      "passed": true,
+      "path": "environment/dgx_stage7_requirements.txt",
+      "sha256": "827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "02b5065b3fed9521dfda7af37f265bc818c8fc64",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/__init__.py",
+      "sha256": "9e09afe4e9cd4ea8f8250eeaa12760077d513dcf91905f67fe5234a6bb3ec92a",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "967b78a2f7662f9c99540c4fcf2692532a82fbd1",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/canonical_lp.py",
+      "sha256": "cdef660c36aa35f493e4735875493c11a9ab884e6f1c6a8974158913fc46f915",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "9e2dbaaaf11c974a0db61d5f41221a9ad3c1542b",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/dcopf_model.py",
+      "sha256": "bc0ed66de29f7972a45b0ee37d636ea7a43cb5703b88c3062849df0285796144",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "5d6511f8f5d89bec8f1b9ca9aa5a4c8eaff66be4",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/gpu_backend.py",
+      "sha256": "8586729e75a630ac9dac76acd978787903969304ea27c32c8723311d5cad42af",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "4c1119f279393055c70ce59d6988f0287d846469",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/gpu_sgs_hpr.py",
+      "sha256": "eceb2a9b10a0c1834e08c932e4364d93d98f276258f25bbc122fd6483b62a358",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "4302132a875e130f946b8f664269e588ecd716be",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/gpu_sparse.py",
+      "sha256": "8243bb28f2128fc17e80487cde55ca319e2f59b48d6c45cc01e0d992405eedbf",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "81d5a5ebb20afd33dd3d2966d3e877985805ff7b",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/gpu_stage5_control.py",
+      "sha256": "3a15d45203fc3d27c8f12a67bf4209bd05f56735f0c636a35514a12b8c5fdd3a",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "b2c844fabe4778d258527acc854d6a9c4fef3642",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/hpr_generic.py",
+      "sha256": "2008c929b463bcf8d45a31428fa057e78a0be56b88c4d2f73154c1cbfbbe8d1e",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "b8c9598b6d9a6a23e884020462a40ca81a729434",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/network_data.py",
+      "sha256": "8da17c113726a785795fa76180dc59fa1e58b8f38f030bf4b13e5b42f9a608d4",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "b843695992957e1393b766bfedd03fd3d1d5ae78",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/preconditioning.py",
+      "sha256": "b37d32fe29eb4b8cc1feb8a520f30fd92a3dbc3f30016291ae3caf16be9bf06e",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "62a215d489c49b96135957deaf9c8028a60c64c1",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/projections.py",
+      "sha256": "8fb40f9e269b81a098e088db78930de1f858a2853f3241a9ddc6eafa570d28d4",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "5d88e2ed14ed914d97f88ff3e00593325861629b",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/ptdf.py",
+      "sha256": "bc3c5487835e7a1d0ce5418f5c9b579e4343dc2d563e8266ad880e0e87437648",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "c603e083a23d427e628b7604ecdf163839d90d92",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/residuals.py",
+      "sha256": "55477250dc4e580729d7b2561bdfa4459ffcb6ffd21550c6c7f576b087c2e887",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "cbaa46616ff45e544d6151c51b2095c916706efe",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/sgs_hpr.py",
+      "sha256": "27f3a02ed0819890c80d1ebfb19ae09840291e8a32cef26df896cf52cf38da15",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "e1515b01797e0874faf59623541cc8927888d3a1",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/stage5_control.py",
+      "sha256": "40f78e6b787de8d529e340ce1533ddc062d6cc59825b0116ccf28a994cdf85e1",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "e4fffd63836d5d91f6867e805728ceb191f7fc7b",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/stage7_scalable_model.py",
+      "sha256": "b406e4f158c170d696cd6d65165107e785ac7310bd81d66a39d1d0545fc59837",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "18fa7bf7cfdf544e31699a668b0b5aa9ddb9d87f",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/stage7_scaled_y1.py",
+      "sha256": "0813660e3be457b3800d2e617e00b2c18ecb471a28be3ab0ef80811c8c64d17f",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "91a3a41e6388f6f01df751481d88e2856f0ecc81",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/stage7_spectral.py",
+      "sha256": "2097818f46f7b9ddbfd96f8812b6ffcdcf84a0c34f27757d5b88213218753c1b",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "87599530910e1036b56d48973a2ee66c6db02afd",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/structural_y1.py",
+      "sha256": "febbe9cbc5abb0bbaa896c053a7b90c2168a44c6320efbc3b67b348026db555b",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "298a21a72cb238242187df44e38fb9277a3a8786",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/toy_problems.py",
+      "sha256": "8c6ff27a067efa773971d8cb7ef69c0984ba77224cb6aba6e17d238eacac7608",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    },
+    {
+      "git_blob": "85a2a3a1a068bdd22b1f2ddc3ad73b297c49d154",
+      "passed": true,
+      "path": "src/gpu_dcopf_hpr/validation.py",
+      "sha256": "5dd5aeff01adac8222a2160ec0467063a718f407fcba4ae75be279d29dc08109",
+      "sha256_definition": "SHA-256 of canonical Git blob bytes with LF text content"
+    }
+  ],
+  "stage": 8,
+  "stage_boundary": {
+    "continuation_allocation_attempt_count": 0,
+    "exact_paper_reproduction_claimed": false,
+    "n_minus_1_extension_enabled": false,
+    "one_new_full_lp_allocation_per_invocation": true,
+    "original_stage_8_terminal_status": "STOPPED_ON_FAILURE",
+    "original_t6_cpu_failure_preserved": true,
+    "paper_a100_timing_reproduction_claimed": false,
+    "stage_8_gpu_only_continuation_complete": true,
+    "stage_8_only": true,
+    "stage_9_allocation_count": 0,
+    "stage_9_locked": true,
+    "unique_allocated_keys": []
+  },
+  "started_utc": "2026-08-05T20:32:03.106308+00:00",
+  "status": "COMPLETE_WITH_RESOURCE_LIMITS",
+  "updated_utc": "2026-08-05T20:32:04.167363+00:00"
+}

@@ -2,9 +2,11 @@
 
 > **Stage decision:** FAIL
 >
-> **Campaign status:** `STOPPED_ON_FAILURE`
+> **Original campaign status:** `STOPPED_ON_FAILURE`
 >
-> **Completed:** August 4, 2026
+> **GPU-only sequence 6--8 continuation:** `COMPLETE_WITH_RESOURCE_LIMITS`
+>
+> **Updated:** August 5, 2026
 >
 > **Classification:** Structural reproduction
 
@@ -30,6 +32,26 @@ allocations. The Stage 8 checker passed all 12 protocol and evidence checks,
 which confirms that the terminal failure was preserved honestly; it does not
 turn that failure into a Stage 8 acceptance pass. Stage 9 remains locked.
 
+On August 5, the user separately authorized a sequence 6--8 continuation with
+only HiGHS and GPU FP64 sGS-HPR eligible. CPU sGS-HPR and Gurobi were explicitly
+skipped and were not represented as passes. The original T6 failure and its
+evidence remained unchanged.
+
+The continuation resolved all three requested rows without allocating an LP:
+
+- T16's unchanged 94.435 GiB unified projection exceeded both live 80% safety
+  budgets: 65.784 GiB from observed host-free pages and 65.496 GiB from
+  observed CUDA-free memory. It was recorded as `MEMORY_BLOCKED` before model,
+  HiGHS, or GPU allocation.
+- T24 and T32 remained `INDEX_BLOCKED` because their conservative planning
+  nonzero counts exceed the largest signed 32-bit CSR index. Both decisions
+  were made without allocation.
+
+Because no requested row passed its preallocation gate, the continuation
+produced no new HiGHS or GPU correctness runs or timings. Its independent
+checker passed 13 of 13 evidence checks. This safely completes the requested
+classification sequence; it does not convert Stage 8 acceptance to PASS.
+
 ## 2. Evidence and provenance
 
 | Item | Recorded value |
@@ -45,6 +67,21 @@ turn that failure into a Stage 8 acceptance pass. Stage 9 remains locked.
 | Executed source manifest | 27 of 27 entries passed |
 | Allocation attempts | 5, all unique and in order |
 | Retries | 0 |
+
+The separate GPU-only continuation has the following provenance:
+
+| Item | Recorded value |
+|---|---|
+| Executed commit | `1cf9da62e263a1fb8cc7e68e6cecc4958e602a22` |
+| Worktree state | Clean detached worktree |
+| Run fingerprint | `238231a3ac6f648c57bee8551bb4755b9d58a5d05be951bff085a22c6f5a70b0` |
+| Continuation start | `2026-08-05T20:32:03.106308+00:00` |
+| Continuation end | `2026-08-05T20:32:04.167362+00:00` |
+| Continuation configuration SHA-256 | `76ff7cb76f70ff104d1691a152b57ebabaade3e26b784091b888c1d5918cc64c` |
+| Final continuation evidence SHA-256 | `edf18f6cda959c47fe5d7c38370c5f88619ee08a8ee4f9dbb480756ff1d34f7b` |
+| DGX checker output SHA-256 | `8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65` |
+| Executed source manifest | 34 of 34 entries passed |
+| Continuation allocation attempts | 0 |
 
 The accepted Stage 7 configuration, evidence, and DGX requirements were reused
 without changing the algorithm, reconstruction, thresholds, or timing
@@ -78,6 +115,13 @@ five measured repetitions. The campaign had to stop at the first numerical,
 time, or resource failure. A later row could not be skipped to, and retrying a
 failed row required an explicit retry invocation.
 
+The separately frozen continuation changed only solver-track scope for
+sequences 6--8: HiGHS and GPU FP64 were required if a row reached allocation;
+CPU sGS-HPR and Gurobi were explicit non-gating skips. It did not change the
+mathematical reconstruction, numerical thresholds, timing repetitions,
+3,600-second deadline, 80% memory fractions, unified-memory accounting, or
+signed-int32 sparse-index requirement.
+
 ## 4. Campaign outcome
 
 | Seq. | Row | Full LP allocated? | Track result | Final row status |
@@ -87,14 +131,15 @@ failed row required an explicit retry invocation.
 | 3 | `case2868rte:T96` | Yes | HiGHS PASS; CPU PASS; GPU PASS | `PASS` |
 | 4 | `case9241pegase:T4` | Yes | HiGHS PASS; CPU PASS; GPU PASS | `PASS` |
 | 5 | `case9241pegase:T6` | Yes | HiGHS PASS; CPU `TIME_LIMIT`; GPU PASS | `FAIL` |
-| 6 | `case9241pegase:T16` | No | Not reached | Not executed |
-| 7 | `case9241pegase:T24` | No | Static signed-int32 block recorded in ledger; not reached | Not executed |
-| 8 | `case9241pegase:T32` | No | Static signed-int32 block recorded in ledger; not reached | Not executed |
+| 6 | `case9241pegase:T16` | No | GPU-only continuation: HiGHS/GPU not run; live unified-memory gate failed | `MEMORY_BLOCKED` |
+| 7 | `case9241pegase:T24` | No | GPU-only continuation: static signed-int32 CSR block | `INDEX_BLOCKED` |
+| 8 | `case9241pegase:T32` | No | GPU-only continuation: static signed-int32 CSR block | `INDEX_BLOCKED` |
 
-The passing prefix length is four. The five allocated keys exactly match the
-first five campaign rows. Reconciliation-only rows received zero allocations,
-Stage 9 received zero allocations, and the optional N-1 extension remained
-disabled.
+The original campaign's passing prefix length remains four. Its five allocated
+keys exactly match the first five campaign rows. The separate continuation
+made zero allocations while resolving sequences 6--8 at preallocation safety
+boundaries. Reconciliation-only rows and Stage 9 still received zero
+allocations, and the optional N-1 extension remained disabled.
 
 T24 and T32 have fail-closed static resource entries because their conservative
 planning envelopes exceed the largest signed 32-bit index value. Those ledger
@@ -179,9 +224,17 @@ and CuPy snapshots likewise bracket solves but are not mislabeled as true
 per-solve GPU peaks. Every completed GPU candidate's transfer audit passed;
 no full solver state moved to the host inside the resident iteration loop.
 
-T16's planning projection is 94.435 GiB, but its live gate was never evaluated
-because the strict campaign stopped at T6. T24 and T32 remain static planning
-blocks. None of those three rows was allocated.
+The original strict-prefix campaign never evaluated T16's live gate because it
+stopped at T6. The separate GPU-only continuation did evaluate it. At that
+instant the runner observed 82.231 GiB of host-free pages and 81.870 GiB of
+CUDA-free memory. Applying the unchanged 80% fractions produced 65.784 GiB and
+65.496 GiB budgets, respectively. The 94.435 GiB unified projection exceeded
+both, so the runner stopped before constructing the LP.
+
+T24 and T32 were resolved without allocation from the frozen count-only
+ledger. Their conservative planning nonzero counts are 2,531,600,260 and
+3,375,704,460, both above 2,147,483,647. No new HiGHS, CPU, GPU, or Gurobi
+solver call was made for T16, T24, or T32.
 
 ## 8. Structural comparison boundary
 
@@ -221,6 +274,21 @@ The checker result is `PASS` because the evidence obeyed the protocol. The
 campaign result remains `STOPPED_ON_FAILURE`, and the Stage 8 acceptance result
 remains `FAIL` because T6 did not complete its required CPU track.
 
+The independent GPU-only continuation checker passed **13 of 13** checks. It
+also replayed the original 12-check audit and verified that the original
+configuration, evidence, checker output, T6 failure, and terminal status were
+byte-for-byte preserved. It then independently recomputed the three resource
+projections and the T16 live gate, verified the two static signed-int32 blocks,
+confirmed zero continuation allocations, proved that CPU and Gurobi were never
+called, and confirmed that Stage 9 remained locked.
+
+An initial rehearsal from commit `79d10069089f29e9bca1649db58fdb8ab8c3488a`
+reached the same zero-allocation resource decisions, but its checker wrapper
+could not serialize an evidence path outside the repository. The wrapper was
+fixed without changing any validation rule. The complete plan, continuation,
+and checker were then rerun from fresh clean commit `1cf9da62...`; only that
+rerun is the official continuation evidence.
+
 The initial checker command-line wrapper contained a result-writer defect: its
 final call referenced a missing `stage7_checker._atomic_write_json` helper.
 The writer was repaired without changing the 12 validation checks, and the
@@ -232,6 +300,16 @@ does not alter the campaign evidence or the Stage 9 decision.
 - `configs/benchmarks/stage_8_large.json`: frozen Stage 8 contract
 - `results/raw/stage_8/stage_8_validation.json`: terminal campaign evidence
 - `results/raw/stage_8/stage_8_checks.json`: independent 12-check result
+- `configs/benchmarks/stage_8_gpu_only_completion.json`: frozen continuation
+  contract
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_validation.json`:
+  terminal continuation evidence
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json`:
+  DGX 13-check result
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks_local.json`:
+  independent local replay of the same 13 checks
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion.partial.json`:
+  final atomic checkpoint, identical to the terminal evidence
 - `results/raw/stage_8/runs/stage8-f1fffc2adcba-20260803T225116Z/`: immutable
   invocation, PID, partial-checkpoint, and final-run archive
 - `docs/stage_reports/stage_8_report.md`: this human-readable report
@@ -251,6 +329,15 @@ Accordingly:
 - Stage 8 acceptance: **FAIL**;
 - Stage 9 authorization condition: **NOT SATISFIED**;
 - Stage 9 state: **LOCKED**.
+
+The GPU-only continuation additionally establishes:
+
+- sequences 6--8 requested scope: **RESOLVED**;
+- continuation allocations: **0**;
+- new HiGHS/GPU timing evidence: **NONE (preallocation guards blocked all rows)**;
+- continuation evidence integrity: **PASS, 13/13**;
+- original Stage 8 result changed: **NO**;
+- Stage 9 work started: **NO**.
 
 No automatic retry is permitted. Any future T6 retry or protocol revision must
 be separately authorized and must preserve this terminal evidence unchanged.

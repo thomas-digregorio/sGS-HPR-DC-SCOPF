@@ -73,8 +73,8 @@ export function ReproductionDashboard() {
   const stageEightAttemptedRows = stageEightDashboard.rows.filter(
     (row) => row.status === "passed" || row.status === "failed",
   );
-  const stageEightLockedRows = stageEightDashboard.rows.filter(
-    (row) => row.status === "locked",
+  const stageEightBlockedRows = stageEightDashboard.rows.filter(
+    (row) => row.status === "memory-blocked" || row.status === "index-blocked",
   );
   const stageEightRecordedRows = stageEightDashboard.rows.filter(
     (row) => !["queued", "running", "locked"].includes(row.status),
@@ -172,12 +172,12 @@ export function ReproductionDashboard() {
             </div>
           </div>
           <div className="metric-card">
-            <div className="metric-label">Attempted campaign rows</div>
+            <div className="metric-label">Resolved campaign rows</div>
             <div className="metric-value">
               {stageEightRecordedRows.length} / {stageEightDashboard.rows.length}
             </div>
             <div className="metric-note">
-              {stageEightLockedRows.length} later rows remain locked and were not executed.
+              {stageEightBlockedRows.length} later rows resolved before allocation; no new LP was built.
             </div>
           </div>
           <div className="metric-card">
@@ -304,7 +304,7 @@ export function ReproductionDashboard() {
                 </div>
                 <div className="machine-detail">
                   {stageEightPassedRows.length} rows passed, {stageEightFailedRows.length} failed,
-                  and {stageEightLockedRows.length} later rows were never executed.
+                  and {stageEightBlockedRows.length} later rows were resource-blocked without allocation.
                 </div>
               </div>
               <div className="machine">
@@ -364,8 +364,8 @@ export function ReproductionDashboard() {
               </div>
               <p className="ablation-note">
                 Combined planning footprint adds the host assembly peak and GPU plan.
-                T16, T24, and T32 remain planning-only estimates: the frozen campaign
-                stopped at T6 before any of those rows were evaluated live or allocated.
+                The separate GPU-only continuation evaluated T16 live and classified T24
+                and T32 statically. All three stopped before LP allocation.
               </p>
             </div>
 
@@ -450,8 +450,9 @@ export function ReproductionDashboard() {
                   <span className="machine-state">{stageEightDashboard.phaseLabel}</span>
                 </div>
                 <div className="machine-detail">
-                  NVIDIA GB10; T6 cleared the memory guard, then stopped on the independent
-                  CPU correctness time limit. No later Stage 8 allocation was attempted.
+                  NVIDIA GB10; the original run stopped at T6. The later GPU-only
+                  continuation resolved T16, T24, and T32 at memory/index guards with zero
+                  new allocations.
                 </div>
               </div>
             </div>

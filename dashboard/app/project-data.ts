@@ -67,7 +67,11 @@ const stageEightTasks: ResearchTask[] = [
     title: "Preserve numerical, timeout, memory, and index failures",
     status: "complete",
   },
-  { id: "8.4", title: "Reconstruct Table II beyond the terminal row", status: "locked" },
+  {
+    id: "8.4",
+    title: "Resolve sequences 6--8 under the separately frozen GPU-only scope",
+    status: "complete",
+  },
   { id: "8.5", title: "Interpret timings only across fair boundaries", status: "complete" },
 ];
 
@@ -77,31 +81,31 @@ const stageEightTasks: ResearchTask[] = [
  */
 export const stageEightDashboard = {
   stageStatus: "stopped" as StageStatus,
-  phaseLabel: "STOPPED_ON_FAILURE",
-  headline: "Stage 8 stopped at the first frozen failure boundary.",
+  phaseLabel: "CONTINUATION_RESOURCE_LIMITS",
+  headline: "Stage 8 sequences 6--8 are resolved at the safety boundary.",
   summary:
-    "Four large rows passed. At T6, the CPU FP64 correctness solve reached the frozen 3,600-second time limit; HiGHS and GPU FP64 passed, but the row and campaign did not.",
+    "The original campaign still fails at T6. A separate HiGHS/GPU-only continuation made zero allocations: T16 was memory-blocked, while T24 and T32 were signed-int32 index-blocked.",
   gate: {
     command: "STAGE 9 LOCKED",
     state: "held" as "held" | "available",
     intro:
-      "The frozen Stage 8 campaign terminated on the T6 CPU correctness failure. A passing evidence audit preserves that result; it does not authorize the next stage.",
-    note: "Stage 9 remains locked. T16, T24, and T32 were not executed.",
+      "The original T6 CPU failure is preserved. The separately authorized sequence 6--8 continuation resolved every row before allocation without changing the frozen safety thresholds.",
+    note: "Stage 9 remains locked with zero allocations, as requested.",
   },
   acceptance: {
     result: "fail" as "running" | "pass" | "fail",
-    checkerPassed: 12 as number | null,
-    checkerTotal: 12 as number | null,
+    checkerPassed: 13 as number | null,
+    checkerTotal: 13 as number | null,
     note:
-      "12 / 12 independent checks validate the protocol and evidence; the campaign still ends STOPPED_ON_FAILURE.",
+      "13 / 13 checks validate the continuation; the original terminal audit remains 12 / 12 PASS and Stage 8 acceptance remains FAIL.",
   },
   guard: {
     usableFraction: "80%",
     formula:
-      "min(0.8 × live host available, 0.8 × live CUDA free) ≥ host assembly peak + GPU planning footprint",
-    liveGuardBudgetGiB: "79.12" as string | null,
+      "min(0.8 x live host available, 0.8 x live CUDA free) >= host assembly peak + GPU planning footprint",
+    liveGuardBudgetGiB: "65.50" as string | null,
     note:
-      "At the final executed preflight, the device budget was 79.12 GiB and the host budget was 79.41 GiB. T6 projected 35.410 GiB and cleared the guard before its solver timeout.",
+      "At the continuation preflight, T16 projected 94.435 GiB. The host budget was 65.784 GiB and the smaller CUDA-free budget was 65.496 GiB, so allocation was denied.",
   },
   tasks: stageEightTasks,
   rows: [
@@ -195,12 +199,13 @@ export const stageEightDashboard = {
       estimatedHostGiB: "47.157",
       estimatedCombinedGiB: "94.435",
       reconstructedNnz: "1,371,647,068",
-      status: "locked",
+      status: "memory-blocked",
       correctness: "not-run",
       highsMedianSeconds: null,
       cpuMedianSeconds: null,
       gpuMedianSeconds: null,
-      note: "Not executed: the frozen campaign stopped at the preceding T6 failure.",
+      note:
+        "GPU-only continuation: the unchanged 94.435 GiB projection exceeded both live 80% budgets. No LP or solver track was allocated.",
     },
     {
       order: 7,
@@ -211,12 +216,13 @@ export const stageEightDashboard = {
       estimatedHostGiB: "70.741",
       estimatedCombinedGiB: "141.663",
       reconstructedNnz: "2,057,650,132",
-      status: "locked",
+      status: "index-blocked",
       correctness: "not-run",
       highsMedianSeconds: null,
       cpuMedianSeconds: null,
       gpuMedianSeconds: null,
-      note: "Not executed: the frozen campaign stopped at T6 before this conditional row.",
+      note:
+        "GPU-only continuation: the 2,531,600,260 planning nnz exceed signed-int32 CSR capacity. No allocation was attempted.",
     },
     {
       order: 8,
@@ -227,12 +233,13 @@ export const stageEightDashboard = {
       estimatedHostGiB: "94.328",
       estimatedCombinedGiB: "188.897",
       reconstructedNnz: "2,743,770,956",
-      status: "locked",
+      status: "index-blocked",
       correctness: "not-run",
       highsMedianSeconds: null,
       cpuMedianSeconds: null,
       gpuMedianSeconds: null,
-      note: "Not executed: the frozen campaign stopped at T6 before this conditional row.",
+      note:
+        "GPU-only continuation: the 3,375,704,460 planning nnz exceed signed-int32 CSR capacity. No allocation was attempted.",
     },
   ] satisfies StageEightCampaignRow[],
   evidence: [
@@ -254,6 +261,23 @@ export const stageEightDashboard = {
     {
       label: "Independent 12-check audit",
       name: "results/raw/stage_8/stage_8_checks.json",
+      availability: "available",
+    },
+    {
+      label: "GPU-only continuation protocol",
+      name: "configs/benchmarks/stage_8_gpu_only_completion.json",
+      availability: "available",
+    },
+    {
+      label: "GPU-only continuation evidence",
+      name:
+        "results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_validation.json",
+      availability: "available",
+    },
+    {
+      label: "Independent 13-check continuation audit",
+      name:
+        "results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json",
       availability: "available",
     },
   ] satisfies EvidenceArtifact[],

@@ -22,19 +22,22 @@ test("server-renders the research dashboard", async () => {
   const html = await response.text();
   const renderedText = html.replaceAll("<!-- -->", "");
   assert.match(html, /<title>HPR Reproduction Control Room<\/title>/i);
-  assert.match(html, /Stage 8 stopped at the first frozen failure boundary/);
+  assert.match(html, /Stage 8 sequences 6--8 are resolved at the safety boundary/);
   assert.match(html, /Research roadmap/);
-  assert.match(html, /STOPPED_ON_FAILURE/);
+  assert.match(html, /CONTINUATION_RESOURCE_LIMITS/);
   assert.match(html, /STAGE 9 LOCKED/);
   assert.match(html, /Locked after terminal failure/);
   assert.match(renderedText, /4 \/ 5/);
-  assert.match(renderedText, /5 \/ 8/);
-  assert.match(html, /12 \/ 12/);
+  assert.match(renderedText, /8 \/ 8/);
+  assert.match(html, /13 \/ 13/);
+  assert.match(html, /12 \/ 12 PASS/);
   assert.match(html, /Stage 8 large-case campaign/);
   assert.match(html, /Unified-memory guard \/ smaller live budget wins/);
   assert.match(html, /Combined planning footprint/);
   assert.match(html, /Correctness and solver-core median seconds/);
-  assert.match(html, /79\.12/);
+  assert.match(html, /65\.50/);
+  assert.match(html, /65\.784/);
+  assert.match(html, /65\.496/);
   assert.match(html, /case2868rte/);
   assert.match(html, /case9241pegase/);
   for (const value of ["T48", "T64", "T96", "T4", "T6", "T16", "T24", "T32"]) {
@@ -56,8 +59,10 @@ test("server-renders the research dashboard", async () => {
   assert.match(html, /included final original-space residual evaluation/);
   assert.match(html, /T6 has no CPU median/);
   assert.match(html, /HiGHS and GPU FP64 passed/);
-  assert.match(html, /T16, T24, and T32 remain planning-only estimates/);
-  assert.match(html, /Locked \/ not run/);
+  assert.match(html, /evaluated T16 live and classified T24[\s\S]*T32 statically/);
+  assert.match(html, /Memory-blocked/);
+  assert.match(html, /Index-blocked/);
+  assert.match(html, /zero[\s\S]*new allocations/i);
   assert.match(html, /paper timings stay[\s\S]*separate/i);
   assert.match(html, /no formal speedup is computed/i);
   assert.match(html, /Stage 9 remains locked/i);
@@ -65,9 +70,18 @@ test("server-renders the research dashboard", async () => {
   assert.match(html, /docs\/stage_reports\/stage_8_report\.md/);
   assert.match(html, /results\/raw\/stage_8\/stage_8_validation\.json/);
   assert.match(html, /results\/raw\/stage_8\/stage_8_checks\.json/);
+  assert.match(html, /configs\/benchmarks\/stage_8_gpu_only_completion\.json/);
+  assert.match(
+    html,
+    /results\/raw\/stage_8\/gpu_only_completion\/stage_8_gpu_only_completion_validation\.json/,
+  );
+  assert.match(
+    html,
+    /results\/raw\/stage_8\/gpu_only_completion\/stage_8_gpu_only_completion_checks\.json/,
+  );
   assert.doesNotMatch(html, /APPROVE STAGE 8 AND RUN STAGE 9/);
   assert.doesNotMatch(html, /APPROVE STAGE 7 AND RUN STAGE 8/);
-  assert.doesNotMatch(html, /DGX campaign running|Index-blocked|Memory-blocked/);
+  assert.doesNotMatch(html, /DGX campaign running/);
   assert.match(html, /DGX Spark/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton|Starter Project/i);
 });

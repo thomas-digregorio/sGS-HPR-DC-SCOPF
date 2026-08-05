@@ -4,8 +4,10 @@ This companion dashboard visualizes the research stages, atomic tasks, gate
 state, evidence files, machine status, and short learning notes for the
 GPU DCOPF sGS-HPR reproduction.
 
-Current gate: Stage 7 passed; Stage 8 remains locked until the exact command
-`APPROVE STAGE 7 AND RUN STAGE 8` is received.
+Current gate: Stage 8 acceptance remains FAIL after the preserved T6 CPU
+timeout. A separately authorized GPU-only continuation resolved T16, T24, and
+T32 at unchanged preallocation guards with zero allocations. Stage 9 remains
+locked.
 
 The dashboard is evidence-driven. Its source data live in
 `app/project-data.ts` and are updated when a stage report changes the

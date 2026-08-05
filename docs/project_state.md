@@ -1,6 +1,6 @@
 # Project state
 
-Last updated: 2026-08-04
+Last updated: 2026-08-05
 
 ## Stage gate
 
@@ -8,8 +8,10 @@ Last updated: 2026-08-04
 - Campaign status: **`STOPPED_ON_FAILURE`**
 - Stage 8 acceptance: **FAIL**
 - Independent protocol checker: **PASS, 12/12 checks**
+- GPU-only sequences 6--8 continuation: **`COMPLETE_WITH_RESOURCE_LIMITS`**
+- Continuation checker: **PASS, 13/13 checks**
 - Current state: **Stage 9 locked**
-- Automatic retry: **not permitted**
+- Continuation allocations: **0**
 - Dashboard: private, owner-only Sites deployment; its URL and project
   identifier are intentionally omitted from the public repository.
 
@@ -17,6 +19,10 @@ The checker PASS and Stage 8 FAIL are intentionally separate decisions. The
 checker confirms that the campaign obeyed its frozen order, provenance,
 resource, timing, and failure-preservation rules. Stage 8 fails acceptance
 because `case9241pegase:T6` did not complete its required CPU FP64 track.
+
+The later, separately authorized continuation does not retry or reclassify
+T6. It resolves sequences 6--8 with CPU sGS-HPR and Gurobi explicitly skipped,
+while preserving the original memory, index, numerical, and timing guards.
 
 ## Stage 8 outcome
 
@@ -38,6 +44,21 @@ Stage 9 received zero allocations.
 The terminal evidence records five unique allocation attempts, a passing
 prefix of four, no retries, no reconciliation-only allocations, and no N-1
 extension work.
+
+### GPU-only sequence 6--8 continuation
+
+| Row | HiGHS | CPU sGS-HPR | GPU FP64 sGS-HPR | Resource decision |
+|---|---|---|---|---|
+| `case9241pegase:T16` | Not run | Explicitly skipped | Not run | `MEMORY_BLOCKED` before allocation |
+| `case9241pegase:T24` | Not run | Explicitly skipped | Not run | `INDEX_BLOCKED` before allocation |
+| `case9241pegase:T32` | Not run | Explicitly skipped | Not run | `INDEX_BLOCKED` before allocation |
+
+T16's 94.435 GiB unified projection exceeded both live 80% budgets:
+65.784 GiB from observed host-free pages and 65.496 GiB from observed
+CUDA-free memory. T24 and T32 have conservative planning nonzero counts of
+2,531,600,260 and 3,375,704,460, both above the signed-int32 maximum. The
+continuation therefore made zero LP allocations and produced no new solver
+timings. Its independent checker passed 13/13 checks.
 
 ## Successful timing tracks
 
@@ -80,11 +101,12 @@ allocation. The projected peaks ranged from 23.606 to 48.303 GiB for the four
 passing rows and were 35.410 GiB for T6. The corresponding live 80% host and
 device budgets remained at least 79.124 GiB.
 
-T16 has a static planning projection of 94.435 GiB, but its live gate was never
-evaluated because the campaign stopped at T6. T24 and T32 have signed-int32
-static block entries in the resource ledger; neither row was reached or
-allocated. The maximum recorded host high-water mark was a cumulative
-process-lifetime value, not an isolated per-solve peak.
+The original campaign did not reach T16. The separate continuation evaluated
+its live gate and stopped before allocation because its 94.435 GiB projection
+exceeded both current budgets. T24 and T32 were resolved directly from their
+signed-int32 static ledger blocks. None of the three rows was allocated. The
+maximum recorded host high-water mark from the original campaign remains a
+cumulative process-lifetime value, not an isolated per-solve peak.
 
 ## Reproduction classification
 
@@ -113,6 +135,12 @@ writer reference defect. The writer was repaired without changing validation
 logic, and the official checks JSON was then produced. This affected reporting
 mechanics, not the checker result or Stage 8 acceptance decision.
 
+The continuation ran from clean detached commit
+`1cf9da62e263a1fb8cc7e68e6cecc4958e602a22` with run fingerprint
+`238231a3ac6f648c57bee8551bb4755b9d58a5d05be951bff085a22c6f5a70b0`.
+Its 34-entry source manifest passed, the original Stage 8 artifact hashes were
+replayed and preserved, and the continuation checker passed 13/13 checks.
+
 ## Evidence
 
 - `results/raw/stage_8/stage_8_validation.json`: terminal Stage 8 evidence
@@ -120,19 +148,29 @@ mechanics, not the checker result or Stage 8 acceptance decision.
 - `results/raw/stage_8/runs/stage8-f1fffc2adcba-20260803T225116Z/`: immutable
   run archive
 - `configs/benchmarks/stage_8_large.json`: frozen Stage 8 contract
+- `configs/benchmarks/stage_8_gpu_only_completion.json`: frozen continuation
+  contract
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_validation.json`:
+  terminal continuation evidence
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks.json`:
+  DGX 13-check audit
+- `results/raw/stage_8/gpu_only_completion/stage_8_gpu_only_completion_checks_local.json`:
+  local 13-check replay
 - `docs/stage_reports/stage_8_report.md`: detailed human-readable report
 
 The final evidence SHA-256 is
 `f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254`.
 The checker-output SHA-256 is
 `ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b`.
+The continuation-evidence SHA-256 is
+`edf18f6cda959c47fe5d7c38370c5f88619ee08a8ee4f9dbb480756ff1d34f7b`.
+The DGX continuation-checker SHA-256 is
+`8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65`.
 
 ## Next action
 
-The user's conditional Stage 9 approval required Stage 8 to look good after
-independent validation. That condition was not met because T6's CPU track hit
-the frozen time limit. Stage 9 therefore remains locked.
-
-No automatic retry is allowed. Any T6 retry, deadline change, or revised Stage
-8 contract requires a new explicit decision and must preserve this failed
-campaign unchanged.
+The GPU-only continuation resolved the user's requested sequences 6--8, but it
+did not produce a passing large-case row or any new solver timing because every
+row stopped at an unchanged preallocation guard. The original Stage 8
+acceptance result remains FAIL. Per the user's instruction, work stops here and
+Stage 9 remains locked with zero allocations.

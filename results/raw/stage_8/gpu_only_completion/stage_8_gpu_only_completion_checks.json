@@ -1,0 +1,81 @@
+{
+  "all_passed": true,
+  "campaign": "gpu_only_sequence_6_8_completion",
+  "campaign_status": "COMPLETE_WITH_RESOURCE_LIMITS",
+  "checker_status": "PASS",
+  "checks": [
+    {
+      "detail": "evidence=loaded, config=loaded",
+      "name": "evidence_and_configuration_load",
+      "passed": true
+    },
+    {
+      "detail": "canonical_sha256=76ff7cb76f70ff104d1691a152b57ebabaade3e26b784091b888c1d5918cc64c",
+      "name": "frozen_gpu_only_continuation_configuration",
+      "passed": true
+    },
+    {
+      "detail": "status=STOPPED_ON_FAILURE, error=none",
+      "name": "original_stage8_terminal_evidence_and_cpu_failure_preserved",
+      "passed": true
+    },
+    {
+      "detail": "hashes={'configuration': '06a172463049c519ab14c446d8b9ab632cd91c8afa4b44264e284b3a4f59a062', 'evidence': '180699f6b34228c3e1a69b158677b12dd3242582a7225e1cdb44aeaac29931ae', 'requirements': '827065b5bfc2920492cfe653e922cd2d3b2b4289ade12b06d866bea83d32dacf'}",
+      "name": "frozen_stage7_reconstruction_and_acceptance_contract_preserved",
+      "passed": true
+    },
+    {
+      "detail": "manifest_rows=34",
+      "name": "executed_source_identity",
+      "passed": true
+    },
+    {
+      "detail": "rows=3",
+      "name": "sequence_6_8_resource_projections_match_frozen_stage8",
+      "passed": true
+    },
+    {
+      "detail": "blocked=['case9241pegase:T24', 'case9241pegase:T32']",
+      "name": "sequence_7_8_signed_int32_blocks_resolved_without_allocation",
+      "passed": true
+    },
+    {
+      "detail": "status=MEMORY_BLOCKED, gate_passed=False",
+      "name": "sequence_6_gate_or_highs_gpu_evidence_is_honest",
+      "passed": true
+    },
+    {
+      "detail": "allocation_history=[], invocations=2",
+      "name": "at_most_one_sequence_6_allocation_and_no_cpu_or_gurobi_calls",
+      "passed": true
+    },
+    {
+      "detail": "status=COMPLETE_WITH_RESOURCE_LIMITS, t16=MEMORY_BLOCKED",
+      "name": "all_requested_rows_reached_an_honest_terminal_protocol_state",
+      "passed": true
+    },
+    {
+      "detail": "HiGHS and GPU retain separate timing boundaries",
+      "name": "no_unsupported_speedup_computed",
+      "passed": true
+    },
+    {
+      "detail": "stage9_locked=True",
+      "name": "stage9_locked_and_structural_claim_boundary_preserved",
+      "passed": true
+    },
+    {
+      "detail": "failed_cases=3, failure_records=3",
+      "name": "all_resource_and_solver_failures_preserved",
+      "passed": true
+    }
+  ],
+  "configuration": "configs/benchmarks/stage_8_gpu_only_completion.json",
+  "evidence": "/home/dgxsparktd/stage8-runs/stage8-gpu-1cf9da6-20260805/stage_8_gpu_only_completion_validation.json",
+  "schema_version": "1.0",
+  "stage": 8,
+  "summary": {
+    "passed": 13,
+    "total": 13
+  }
+}

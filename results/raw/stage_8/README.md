@@ -33,3 +33,32 @@ source, threshold, or acceptance rule was changed.
 The terminal publication commit fixes only that output-writer import and adds a
 regression test; the archived campaign evidence remains tied to the clean
 executed commit above.
+
+## GPU-only sequences 6--8 continuation
+
+On August 5, 2026, a separately frozen continuation resolved the three rows
+that followed the original T6 stop. Only HiGHS and GPU FP64 sGS-HPR were
+eligible if a row passed preallocation; CPU sGS-HPR and Gurobi were explicit
+non-gating skips. The original terminal campaign above was not retried or
+modified.
+
+- Executed commit: `1cf9da62e263a1fb8cc7e68e6cecc4958e602a22`
+- Continuation status: `COMPLETE_WITH_RESOURCE_LIMITS`
+- T16: `MEMORY_BLOCKED` before allocation
+- T24 and T32: `INDEX_BLOCKED` before allocation
+- Full LP allocations: 0
+- New HiGHS/GPU timings: none
+- Independent continuation checker: PASS, 13/13
+- Stage 9: locked, zero allocations
+
+| File | SHA-256 |
+|---|---|
+| `gpu_only_completion/stage_8_gpu_only_completion_validation.json` | `edf18f6cda959c47fe5d7c38370c5f88619ee08a8ee4f9dbb480756ff1d34f7b` |
+| `gpu_only_completion/stage_8_gpu_only_completion.partial.json` | `edf18f6cda959c47fe5d7c38370c5f88619ee08a8ee4f9dbb480756ff1d34f7b` |
+| `gpu_only_completion/stage_8_gpu_only_completion_checks.json` | `8cda412285568b2685abc58d6571132f7e83123f9158500d3efd1c1ec976fa65` |
+| `gpu_only_completion/stage_8_gpu_only_completion_checks_local.json` | `a3365f9b17ebefd538f0da8e1521c445f6c1527334f2d25e27958f29c18821ec` |
+
+The T16 gate used the unchanged 94.435 GiB unified projection and 80% safety
+fractions. Its observed host and CUDA-free budgets were 65.784 GiB and 65.496
+GiB. T24 and T32 exceeded the signed-int32 conservative planning limit. All
+three decisions were recorded before LP allocation.

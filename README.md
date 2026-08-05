@@ -49,7 +49,9 @@ Every stage ends with tests, a report, preserved evidence, and an acceptance
 decision. Stage 8 reached a terminal `STOPPED_ON_FAILURE` state. Its evidence
 protocol passed independent review, but Stage 8 itself failed because the T6
 CPU correctness track exceeded the frozen per-solve deadline. Stage 9 remains
-locked, and no automatic Stage 8 retry is permitted.
+locked. A separately authorized GPU-only continuation later resolved sequences
+6--8 at unchanged preallocation safety boundaries without modifying or
+retrying that terminal campaign.
 
 ## Current status
 
@@ -63,8 +65,15 @@ CPU candidate or CPU timing median.
 The independent Stage 8 checker passed **12/12** protocol and evidence checks.
 That checker PASS verifies the honest terminal record; it does not convert the
 T6 failure into a Stage 8 acceptance pass. Five unique rows were allocated,
-the passing prefix is four, no retry occurred, T16/T24/T32 were not executed,
-and Stage 9 recorded zero allocations.
+the passing prefix is four, and no retry occurred.
+
+The later GPU-only sequence 6--8 continuation passed its independent **13/13**
+evidence audit. T16 was `MEMORY_BLOCKED` before allocation because its 94.435
+GiB unified projection exceeded both live 80% budgets. T24 and T32 were
+`INDEX_BLOCKED` before allocation because their planning nonzero counts exceed
+signed-int32 CSR capacity. The continuation made zero allocations, ran no new
+HiGHS or GPU solves, and explicitly skipped CPU sGS-HPR and Gurobi. Stage 9
+still records zero allocations and remains locked.
 
 All Table II rows still have exact row and variable dimensions while every
 reconstructed sparse nonzero count differs from the paper. The result remains
@@ -160,6 +169,11 @@ Stage 8 executed from clean detached commit
 frozen configuration, inherited Stage 7 identities, and package requirements
 passed preflight before each strict-prefix allocation.
 
+The GPU-only sequence 6--8 continuation executed from clean detached commit
+`1cf9da62e263a1fb8cc7e68e6cecc4958e602a22`. Its 34-entry source manifest and
+13-check audit passed. All three rows stopped before allocation at the frozen
+memory or sparse-index guards.
+
 Raw machine inventories and access details remain local and are intentionally
 excluded from the public repository. See `environment/README.md` for the
 regeneration and privacy policy.
@@ -183,7 +197,8 @@ experiment.
 
 Stage 8 preserves that classification. Its four passing large rows validate
 the frozen structural reconstruction at larger scale; the T6 CPU time limit
-prevents a complete Stage 8 pass and keeps Stage 9 locked.
+prevents a complete Stage 8 pass. The later zero-allocation GPU-only
+continuation does not change that decision, so Stage 9 remains locked.
 
 Until the required inputs are recovered, this project will not claim exact
 numerical reproduction. Stage 7 is explicitly labeled a structural
