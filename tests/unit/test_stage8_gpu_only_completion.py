@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+from pathlib import Path
 
 import scripts.check_stage_8_gpu_only_completion as checker
 import scripts.run_stage_8 as stage8
@@ -144,3 +145,9 @@ def test_allocation_audit_rejects_any_cpu_or_gurobi_call() -> None:
     assert checker._allocation_valid(evidence)[0]
     evidence["invocations"][0]["cpu_hpr_called"] = True
     assert not checker._allocation_valid(evidence)[0]
+
+
+def test_checker_can_label_external_checkpoint_paths() -> None:
+    external = Path("/home/dgxsparktd/stage8-runs/evidence.json")
+
+    assert checker._display_path(external) == external.as_posix()

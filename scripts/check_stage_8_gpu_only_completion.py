@@ -42,6 +42,13 @@ def _load(path: Path) -> tuple[dict[str, Any], str | None]:
         return {}, f"{type(error).__name__}: {error}"
 
 
+def _display_path(path: Path) -> str:
+    try:
+        return path.relative_to(PROJECT_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def _add(checks: list[dict[str, Any]], name: str, passed: bool, detail: str) -> None:
     checks.append({"name": name, "passed": bool(passed), "detail": detail})
 
@@ -522,8 +529,8 @@ def run_checks(
         "checker_status": "PASS" if passed else "FAIL",
         "all_passed": passed,
         "campaign_status": evidence.get("status"),
-        "evidence": evidence_path.relative_to(PROJECT_ROOT).as_posix(),
-        "configuration": config_path.relative_to(PROJECT_ROOT).as_posix(),
+        "evidence": _display_path(evidence_path),
+        "configuration": _display_path(config_path),
         "checks": checks,
         "summary": {
             "passed": sum(bool(row["passed"]) for row in checks),
