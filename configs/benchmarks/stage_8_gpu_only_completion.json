@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "stage": 8,
+  "name": "stage_8_gpu_only_sequence_6_8_completion",
+  "classification": "structural_reproduction",
+  "approval_gate": "for stage 8, proceed with completing sequence 6,7,8 but only do HiGHS and GPU (i.e. skip CPU which was timing out). then give an updated report. stop before proceeding to stage 9.",
+  "original_stage_8": {
+    "configuration_path": "configs/benchmarks/stage_8_large.json",
+    "configuration_sha256": "ac61cf282fe3f146a1fbe5e2d1bff87b4ce36641d30f6feaaf3a64d48bd04284",
+    "evidence_path": "results/raw/stage_8/stage_8_validation.json",
+    "evidence_sha256": "f4197554d8f7e108a4ca2701cbb0b12a485d593febb76f56f431fb482af14254",
+    "checker_path": "results/raw/stage_8/stage_8_checks.json",
+    "checker_sha256": "ff8f48af5c9f2866eb1a461776a3128e87100dc75bc99618671e63da5e94672b",
+    "terminal_status": "STOPPED_ON_FAILURE",
+    "preserve_unchanged": true,
+    "do_not_reclassify_t6_cpu_timeout": true
+  },
+  "requested_sequence": [
+    {
+      "sequence": 6,
+      "key": "case9241pegase:T16",
+      "disposition": "live_preallocation_gate_then_highs_and_gpu"
+    },
+    {
+      "sequence": 7,
+      "key": "case9241pegase:T24",
+      "disposition": "static_preallocation_classification_only"
+    },
+    {
+      "sequence": 8,
+      "key": "case9241pegase:T32",
+      "disposition": "static_preallocation_classification_only"
+    }
+  ],
+  "track_policy": {
+    "required_solver_tracks": [
+      "highs",
+      "gpu_fp64_sgs_hpr"
+    ],
+    "explicitly_skipped_solver_tracks": [
+      "cpu_fp64_sgs_hpr",
+      "gurobi"
+    ],
+    "cpu_skip_scope": "sequence_6_7_8_only",
+    "cpu_skip_reason": "explicit_user_instruction_after_preserved_T6_CPU_time_limit",
+    "cpu_skip_is_not_a_cpu_pass": true,
+    "fp64_required": true
+  },
+  "resource_policy": {
+    "estimate_before_every_allocation": true,
+    "host_safety_fraction": 0.8,
+    "device_safety_fraction": 0.8,
+    "unified_memory_accounting": "sum_host_assembly_peak_and_device_planning",
+    "require_observed_host_available_bytes": true,
+    "require_observed_device_total_bytes": true,
+    "require_observed_device_free_bytes": true,
+    "required_sparse_index_bits": 32,
+    "stop_before_allocation_if_unsafe": true,
+    "memory_projection_unchanged_by_cpu_waiver": true
+  },
+  "execution_policy": {
+    "one_new_full_lp_allocation_per_invocation": true,
+    "only_sequence_6_is_allocation_eligible": true,
+    "record_sequence_7_8_static_blocks_without_allocation": true,
+    "stop_after_runtime_or_numerical_failure": true,
+    "resume_by_run_fingerprint": true,
+    "interrupted_run_requires_new_user_direction": true,
+    "do_not_replace_failures_with_estimates": true
+  },
+  "expected_preallocation_blocks": {
+    "case9241pegase:T24": "signed_int32_csr_nnz_limit",
+    "case9241pegase:T32": "signed_int32_csr_nnz_limit"
+  },
+  "inherited_acceptance": {
+    "reuse_reconstruction_protocol_without_changes": true,
+    "reuse_algorithm_without_changes": true,
+    "reuse_numerical_thresholds_without_changes": true,
+    "reuse_timing_repetitions_without_changes": true,
+    "per_solve_time_limit_seconds": 3600,
+    "correctness_run_count": 1,
+    "warmup_run_count": 1,
+    "minimum_measured_run_count": 5,
+    "speedup_computed": false
+  },
+  "stage_boundary": {
+    "stage_8_only": true,
+    "stage_9_locked": true,
+    "stage_9_allocation_count": 0,
+    "exact_paper_reproduction_claimed": false,
+    "paper_a100_timing_reproduction_claimed": false,
+    "n_minus_1_extension_enabled": false
+  }
+}
