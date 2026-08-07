@@ -12,6 +12,12 @@ reproduced and independently checked. The authors' numerical instances,
 sparse supports, code, A100 hardware, and timing boundary were not available,
 and the frozen large-scale campaign retained an honest Stage 8 failure.
 
+The A--E classification is a preregistered project-specific vocabulary, not
+the ACM artifact-badging taxonomy. The revised paper identifies its author as
+an independent researcher, provides a code-and-data statement, cites the
+external numerical software and public-case sources, and is released as Git
+tag `stage9-report-v2`.
+
 ## Claim map
 
 | Claim family | Authoritative source |
@@ -36,20 +42,35 @@ and the frozen large-scale campaign retained an honest Stage 8 failure.
 
 - Question: how did locally measured HiGHS, CPU FP64, and GPU FP64 solver-core
   time vary across allocated Stage 7--8 reconstructions?
-- Data: five-repeat medians after a correctness run and warm-up.
-- Encoding: case/horizon on x, seconds on logarithmic y, distinct color and
-  marker by track; T6 CPU timeout is an explicit cross at 3,600 seconds.
+- Data: medians after a correctness run and warm-up, with five measured
+  repeats unless the frozen variability rule escalated the track to nine.
+- Encoding: three solver facets, case/horizon on x, seconds on logarithmic y,
+  median markers with observed minimum--maximum whiskers; T6 CPU is one
+  censored correctness attempt at 3,600 seconds rather than a median.
 - Required caveat: boundaries differ by solver and are not a controlled
   paper-speedup comparison.
 
 ### Figure 2 - fail-closed resource boundaries
 
 - Question: why were the final three authorized Stage 8 rows not allocated?
-- Data: T16 projected unified memory and two live 80% budgets; T24/T32
-  conservative planning nnz and signed-int32 maximum.
+- Data: T16 projected unified memory, two live 80% budgets, and the nominal
+  128-GB-derived reference; T24/T32 conservative planning counts, exact
+  reconstructed counts, and the signed-int32 maximum.
 - Encoding: horizontal magnitude bars; measured/derived blockers highlighted.
 - Required caveat: these are preallocation decisions, not out-of-memory
-  crashes and not solver failures.
+  crashes and not solver failures. T16 exceeds the live budgets but is below
+  the nominal 80% reference. T24's planning count exceeds signed int32 while
+  its exact reconstructed count does not; T32 exceeds the limit under both
+  counts.
+
+## Algebra contract
+
+- The structural solve is stated as a lemma with a Sherman--Morrison proof and
+  a mean/zero-mean interpretation.
+- The source-paper sign gives median relative error 0.206 on the analytic
+  family; the corrected sign gives maximum relative error 3.03e-16.
+- Conditioning evidence spans condition numbers 1 through 25,616.42 and is
+  reported separately from the algebraic proof.
 
 ## Stage 9 exclusions
 

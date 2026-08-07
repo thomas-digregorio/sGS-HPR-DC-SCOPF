@@ -18,6 +18,9 @@
 - [x] Paper-order z, x, y1, y2, y1, reflection, and Halpern updates tested.
 - [x] Structural equality solve checked against direct FP64 solves.
 - [x] Printed rank-one inverse sign discrepancy disclosed and corrected.
+- [x] Structural solve stated as a lemma with a mean/zero-mean derivation;
+  printed-sign median error 0.206 and corrected-sign maximum error 3.03e-16
+  reported with conditioning evidence.
 - [x] Spectral proximal safeguard checked independently.
 
 ## Power-system model
@@ -45,27 +48,38 @@
 ## Benchmark protocol
 
 - [x] Every accepted track completed one correctness run, one warm-up, and five
-  measured repetitions.
+  measured repetitions, with nine repeats for tracks escalated by the frozen
+  variability rule.
 - [x] Frozen normalized, raw KKT, physical, objective, and time gates retained.
 - [x] Stage 7 reports six fully validated public-network rows.
 - [x] Stage 8 reports four fully passing rows and a T6 CPU timeout.
 - [x] T16 memory block and T24/T32 index blocks occurred before allocation.
+- [x] T16 is labeled as a live-budget decision below the nominal 80% memory
+  reference; T24 planning and exact counts are distinguished; T32 exceeds the
+  signed-int32 limit under both counts.
 - [x] No unsupported CPU/GPU or paper speedup is claimed.
 
 ## Reporting and audit
 
 - [x] Final classification uses the frozen A--E vocabulary.
+- [x] The A--E vocabulary is explicitly labeled preregistered and
+  project-specific rather than a standard ACM taxonomy.
+- [x] The paper includes author affiliation/contact, scholarly references,
+  exact solver settings, deterministic instance construction, timing
+  boundaries, limitations, and code/data availability.
+- [x] Solver timing is faceted by boundary and reports median, minimum,
+  maximum, IQR, standard deviation, repeat count, and T6 censoring semantics.
 - [x] Machine-readable result index includes evidence hashes.
 - [x] Every final table has a regeneration command.
 - [x] LaTeX source and archival Markdown report agree on material conclusions.
 - [x] Stage 9 independent checker passes, 17/17.
-- [x] Full Python tests, Ruff, dashboard build/test/lint pass: 307 tests passed,
-  one local CuPy-version skip, 112 files satisfy Ruff formatting, and both
-  dashboard rendering tests pass.
-- [x] Final six-page PDF is rendered page-by-page and visually inspected with
-  no clipped or overfull content.
-- [x] Final Git worktree is clean after commit and push; the completion handoff
-  records the resulting commit because a commit cannot embed its own identifier.
+- [x] Full Python tests and Ruff pass: 308 tests passed, one local
+  CuPy-version skip, and 112 files satisfy Ruff formatting.
+- [x] Revised seven-page PDF is rendered page-by-page and visually inspected with no
+  clipped or overfull content.
+- [x] Revised report is committed, pushed, and tagged `stage9-report-v2`; the
+  completion handoff records the resulting commit because a commit cannot
+  embed its own identifier.
 
 ## Locked follow-up
 

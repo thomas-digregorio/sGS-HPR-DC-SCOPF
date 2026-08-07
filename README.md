@@ -56,7 +56,8 @@ the distinction between protocol integrity and scientific acceptance. Stage
 **Stage 9 is complete with final classification D - structural reproduction.**
 The LaTeX paper, compiled PDF, archival Markdown report, reproducibility
 checklist, regeneration commands, deterministic tables/figures, and
-machine-readable result index are versioned in the repository.
+machine-readable result index are versioned in the repository. The revised
+scientific-paper release is tagged `stage9-report-v2`.
 
 Stages 0--7 passed. Stage 8 remains **FAIL** with campaign status
 `STOPPED_ON_FAILURE`: four large rows passed, while the required T6 CPU FP64
@@ -65,10 +66,14 @@ passed. The 12/12 Stage 8 checker validates the terminal protocol but does not
 turn the row into a pass.
 
 The later GPU-only continuation resolved T16 as `MEMORY_BLOCKED` and T24/T32
-as `INDEX_BLOCKED`, all before allocation; its checker passed 13/13. Across the
-paper's 18 Table II rows, all reproduced `(m,n)` dimensions match and no sparse
-nonzero count matches. Eleven benchmark rows have validated GPU candidates and
-ten have validated CPU candidates. No speedup is claimed.
+as `INDEX_BLOCKED`, all before allocation; its checker passed 13/13. T16 was
+blocked by the sampled live budgets even though its projection remained below
+the nominal 80% memory reference. T24 was blocked by its conservative planning
+count even though its exact reconstructed count is below signed int32; T32
+exceeds signed int32 under both counts. Across the paper's 18 Table II rows,
+all reproduced `(m,n)` dimensions match and no sparse nonzero count matches.
+Eleven benchmark rows have validated GPU candidates and ten have validated CPU
+candidates. No speedup is claimed.
 
 Stage 10 remains locked, and no N-1 work was performed.
 

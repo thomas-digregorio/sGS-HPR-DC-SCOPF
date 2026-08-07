@@ -1,6 +1,6 @@
 # Project state
 
-Last updated: 2026-08-05
+Last updated: 2026-08-07
 
 ## Stage gate
 
@@ -20,6 +20,11 @@ Last updated: 2026-08-05
 The final report is available as archival Markdown, LaTeX source, and a
 compiled PDF. Every quantitative report table is generated from preserved
 machine-readable evidence and indexed by SHA-256.
+
+The revised scientific-paper release is identified by Git tag
+`stage9-report-v2`. Its report text distinguishes the internal A--E evidence
+scale from standard artifact-badging taxonomies and includes full methods,
+uncertainty, source citations, authorship, and code/data availability.
 
 The Stage 9 dashboard source, rendered-output tests, and social preview pass
 locally. Production publication is pending recovery of the persisted private
@@ -79,12 +84,17 @@ timing median. No retry was attempted.
 The separately authorized GPU-only continuation then resolved:
 
 - T16 as `MEMORY_BLOCKED`: 94.435 GiB projected versus 65.784 GiB host and
-  65.496 GiB CUDA live budgets;
-- T24 as `INDEX_BLOCKED`: 2,531,600,260 planning nnz; and
-- T32 as `INDEX_BLOCKED`: 3,375,704,460 planning nnz.
+  65.496 GiB CUDA live budgets. The projection is below the 97.352 GiB
+  nominal 80% reference, so this is a live-availability gate, not a claim that
+  the 128 GB system is intrinsically too small;
+- T24 as `INDEX_BLOCKED`: 2,531,600,260 conservative planning nnz, while the
+  exact reconstructed count 2,057,650,132 is below signed int32; and
+- T32 as `INDEX_BLOCKED`: 3,375,704,460 planning nnz and 2,743,770,956 exact
+  reconstructed nnz, both above signed int32.
 
-T24 and T32 exceed the signed-int32 maximum 2,147,483,647. All three decisions
-occurred before LP or solver allocation.
+All three decisions occurred before LP or solver allocation. T24 records the
+frozen conservative policy envelope rather than a demonstrated materialized
+index overflow.
 
 ## Evidence and report artifacts
 

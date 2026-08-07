@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
 \usepackage{microtype}
 \usepackage{listings}
 \usepackage{url}
@@ -20,9 +21,9 @@
 \definecolor{reportred}{HTML}{B42318}
 
 \hypersetup{
-  pdftitle={Reproducing a GPU-Based sGS-HPR Solver for Large-Scale Multi-Period DC Optimal Power Flow},
+  pdftitle={Evidence-Bounded Structural Reproduction of a GPU sGS-HPR DCOPF Solver},
   pdfauthor={Thomas DiGregorio},
-  pdfsubject={Stage 9 final structural reproduction report},
+  pdfsubject={Stage 9 structural reproduction study},
   pdfkeywords={DCOPF, sGS-HPR, GPU, DGX Spark, reproducibility}
 }
 
@@ -41,40 +42,36 @@
   showstringspaces=false
 }
 
-\title{Reproducing a GPU-Based sGS-HPR Solver for Large-Scale Multi-Period DC Optimal Power Flow:\\
-An Evidence-Bounded Structural Reproduction on NVIDIA DGX Spark}
+\title{Evidence-Bounded Structural Reproduction of a GPU sGS-HPR Solver
+for Large-Scale Multi-Period DC Optimal Power Flow}
 
 \author{Thomas~DiGregorio%
-\thanks{Independent reproduction study completed August 5, 2026. Source,
-machine-readable evidence, and regeneration commands are maintained in the
-sGS-HPR-DC-SCOPF repository.}}
+\thanks{Independent Researcher. Correspondence, code, data, and the immutable
+report release are available at
+\url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}.}}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-This work reproduces the mathematical and computational structure of the
-symmetric Gauss--Seidel Halpern-accelerated proximal-reflection (\sgshpr{})
-method reported by Wang \emph{et al.} for large-scale multi-period DC optimal
-power flow (DCOPF). We reconstruct the canonical linear program, implement the
-paper-order dual updates, independently verify the KKT and stopping maps,
-correct a sign inconsistency in the printed structural equality inverse, build
-an FP64 CPU oracle, and port the validated path to an NVIDIA DGX Spark. The GPU
-path proves low-level cuSPARSE CSR ALG2 selection, resident iterative state,
-and trajectory parity with the CPU implementation.
-
-Public MATPOWER networks and deterministic renewable/storage policies are used
-to reconstruct all 18 rows of the paper's main benchmark table. All 18 row and
-variable dimensions match the publication, but none of the sparse nonzero
-counts match because the authors' modified instances and construction pipeline
-are unavailable. Six Stage 7 rows pass HiGHS, CPU FP64, GPU FP64, numerical,
-physical, provenance, and repeated-timing gates. Stage 8 adds four fully
-passing large rows. On \texttt{case9241pegase:T6}, HiGHS and GPU FP64 pass,
-while the required CPU FP64 correctness solve exceeds the frozen 3,600-second
-deadline. The final three requested rows are resolved without allocation: T16
-exceeds both live unified-memory budgets, and T24/T32 exceed signed-int32 CSR
-planning capacity. We therefore classify the result as \classresult{}, not an
-exact, near-exact, or controlled performance reproduction.
+We assess whether the mathematical and computational route of a published
+GPU symmetric Gauss--Seidel Halpern-accelerated proximal-reflection
+(\sgshpr{}) method for multi-period DC optimal power flow can be reconstructed
+and validated without the authors' instances or code. The canonical LP,
+paper-order updates, stopping and KKT maps, structural equality solve, FP64 CPU
+oracle, and resident NVIDIA DGX Spark GPU path were implemented and checked.
+A sign inconsistency in the printed rank-one inverse is corrected; the
+corrected solve has maximum relative error $3.03\times10^{-16}$, whereas the
+printed sign has median relative error 0.206. Public MATPOWER reconstructions
+match all 18 published row and variable dimensions but none of the nonzero
+counts. Eleven rows were allocated and GPU-validated; ten also passed the
+required CPU track. The remaining CPU attempt reached the frozen 3,600-s
+limit. Three later rows stopped before allocation: T16 exceeded observed live
+memory budgets despite fitting the nominal 80\% reference, T24 exceeded a
+conservative int32 planning envelope while its count-only nnz did not, and T32
+exceeded int32 under both measures. Under a preregistered project-specific
+taxonomy, the result is \classresult{}. No paper-time reproduction or local
+speedup is claimed.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -85,110 +82,113 @@ Spark.
 
 \section{Introduction}
 
-The central question of this reproduction is not merely whether a GPU program
-can solve a related DCOPF. It is whether the mathematical route in
-\cite{wang2026} can be rebuilt, checked against independent oracles, ported
-without changing the algorithmic path, and scaled transparently enough to
-distinguish reproduction from reconstruction or resource limitation.
+Wang \emph{et al.} propose a GPU \sgshpr{} method for large-scale
+multi-period DC optimal power flow (DCOPF) and report results on an
+A100-SXM4-80GB GPU \cite{wang2026}. Reproducing that work requires more than
+running a related optimizer: the mathematical map, instance identity,
+implementation path, validation criteria, timing boundary, and hardware
+conditions must be separated. This study asks which of those layers can be
+recovered from the paper and public artifacts, and which conclusions remain
+unsupported.
 
-The answer has three parts. First, the canonical LP, Algorithm 2 update order,
-KKT map, stopping tests, structural equality solve, CPU oracle, and resident
-FP64 GPU path were independently checked. Second, the authors' numerical
-instances were not reproduced: public-network reconstructions match every
-published row and variable dimension but differ in every sparse nonzero count.
-Third, the full large-scale acceptance campaign did not pass. Four Stage 8
-rows passed; a fifth failed when its required CPU correctness track timed out;
-later rows were safely stopped by memory and index guards.
+The project froze an A--E decision framework before final synthesis:
+A exact, B near-exact, C mathematical, D structural, and E partial. This is a
+project-specific evidence-resolution taxonomy, not an ACM artifact badge or a
+replacement for the standard repeatability/reproducibility/replicability
+terminology \cite{acm2020}. Structural reproduction means that the
+mathematical path, implementation structure, public-network scaling,
+validation, and resource behavior are reproduced while author-instance
+identity and controlled paper timing are not.
 
-This distinction is critical. An independent checker PASS establishes that a
-protocol was followed and evidence preserved. It cannot convert a failed
-scientific acceptance gate into a successful result. The final classification
-is therefore \classresult{}.
+The principal result is \classresult{}. The mathematics and an FP64 GPU
+implementation are validated, but the author instances are unavailable, all
+18 reconstructed sparse supports differ, and the frozen large-run campaign
+contains a required CPU timeout. A separately implemented validation checker
+records that the protocol and evidence are internally consistent; it does not
+convert the Stage 8 scientific decision from FAIL to PASS.
 
-\subsection{Contributions}
-
-This report contributes:
+The contributions are:
 \begin{itemize}
-  \item a line-by-line mathematical specification of the canonical DCOPF and
-  \sgshpr{} updates;
-  \item independent projection, residual, direct-solve, spectral, physical,
+  \item a self-contained canonical DCOPF and \sgshpr{} implementation
+  contract;
+  \item independent projection, residual, physical, spectral, direct-solve,
   and CPU/GPU trajectory checks;
-  \item a documented correction to the paper's rank-one inverse;
-  \item a resident FP64 DGX implementation with observed CSR ALG2 selection
-  and transfer auditing;
-  \item an 18-row structural ledger and an 11-row allocated benchmark record;
-  \item fail-closed unified-memory and signed-int32 resource evidence; and
-  \item a machine-readable index, deterministic table generator, command
-  inventory, and reproducibility checklist.
+  \item a formal correction and stable implementation of the structural
+  equality inverse;
+  \item an 18-row structural ledger, an 11-row allocated benchmark record,
+  and repeated timing distributions;
+  \item fail-closed live-memory and sparse-index evidence with the planning
+  and count-only interpretations kept distinct; and
+  \item a public, versioned code/data release with machine-readable
+  provenance and regeneration instructions.
 \end{itemize}
 
-The optional N-1 extension is outside scope and remains locked.
+The displayed source model has no outage or contingency index. This report
+therefore studies base-case multi-period DCOPF. N-1 SCOPF is new work and
+Stage 10 remains locked.
 
-\section{Source Paper and Reproduction Boundary}
+\section{Methods}
 
-The reproduced source is \emph{An Efficient GPU-based Halpern Accelerating
-Algorithm for Large-scale DC Optimal Power Flow} by Wang \emph{et al.}
-\cite{wang2026}. The supplied 17-page PDF has SHA-256
+\subsection{Source paper, scope, and public data}
+
+The source paper is the 17-page article by Wang \emph{et al.}
+\cite{wang2026}; the supplied PDF has SHA-256
 \begin{center}
-\scriptsize\url{7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4}.
+\scriptsize
+\url{7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4}.
 \end{center}
-The paper writes a multi-period base-case DCOPF as a box-constrained LP,
-applies HPR to its dual, and exploits the equality/inequality partition with a
-symmetric Gauss--Seidel sweep. The equality block admits a diagonal plus
-low-rank solution; the inequality multiplier update is a projected spectral
-step. The authors prove an $O(1/k)$ non-ergodic KKT residual rate and summarize
-large-system complexity as $O(N_Ln/\epsilon)$.
+The paper applies HPR to the dual of a box-constrained LP, splits equality and
+inequality multipliers with an sGS sweep, and uses CSR sparse products on an
+A100. Its $O(1/k)$ KKT residual result follows the HPR framework
+\cite{chen2026}.
 
-The paper reports an A100-SXM4-80GB, CUDA 12.3, CSR storage, and cuSPARSE CSR
-ALG2. Gurobi 12.0 is timed on a separate Intel i9-14900HX workstation. The
-publication calls the problem security-constrained, but the displayed model
-contains no outage or contingency index. This work therefore treats the
-printed formulation as base-case multi-period DCOPF. An N-1 SCOPF model would
-be new research rather than part of this reproduction.
+Public base networks are MATPOWER 8.1
+\texttt{case1354pegase}, \texttt{case2868rte}, and
+\texttt{case9241pegase}, pinned by upstream commit, Git blob, and SHA-256
+\cite{matpower,josz2016}. The PEGASE/RTE provenance is described in
+\cite{fliscounakis2013,josz2016}. The authors' renewable/storage placements,
+time series, reserve profiles, modified ramps, storage data, matrix
+construction, exact control code, and timer boundary were unavailable.
+Appendix~\ref{app:recipe} gives the deterministic replacement policy.
 
-\section{Mathematical Formulation}
+\subsection{Mathematical formulation}
 
-\subsection{Canonical primal and dual}
-
-The implementation contract is the paper's canonical linear program
+The implementation contract is
 \begin{equation}
 \begin{aligned}
 \min_{x\in\R^n}\quad & c^{\mathsf T}x,\\
-\text{s.t.}\quad & A_1x=b_1,\\
+\mathrm{s.t.}\quad & A_1x=b_1,\\
 & A_2x\ge b_2,\\
 & \ell\le x\le u,
 \end{aligned}
 \label{eq:primal}
 \end{equation}
 where $A=[A_1;A_2]$, $b=[b_1;b_2]$, and $C=[\ell,u]$. With
-$D=\R^{m_1}\times\R_+^{m_2}$, its dual is
+$D=\R^{m_1}\times\R_+^{m_2}$, the dual is
 \begin{equation}
 \begin{aligned}
 \min_{y,z}\quad &-b^{\mathsf T}y+\delta_D(y)+\delta_C^*(-z),\\
-\text{s.t.}\quad &A^{\mathsf T}y+z=c.
+\mathrm{s.t.}\quad &A^{\mathsf T}y+z=c.
 \end{aligned}
 \label{eq:dual}
 \end{equation}
-Equality multipliers are free and inequality multipliers are nonnegative. The
+Equality multipliers are free; inequality multipliers are nonnegative. The
 canonical inequality direction is always $A_2x\ge b_2$.
 
-The reconstructed decision order is
+The decision order is
 \begin{equation}
 x=(p_G,p_{RG},p_{ESS}^{dc},p_{ESS}^{ch},r^u,r^d).
 \end{equation}
 For $T$ periods, $N_L$ constrained lines, $N_G$ conventional generators,
-$N_{RG}$ renewable generators, and $N_{ESS}$ storage devices, the
-table-consistent dimensions are
+$N_{RG}$ renewables, and $N_{ESS}$ storage devices,
 \begin{align}
 n &= T(3N_G+N_{RG}+2N_{ESS}),\\
 m_1 &= T+N_{ESS},\\
 m_2 &= 2TN_L+(4T-2)N_G+2TN_{ESS}+2T.
 \end{align}
-Power balance and terminal storage energy form $A_1$. Split branch-flow,
-headroom/footroom, reserve, ramping, and storage-energy inequalities form
-$A_2$. Remaining device limits form the box $C$.
-
-\subsection{KKT and stopping maps}
+Power balance and terminal storage energy form $A_1$. Split branch flow,
+headroom/footroom, reserve, ramp, and storage-energy rows form $A_2$; remaining
+device limits form $C$.
 
 The full KKT residual is
 \begin{equation}
@@ -201,137 +201,161 @@ c-A^{\mathsf T}y-z
 \label{eq:kkt}
 \end{equation}
 The paper's stopping rule separately normalizes primal feasibility, box
-normal-cone consistency, and stationarity. In particular, its first stopping
-block is not the full first block of \eqref{eq:kkt}. Every accepted candidate
-must satisfy the three normalized blocks at $5\times10^{-5}$, raw KKT at
-$10^{-2}$, original-space physical violations at $10^{-2}$ MW/MWh, and scaled
-objective gap to HiGHS at $2\times10^{-4}$.
+normal-cone consistency, and stationarity. Its first stopping block is not the
+entire first block of \eqref{eq:kkt}; both maps are retained.
 
-\section{Implemented sGS-HPR Algorithm}
+\subsection{Implemented algorithm and sourced control policy}
 
-For $w=(y_1,y_2,z,x)$, the FP64 implementation follows the printed order.
-First, the $z$ proximal update and primal multiplier update collapse to
+For $w=(y_1,y_2,z,x)$, the FP64 implementation follows the printed update
+order. The combined $z$/primal update gives
 \begin{equation}
-\bar x^{k+1}=\Pi_C\left[x^k+\sigma(A^{\mathsf T}y^k-c)\right].
+\bar x^{k+1}=\Pi_C\!\left[x^k+\sigma(A^{\mathsf T}y^k-c)\right].
 \label{eq:xproj}
 \end{equation}
-Next, the first equality solve produces $\bar y_1^{k+1/2}$ using $y_2^k$.
-The inequality multiplier is then projected as
+An equality solve computes $\bar y_1^{k+1/2}$ using $y_2^k$. Then
 \begin{equation}
 \bar y_2^{k+1}=\Pi_{\R_+^{m_2}}
 \left[y_2^k+\lambda^{-1}(b_2/\sigma-A_2R_y)\right],
 \label{eq:y2}
 \end{equation}
-where $\lambda$ safely bounds $\lVert A_2\rVert_2^2$. A second equality solve
-produces $\bar y_1^{k+1}$ using the new $\bar y_2^{k+1}$. Both equality sweeps
-are required. Finally,
+where $\lambda$ safely bounds $\norm{A_2}_2^2$. A second equality solve uses
+the new $\bar y_2^{k+1}$ to obtain $\bar y_1^{k+1}$. Finally,
 \begin{align}
 \widehat w^{k+1}&=2\bar w^{k+1}-w^k,\\
-w^{k+1}&=\frac{1}{k+2}w^0+\frac{k+1}{k+2}\widehat w^{k+1}.
+w^{k+1}&=\frac{1}{k+2}w^0+
+          \frac{k+1}{k+2}\widehat w^{k+1}.
 \label{eq:halpern}
 \end{align}
 The anchor $w^0$ is fixed.
 
-Production preprocessing uses ten reversible Ruiz passes, one simultaneous
-Pock--Chambolle diagonal step with $\alpha=1$, and complete-vector $b$/$c$
-normalization. The manuscript does not publish exact adaptive-penalty and
-restart code. Published HPR-LP rules are therefore transferred at the
-paper's 100-iteration cadence and explicitly labeled a sourced reconstruction.
+Production preprocessing applies ten Ruiz equilibration passes
+\cite{ruiz2001}, one simultaneous Pock--Chambolle diagonal step with
+$\alpha=1$ \cite{pock2011}, and complete-vector $b$/$c$ normalization.
+Initial $\sigma=1$. The DCOPF paper does not publish exact restart or
+adaptive-penalty code; Appendix~\ref{app:controls} states the transferred
+HPR-LP rules, formulas, guards, and source pin explicitly
+\cite{chen2026}. This is a sourced reconstruction, not author-code identity.
 
-\section{Derivation and Implementation Verification}
+\subsection{CPU, GPU, and reference solvers}
 
-\subsection{Projection, residual, and physical oracles}
+The CPU oracle uses SciPy sparse operators in FP64, zero initial state, both
+equality sweeps, original-coordinate recovery, and independent residual and
+physical checks. SciPy/HiGHS supplies the reference objective via
+\texttt{linprog(method='highs-ds')} with presolve, $10^{-9}$ primal and dual
+feasibility tolerances, and a 3,600-s limit \cite{scipy2020,highs2018}.
 
-Analytic toy LPs verify box projection, nonnegative multiplier projection, the
-combined $z$/$x$ identity, \eqref{eq:kkt}, and the separate stopping blocks.
-Independent SciPy HiGHS solves establish objective and multiplier-sign
-references. PTDF branch flows are checked against an independent angle solve;
-transformer phase shifts are retained as affine offsets. Public base-network
-and synthetic storage fixtures remain separate.
+The GPU path uses CuPy 14.1.1 arrays, FP64 CSR matrices, resident state, and
+reused workspaces \cite{okuta2017}. A low-level descriptor records
+\texttt{CUSPARSE\_SPMV\_CSR\_ALG2}; normal and transpose probes verify the
+selected path. NVIDIA documents CSR ALG2 as deterministic for non-transpose
+SpMV \cite{cusparse}. Transfer ledgers reject unexpected full-state copies
+inside the iteration loop.
 
-\subsection{Structural equality solve and manuscript correction}
+\subsection{Acceptance and timing design}
 
-For the explicit equality matrix, $A_1A_1^{\mathsf T}$ has diagonal blocks
-with rank-one coupling. Eliminating the storage block produces
-\begin{equation}
-(D_1-\alpha\bm{1}\bm{1}^{\mathsf T})y_{11}=\widetilde R_{11}.
-\end{equation}
-The manuscript prints the Woodbury sign pattern for a plus rank-one update.
-The direct linear-system oracle rejects it. The implementation uses
-\begin{equation}
-(D_1-\alpha uu^{\mathsf T})^{-1}=D_1^{-1}+
-\frac{D_1^{-1}uu^{\mathsf T}D_1^{-1}}
-{\alpha^{-1}-u^{\mathsf T}D_1^{-1}u},
-\label{eq:woodbury}
-\end{equation}
-which matches Cholesky in FP64. Stage 4's checker passed 20/20 checks. This is
-a documented correction, not a hidden algorithm change.
+Every accepted candidate must meet normalized stopping blocks
+$\le5\times10^{-5}$, raw KKT $\le10^{-2}$, physical violation
+$\le10^{-2}$ MW/MWh, and scaled objective gap to HiGHS
+$\le2\times10^{-4}$. Stage 7--8 requires HiGHS, CPU FP64, and GPU FP64 unless
+a later continuation explicitly skips CPU without rewriting the original
+decision.
 
-Dense eigendecomposition is the small-case authority for the proximal
-spectral value. Sparse \texttt{eigsh} and seeded power iteration cross-check
-it before a positive safety margin is applied. CPU/GPU comparisons test
-intermediate trajectories, not only final objectives.
+Each successful timing track has one correctness solve, one warm-up, and at
+least five measured solves. Relative range above 0.2 escalates the track to
+nine repeats. The report retains median, minimum, maximum, standard deviation,
+and interquartile range (IQR). HiGHS time includes the SciPy interface/model
+setup and solve; CPU/GPU times use separately prepared solver workspaces and
+include their solver-specific iteration/residual boundary. These definitions
+are not interchangeable. The T6 CPU event is one censored correctness
+attempt, not a timing median.
 
-\section{CPU and GPU Implementations}
+\section{Verification}
 
-\subsection{CPU oracle}
-
-The CPU implementation uses SciPy sparse operators, FP64 state, explicit
-projections, the paper update order, and both direct and paper-structural
-equality backends. All candidates are recovered to original coordinates before
-KKT, objective, and power-system checks. It supplies fixed-horizon trajectories
-and an independent residual path for GPU validation.
-
-CPU work on the DGX is necessary even in a GPU study: model construction,
-reference validation, policy bookkeeping, and an independent oracle cannot be
-inferred from GPU success. Stage 8 also preregistered CPU FP64 as a required
-track. Consequently, the T6 CPU timeout is a Stage 8 failure even though its
-GPU candidate passed. A later user-authorized continuation skipped CPU for
-sequences 6--8 without revising the original evidence or contract.
-
-\subsection{Resident FP64 GPU path}
-
-The GPU path uses CuPy arrays and CSR matrices in FP64. $A_1$, $A_2$, their
-transposes, scaling vectors, state, and reusable workspaces remain resident. A
-phase-labeled transfer ledger permits preparation, scalar diagnostics, policy
-checks, and final recovery while rejecting unexpected full-state copies inside
-the loop.
-
-Kernel selection is observed, not inferred. A low-level descriptor records
-\texttt{CUSPARSE\_SPMV\_CSR\_ALG2} (enum 3 with pinned CuPy 14.1.1), and a probe
-verifies normal and transpose products. The largest Stage 6 CPU/GPU sparse
-operator error is $2.22045\times10^{-16}$. Full FP64 policy objectives agree
-to approximately $1.82\times10^{-11}$ absolute. FP32 is non-gating: it is
-finite but misses the frozen FP64 trajectory tolerance and is not represented
-as equivalent.
-
-\section{Environment}
+\subsection{Staged validation map}
 
 \begin{table*}[t]
-\caption{Principal reproduction and paper environments.}
-\label{tab:environment}
+\caption{Stage map and irreversible acceptance boundary.}
+\label{tab:stages}
 \centering
-\small
-\begin{tabular}{@{}p{0.20\textwidth}p{0.36\textwidth}p{0.34\textwidth}@{}}
+\scriptsize
+\begin{tabular}{@{}clp{0.62\textwidth}c@{}}
 \toprule
-Item & Reproduction & Paper \\
+Stage & Scope & Principal evidence & Decision \\
 \midrule
-GPU & NVIDIA GB10, integrated, compute capability 12.1 & NVIDIA A100-SXM4-80GB \\
-Memory & 130,663,165,952 bytes (121.69 GiB) unified/global & 80 GB GPU memory \\
-Host / OS & Linux/aarch64; Ubuntu 24.04.4; kernel 6.17.0-1029-nvidia & GPU host/OS not specified \\
-Python stack & Python 3.12.3; NumPy 2.3.5; SciPy 1.16.3; CuPy 14.1.1 & not specified \\
-CUDA & driver API 13.0; runtime API 13.2 & CUDA 12.3 \\
-Sparse representation & CSR; signed-int32 indices; FP64 gating path & CSR; index width and precision unstated \\
-Gurobi & unavailable and optional locally & v12.0, separate i9-14900HX, 96 GB host \\
+0 & Paper audit & identity, equations, ambiguities, unavailable artifacts & Pass \\
+1 & Generic LP & projections, residuals, toy LP oracles & Pass \\
+2 & DCOPF build & MATPOWER parsing, PTDF, dimensions, physical checks & Pass \\
+3 & CPU \sgshpr{} & paper-order fixed-$\sigma$ solver and trajectories & Pass \\
+4 & Structural solve & direct oracle, sign resolution, conditioning & Pass \\
+5 & Controls & reversible scaling, restart, adaptive $\sigma$ & Pass \\
+6 & DGX backend & resident FP64 path, ALG2, CPU/GPU parity, timing ledger & Pass \\
+7 & Benchmarks & six allocated small/medium public reconstructions & Pass \\
+8 & Large campaign & four passes, T6 CPU timeout, three resource classifications & \textbf{Fail} \\
+9 & Synthesis & frozen taxonomy, report, index, PDF, separate checker & D \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-Table~\ref{tab:environment} precludes an exact timing comparison even before
-instance differences are considered. The accepted evidence was generated from
-clean detached worktrees with executed-source manifests and package pins.
+Table~\ref{tab:stages} prevents a later aggregate score from erasing an
+earlier failed gate. Checker totals were 120/120 for Stages 0--7, 12/12 for
+the strict Stage 8 protocol, and 13/13 for the approved GPU-only continuation.
+Those totals verify evidence handling; the Stage 8 decision remains FAIL.
 
-\section{Validation Results}
+\subsection{Structural equality correction}
+
+\textbf{Lemma 1 (stable inverse of the reduced equality block).}
+Let $D_2\succ0$ be diagonal, $a>0$, $d$ a vector, and
+$\alpha=d^{\mathsf T}D_2^{-1}d$. For
+\begin{equation}
+\begin{bmatrix}
+aI_T & \bm{1}d^{\mathsf T}\\
+d\bm{1}^{\mathsf T} & D_2
+\end{bmatrix}
+\begin{bmatrix}y_{11}\\y_{12}\end{bmatrix}
+=
+\begin{bmatrix}r_{11}\\r_{12}\end{bmatrix},
+\end{equation}
+define
+\begin{align}
+\widehat r&=r_{11}-\bm{1}d^{\mathsf T}D_2^{-1}r_{12},\\
+\gamma&=a-T\alpha,\qquad
+\mu=T^{-1}\bm{1}^{\mathsf T}\widehat r.
+\end{align}
+If $\gamma>0$, the unique solution is
+\begin{align}
+y_{11}&=\frac{\widehat r-\mu\bm{1}}{a}
+       +\frac{\mu}{\gamma}\bm{1},
+\label{eq:stable-y11}\\
+y_{12}&=D_2^{-1}\!\left(r_{12}-d\bm{1}^{\mathsf T}y_{11}\right).
+\label{eq:stable-y12}
+\end{align}
+
+\emph{Proof.} Eliminating $y_{12}$ yields
+$(aI_T-\alpha\bm{1}\bm{1}^{\mathsf T})y_{11}=\widehat r$.
+The zero-mean subspace has eigenvalue $a$ and
+$\operatorname{span}\{\bm{1}\}$ has eigenvalue
+$a-T\alpha=\gamma$. Decomposing $\widehat r$ into mean and zero-mean
+components gives \eqref{eq:stable-y11}; back-substitution gives
+\eqref{eq:stable-y12}. \hfill$\square$
+
+The printed expression uses the sign pattern of a plus rank-one update and
+fails a direct linear-system oracle. Equation~\eqref{eq:stable-y11} avoids
+forming the cancellation-prone Woodbury denominator in the solve. The code
+also evaluates $\gamma$ through a positive-sum identity (Appendix
+\ref{app:algebra}). On the sign fixture, the printed formula's median relative
+error is 0.206; the corrected maximum relative error is
+$3.03\times10^{-16}$. Across condition numbers from 1 to 25,616, the largest
+normalized residual is $2.93\times10^{-14}$.
+
+\subsection{Numerical, physical, and trajectory checks}
+
+Analytic LPs verify box and nonnegative projections, \eqref{eq:kkt}, the
+separate stopping blocks, and the combined $z$/primal identity. Dense
+eigendecomposition is the small-case authority for $\lambda$; sparse
+\texttt{eigsh} and seeded power iteration cross-check it. PTDF flows are
+compared with an independent angle solve, including phase-shift offsets.
+CPU/GPU checks compare intermediate trajectories, policy events, final
+objectives, and recovered physical states.
 
 \begin{table}[t]
 \caption{Frozen gates and largest accepted observations.}
@@ -353,35 +377,22 @@ Per-solve deadline & $3600$ s & $3600.093$ s & T6 CPU fail \\
 \end{tabular}
 \end{table}
 
-The maxima in Table~\ref{tab:gates} cover completed Stage 7--8 candidates.
-The T6 CPU attempt produced no accepted candidate and is represented only by
-its timeout.
+\section{Results}
 
-\begin{table}[t]
-\caption{Independent evidence checks versus scientific decisions.}
-\label{tab:checks}
-\centering
-\scriptsize
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Scope & Decision & Checks & Interpretation \\
-\midrule
-Stages 0--7 & Pass & 120/120 & accepted chain \\
-Stage 8 strict & \textbf{Fail} & 12/12 & T6 CPU timeout \\
-Stage 8 continuation & resource-limited & 13/13 & no allocation \\
-\bottomrule
-\end{tabular}
-\end{table}
+\subsection{Structural reconciliation}
 
-The checker/decision separation in Table~\ref{tab:checks} prevents protocol
-integrity from being misread as numerical acceptance.
+All 18 Table II $(m,n)$ pairs match. Zero reconstructed nnz counts match;
+differences range from approximately $-8.14\%$ to $-36.66\%$. Thus the
+public models reproduce the dimension algebra but not the author sparse
+supports. Paper/local timing ratios are invalid before hardware differences
+are considered.
 
-\section{Benchmark Evidence}
+\subsection{Allocated benchmarks}
 
 \begin{table*}[t]
-\caption{Allocated Stage 7--8 reconstructions. Times are five-repeat local
-solver-core medians after correctness and warm-up. A dash denotes no accepted
-measurement.}
+\caption{Allocated Stage 7--8 reconstructions. Times are local solver-core
+medians after correctness and warm-up; measured dispersion is in Appendix
+\ref{app:timing}. A dash denotes no accepted timing sample.}
 \label{tab:benchmarks}
 \centering
 \scriptsize
@@ -405,292 +416,461 @@ Stage & Reconstruction & $m$ & $n$ & nnz$(A)$ & HiGHS (s) & CPU (s) & GPU (s) & 
 \end{tabular}
 \end{table*}
 
-The GPU completed and validated all 11 allocated rows in
-Table~\ref{tab:benchmarks}; the CPU completed 10. Stage 8's fully passing
-prefix is four because all required tracks had to pass.
+The GPU completed and validated all 11 allocated rows; CPU completed 10. The
+T6 GPU result does not override the preregistered all-track requirement.
 
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}
-\begin{axis}[
+\begin{groupplot}[
+  group style={group size=1 by 3,vertical sep=0.85cm},
   width=0.96\textwidth,
-  height=0.34\textwidth,
+  height=0.14\textwidth,
   ymode=log,
   ymin=0.8,
   ymax=5000,
-  ylabel={Median seconds (log scale)},
-  xlabel={Public-network reconstruction},
   xtick={0,...,10},
-  xticklabels={1354/T4,1354/T16,1354/T48,1354/T96,2868/T4,2868/T16,2868/T48,2868/T64,2868/T96,9241/T4,9241/T6},
-  xticklabel style={rotate=35,anchor=east,font=\scriptsize},
   ymajorgrids=true,
   grid style={draw=gray!25},
-  legend style={at={(0.5,1.02)},anchor=south,legend columns=4,draw=none},
-  mark size=2.5pt,
+  ylabel={s (log)},
+  title style={font=\small},
+  tick label style={font=\scriptsize},
 ]
-\addplot[only marks,mark=*,reportblue,fill=reportblue] coordinates {
-  (0,1.463376) (1,7.265354) (2,32.095478) (3,101.242296)
-  (4,5.366418) (5,22.138002) (6,76.238645) (7,108.232479)
-  (8,163.592526) (9,142.478889) (10,963.956952)};
-\addlegendentry{HiGHS}
-\addplot[only marks,mark=square*,reportgray,fill=reportgray] coordinates {
-  (0,13.190169) (1,47.398903) (2,153.046368) (3,336.657478)
-  (4,60.349654) (5,250.601316) (6,804.863493) (7,1078.891699)
-  (8,1621.905045) (9,3087.217721)};
-\addlegendentry{CPU FP64}
-\addplot[only marks,mark=triangle*,reportorange,fill=reportorange] coordinates {
-  (0,1.013252) (1,2.924268) (2,9.480950) (3,21.084461)
-  (4,3.938934) (5,15.408042) (6,49.968351) (7,68.383103)
-  (8,105.022444) (9,193.631896) (10,357.543837)};
-\addlegendentry{GPU FP64}
-\addplot[only marks,mark=x,mark size=4pt,reportred,very thick] coordinates {(10,3600.092739)}
-  node[pos=1,above left,font=\scriptsize]{CPU timeout};
-\addlegendentry{time limit}
-\end{axis}
+\nextgroupplot[title={HiGHS dual simplex: median with measured min--max},
+  xticklabels=\empty]
+\addplot+[only marks,mark=*,mark size=2.4pt,reportblue,fill=reportblue,
+  error bars/.cd,y dir=both,y explicit]
+table[x=x,y=y,
+  y error plus expr={\thisrow{max}-\thisrow{y}},
+  y error minus expr={\thisrow{y}-\thisrow{min}}] {
+x y min max
+0 1.463376 1.453187 1.480123
+1 7.265354 7.257811 7.283389
+2 32.095478 31.248877 39.289736
+3 101.242296 100.939751 101.612720
+4 5.366418 5.340087 5.374710
+5 22.138002 22.081919 22.420685
+6 76.238645 70.891817 77.948837
+7 108.232479 107.335302 108.458428
+8 163.592526 158.374185 164.829042
+9 142.478889 141.936895 142.810381
+10 963.956952 960.496580 966.055722
+};
+
+\nextgroupplot[title={CPU FP64 \sgshpr{}: median with measured min--max;
+T6 is one censored correctness attempt},xticklabels=\empty]
+\addplot+[only marks,mark=square*,mark size=2.4pt,reportgray,fill=reportgray,
+  error bars/.cd,y dir=both,y explicit]
+table[x=x,y=y,
+  y error plus expr={\thisrow{max}-\thisrow{y}},
+  y error minus expr={\thisrow{y}-\thisrow{min}}] {
+x y min max
+0 13.190169 11.836044 16.878720
+1 47.398903 46.634567 127.423818
+2 153.046368 152.640874 155.014961
+3 336.657478 330.488430 537.835392
+4 60.349654 60.017630 60.807169
+5 250.601316 249.273168 255.187227
+6 804.863493 801.568522 808.401330
+7 1078.891699 1077.121666 1135.954169
+8 1621.905045 1594.075813 1634.230247
+9 3087.217721 3070.084596 3096.832156
+};
+\addplot[only marks,mark=x,mark size=4pt,reportred,very thick]
+coordinates {(10,3600.092739)};
+\node[font=\scriptsize,anchor=east] at (axis cs:9.85,3600.092739)
+{censored at limit};
+
+\nextgroupplot[title={GPU FP64 \sgshpr{}: median with measured min--max},
+  xticklabels={1354/T4,1354/T16,1354/T48,1354/T96,2868/T4,2868/T16,
+  2868/T48,2868/T64,2868/T96,9241/T4,9241/T6},
+  xticklabel style={rotate=35,anchor=east,font=\scriptsize}]
+\addplot+[only marks,mark=triangle*,mark size=2.4pt,reportorange,fill=reportorange,
+  error bars/.cd,y dir=both,y explicit]
+table[x=x,y=y,
+  y error plus expr={\thisrow{max}-\thisrow{y}},
+  y error minus expr={\thisrow{y}-\thisrow{min}}] {
+x y min max
+0 1.013252 0.995221 1.091844
+1 2.924268 2.885473 2.996055
+2 9.480950 9.476246 9.531049
+3 21.084461 20.946986 21.380443
+4 3.938934 3.845813 3.959032
+5 15.408042 15.393926 15.413484
+6 49.968351 49.926691 49.998495
+7 68.383103 68.291624 68.391998
+8 105.022444 105.000819 105.174273
+9 193.631896 193.603076 193.741143
+10 357.543837 357.461910 357.751183
+};
+\end{groupplot}
 \end{tikzpicture}
-\caption{Local validated solver-core timing. Boundaries differ by solver, the
-sparse supports differ from the paper, and GB10 differs from A100. The plot is
-descriptive and is not a controlled speedup claim.}
+\caption{Faceted local timing evidence. Each panel has a distinct solver
+definition; whiskers span measured minima and maxima. The plot supports
+within-track repeatability inspection only. Cross-solver ratios and speedups
+are not valid because the solver boundaries and algorithms differ.}
 \label{fig:timings}
 \end{figure*}
 
-No speedup is claimed from Fig.~\ref{fig:timings}. Dividing these measurements
-would mix solver boundary, sparse support, implementation, and hardware
-effects. The paper's timer inclusion rule is also under-specified.
+No speedup is claimed from Fig.~\ref{fig:timings}. The elevated CPU maxima on
+several nine-repeat tracks show why a median alone is insufficient. The five
+GPU samples are tightly clustered on the large rows, but this is local
+repeatability evidence, not an A100 comparison.
 
-\section{Timing Decomposition}
+\subsection{Resource boundaries}
 
-Stage 6 froze named timing boundaries before large benchmarking. CUDA
-initialization took 0.404647 s; CPU construction/preprocessing 0.008021 s;
-first-run compilation/warm-up 0.010213 s; synchronized host-to-device transfer
-0.004171 s; GPU solver initialization 0.074478 s including allocation; two
-1,000-step resident loops 1.828999 s; nested residual checks 0.008027 s;
-device-to-host transfer 0.024864 s; and complete runner wall time 6.716848 s.
-Nested residual time must not be added to loop time.
-
-Stage 7--8 medians use solver-specific prepared-workspace boundaries recorded
-in each track. Construction and preprocessing remain separate. The
-decomposition makes local results auditable but does not make them identical
-to the paper's undocumented stopwatch boundary.
-
-\section{Memory and Fail-Closed Resource Results}
-
-DGX Spark exposes one physical pool to CPU and integrated GPU. The runner
-therefore budgets projected host assembly plus GPU planning memory once as a
-unified peak. A row may allocate only if this projection fits within both 80\%
-of live host-available pages and 80\% of CUDA-free memory. The smaller live
-budget is decisive; nominal 128 GB product capacity is not a safe allocation
-budget.
-
-\begin{table}[t]
-\caption{Stage 8 unified-memory gates.}
-\label{tab:memory}
-\centering
-\scriptsize
-\begin{tabular}{@{}lrrrl@{}}
-\toprule
-Row & Projected & Host & CUDA & Outcome \\
-& \multicolumn{3}{c}{GiB} & \\
-\midrule
-2868 T48 & 24.114 & 82.657 & 82.367 & Pass \\
-2868 T64 & 32.169 & 80.811 & 80.522 & Pass \\
-2868 T96 & 48.303 & 80.447 & 80.157 & Pass \\
-9241 T4  & 23.606 & 79.659 & 79.255 & Pass \\
-9241 T6  & 35.410 & 79.413 & 79.124 & allocated \\
-9241 T16 & 94.435 & 65.784 & 65.496 & blocked \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-T24 and T32 are blocked earlier by CSR index capacity. Their conservative
-planning counts are 2,531,600,260 and 3,375,704,460, above the signed-int32
-maximum 2,147,483,647. No LP construction or solver call occurred for T16,
-T24, or T32.
-
-\begin{figure*}[t]
-\centering
-\begin{minipage}{0.44\textwidth}
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.86\linewidth,height=5.0cm,
-  xbar,xmin=0,xmax=105,
-  xlabel={GiB},
-  symbolic y coords={CUDA budget,Host budget,Projected},
-  ytick={Projected,Host budget,CUDA budget},
-  xmajorgrids=true,grid style={draw=gray!20},
-  nodes near coords,nodes near coords align={horizontal},
-  title={T16 unified-memory gate},
-  title style={font=\small\bfseries},
-]
-\addplot[fill=reportorange,draw=none] coordinates {(94.435,Projected)};
-\addplot[fill=reportblue,draw=none] coordinates {(65.784,Host budget)};
-\addplot[fill=reportgray,draw=none] coordinates {(65.496,CUDA budget)};
-\end{axis}
-\end{tikzpicture}
-}%
-\end{minipage}\hfill
-\begin{minipage}{0.44\textwidth}
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.86\linewidth,height=5.0cm,
-  xbar,xmin=0,xmax=3.6,
-  xlabel={Planning nnz (billions)},
-  symbolic y coords={int32 max,T24,T32},
-  ytick={T32,T24,int32 max},
-  xmajorgrids=true,grid style={draw=gray!20},
-  nodes near coords,nodes near coords align={horizontal},
-  title={Signed-int32 CSR gate},
-  title style={font=\small\bfseries},
-]
-\addplot[fill=reportorange,draw=none] coordinates {(3.376,T32)};
-\addplot[fill=reportorange!75!black,draw=none] coordinates {(2.532,T24)};
-\addplot[fill=reportblue,draw=none] coordinates {(2.147,int32 max)};
-\end{axis}
-\end{tikzpicture}
-}%
-\end{minipage}
-\caption{Preallocation safety boundaries for the final requested Stage 8 rows.
-These are fail-closed resource outcomes, not runtime OOM crashes.}
-\label{fig:resources}
-\end{figure*}
-
-The maximum cumulative process-lifetime host high-water mark was 95.375 GiB
-at T6. It is not an isolated solve peak. CUDA snapshots likewise bracket
-solves but do not expose a true per-solve GPU high-water mark through this
-backend.
-
-\section{Differences from the Paper}
-
-\subsection{Matched structure}
-
-The canonical signs, variables, constraint families, all 18 $(m,n)$ pairs,
-paper update order, Halpern weights, tolerance, ten Ruiz passes,
-Pock--Chambolle $\alpha=1$, initial $\sigma=1$, 100-iteration policy cadence,
-CSR storage, and requested ALG2 path are reproduced. FP64 CPU/GPU trajectories
-and accepted original-space numerical checks agree.
-
-\subsection{Reconstructed or unavailable identity}
-
-Renewable/storage placement, time profiles, reserves, ramps, device parameters,
-costs, PTDF reference and sparsification, exact penalty/restart code, author
-source, and timer boundary are unavailable. All 18 reconstructed nonzero counts
-differ from Table II; observed differences range from approximately -8.14\%
-to -36.66\%. The GB10 stack differs from the A100 environment.
-
-\subsection{Retained manuscript ambiguities}
-
-Equation (55) and Table II imply $m_1=T+N_{ESS}$, whereas Appendix A prose
-implies $T(1+N_{ESS})$. The rank-one inverse sign is inconsistent with its
-Schur complement. The objective-error denominator, precision, spectral
-estimator, PTDF thresholding, source revisions, and exact timer boundary are
-not fully specified. The security-constrained label lacks an explicit N-1
-formulation.
-
-\section{Final Reproduction Classification}
+DGX Spark has 128 GB LPDDR5x unified memory \cite{dgxspark}. The run-time
+system reported 130,663,165,952 bytes (121.690 GiB). The preregistered guard
+did not allocate against that nominal total. It required the projected host
+assembly plus device plan to fit within both 80\% of observed host-available
+pages and 80\% of observed CUDA-free bytes.
 
 \begin{table*}[t]
-\caption{Frozen A--E classification decision.}
-\label{tab:classification}
+\caption{Interpretation of final Stage 8 preallocation outcomes.}
+\label{tab:resources}
 \centering
-\small
-\begin{tabular}{@{}clp{0.72\textwidth}@{}}
+\scriptsize
+\begin{tabular}{@{}llrrrrp{0.28\textwidth}@{}}
 \toprule
-Code & Label & Decision \\
+Row & Status & Projected GiB & Planning nnz & Exact count nnz & int32 max &
+Interpretation \\
 \midrule
-A & Exact & Rejected: author instances, code, hardware, and exact outputs are unavailable. \\
-B & Near-exact & Rejected: every sparse nnz differs and timing is not hardware-controlled. \\
-C & Mathematical & Achieved but incomplete as the final label: the benchmark structure was also reconstructed and executed. \\
-\textbf{D} & \textbf{Structural} & \textbf{Selected: mathematics, implementation, dimensions, public-network scaling, validation, and resource limits are reproduced with transparently reconstructed data.} \\
-E & Partial & Rejected: the evidence exceeds an isolated component or incomplete prototype despite the honest Stage 8 failure. \\
+T16 & memory blocked & 94.435 & 1,687,613,820 & 1,371,647,068 &
+2,147,483,647 & Above live budgets 65.784/65.496 GiB, but below the
+97.352-GiB nominal 80\% reference. \\
+T24 & index blocked & 141.663 & 2,531,600,260 & 2,057,650,132 &
+2,147,483,647 & Conservative planning envelope exceeds int32; count-only
+reconstructed nnz remains below it. \\
+T32 & index blocked & 188.897 & 3,375,704,460 & 2,743,770,956 &
+2,147,483,647 & Both planning envelope and count-only reconstructed nnz exceed
+int32. \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-Classification is an evidence boundary, not a stage-score average. Exact
-instance identity is unavailable, but the work includes 18 symbolic rows, 11
-allocated GPU-validated rows, 10 CPU-validated rows, full provenance,
-independent checks, and fail-closed resource accounting. The defensible final
-label is \classresult{}.
+\begin{figure*}[t]
+\centering
+\begin{minipage}{0.45\textwidth}
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\linewidth,height=5.1cm,
+  xbar,xmin=0,xmax=105,
+  xlabel={GiB},
+  symbolic y coords={Nominal 80\%,Live CUDA 80\%,Live host 80\%,Projected},
+  ytick=data,
+  xmajorgrids=true,grid style={draw=gray!20},
+  nodes near coords,nodes near coords align={horizontal},
+  title={T16 live-availability decision},
+  title style={font=\small\bfseries},
+]
+\addplot[fill=reportorange,draw=none] coordinates {(94.435,Projected)};
+\addplot[fill=reportblue,draw=none] coordinates {(65.784,Live host 80\%)};
+\addplot[fill=reportgray,draw=none] coordinates {(65.496,Live CUDA 80\%)};
+\addplot[fill=gray!55,draw=none] coordinates {(97.352,Nominal 80\%)};
+\end{axis}
+\end{tikzpicture}
+}%
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.90\linewidth,height=5.1cm,
+  xbar,xmin=0,xmax=3.6,
+  xlabel={nnz (billions)},
+  symbolic y coords={int32 max,T32 exact,T32 plan,T24 exact,T24 plan},
+  ytick=data,
+  xmajorgrids=true,grid style={draw=gray!20},
+  nodes near coords,nodes near coords align={horizontal},
+  title={Planning envelope versus count-only nnz},
+  title style={font=\small\bfseries},
+]
+\addplot[fill=reportorange,draw=none] coordinates {(2.532,T24 plan)};
+\addplot[fill=reportblue,draw=none] coordinates {(2.058,T24 exact)};
+\addplot[fill=reportorange!75!black,draw=none] coordinates {(3.376,T32 plan)};
+\addplot[fill=reportblue!75!black,draw=none] coordinates {(2.744,T32 exact)};
+\addplot[fill=reportgray,draw=none] coordinates {(2.147,int32 max)};
+\end{axis}
+\end{tikzpicture}
+}%
+\end{minipage}
+\caption{Fail-closed resource evidence. T16 is a live-availability safety
+block, not a nominal 128-GB ceiling. T24 is a conservative policy-envelope
+block, not a demonstrated materialized overflow. T32 exceeds signed-int32
+under both the envelope and count-only reconstruction. No row reached LP
+construction, solver allocation, or an OOM crash.}
+\label{fig:resources}
+\end{figure*}
 
-\section{Limitations and Next Research Step}
+The maximum cumulative process-lifetime host high-water mark was 95.375 GiB
+at T6; it is not an isolated solve peak. CUDA memory observations are
+snapshots, not per-solve high-water marks.
 
-The dominant limitation is author-instance provenance, not tuning. Local
-timings cannot isolate hardware, sparse support, runtime, algorithm, and timer
-effects. Stage 8 does not fully validate T6 because CPU FP64 timed out. The
-three final rows establish safe local resource limits but no solver timing.
-Available memory APIs provide snapshots and cumulative host high-water marks,
-not isolated peaks. The control policy is a sourced reconstruction. Finally,
-this is base-case DCOPF, not N-1 security analysis.
+\section{Discussion}
 
-The highest-value next step is author-instance reconciliation: obtain modified
-case files, time series, placements, physical parameters, construction code,
-precision, policy implementation, and timing rules. Exact $m$, $n$, and nnz
-should first be matched on small rows, followed by objective/KKT fingerprints
-and an equivalent A100 timing boundary. If author artifacts remain unavailable,
-a verified 64-bit or partitioned sparse representation and lower-peak assembly
-would form a new scalability study, not a revision of the present result.
-Stage 10 remains locked.
+\subsection{What was and was not reproduced}
+
+The canonical signs, variables, constraint families, all 18 $(m,n)$ pairs,
+update order, Halpern weights, tolerance, Ruiz/Pock--Chambolle preprocessing,
+initial $\sigma$, policy cadence, FP64 CSR path, and requested ALG2 selection
+are reproduced. CPU/GPU trajectories and all accepted original-space checks
+agree.
+
+Author-instance identity is not reproduced. Placement, time series, reserve
+and ramp edits, storage parameters, costs, PTDF reference/sparsification,
+control code, source revision, precision details, and timer boundary are
+missing. Equation (55) and Table II imply $m_1=T+N_{ESS}$ while Appendix A
+prose implies $T(1+N_{ESS})$; the rank-one sign is inconsistent with the Schur
+complement; and the security-constrained label lacks an explicit outage model.
+
+\subsection{Classification and uncertainty}
+
+Class A is rejected because author artifacts, hardware, and exact outputs are
+unavailable. B is rejected because every nnz differs and timing is
+uncontrolled. C is achieved mathematically but understates the executed
+public-network scaling. E understates the validated solver and complete
+structural ledger. Under the frozen internal taxonomy, D is the narrowest
+defensible label.
+
+The major uncertainties are instance construction and external performance,
+not whether the local code can execute. Timing cannot disentangle algorithm,
+support, implementation, hardware, runtime, or stopwatch effects. The T6 CPU
+track is censored and gives no median. T16/T24/T32 give safe classifications,
+not solve times. Memory APIs limit peak attribution. The adaptive policy is a
+pinned HPR-LP transfer rather than unpublished DCOPF author code.
+
+The most valuable follow-up is author-instance reconciliation: obtain modified
+cases, profiles, placements, parameters, construction code, precision,
+control logic, and timer rules; first match $(m,n,\mathrm{nnz})$, then
+objective/KKT fingerprints, then an equivalent A100 boundary. If those
+artifacts remain unavailable, 64-bit sparse indices, partitioned operators,
+or lower-peak assembly would be a new scalability study rather than a
+correction to this result.
 
 \section{Conclusion}
 
-The project rebuilt and checked the paper's route from canonical DCOPF to a
-resident FP64 GPU solver. It identified a material algebraic sign error,
-separated stopping from full KKT validation, demonstrated CPU/GPU trajectory
-parity, and preserved every large-run outcome without weakening a gate. Public
-reconstructions scale to hundreds of millions of sparse nonzeros but are not
-the authors' instances. The large campaign contains a genuine CPU timeout and
-two distinct preallocation ceilings. The scientifically defensible conclusion
-is \classresult{}: stronger than a partial port and narrower than a near-exact
-replication.
+This study reconstructs and validates the paper's path from canonical DCOPF
+to a resident FP64 GPU \sgshpr{} solver. It records a quantitatively material
+rank-one sign error, separates stopping from full KKT validation, verifies
+CPU/GPU trajectories, retains repeated timing dispersion, and distinguishes
+three different preallocation outcomes. The evidence also contains a genuine
+required-track timeout and complete sparse-support mismatch. The result is
+therefore \classresult{}---stronger than a component demonstration and
+narrower than an exact, near-exact, or controlled performance reproduction.
 
 \appendices
 
-\section{Full Evidence Ledger}
+\section{Deterministic Public-Instance Construction}
+\label{app:recipe}
 
-The independent checker totals are: Stage 0, 10/10; Stage 1, 6/6; Stage 2,
-9/9; Stage 3, 12/12; Stage 4, 20/20; Stage 5, 23/23; Stage 6, 21/21; Stage 7,
-19/19; Stage 8 strict protocol, 12/12; and Stage 8 GPU-only continuation,
-13/13. Exact paths and hashes are in
-\pathcode{results/stage_9_result_index.json}. Checker totals establish
-evidence integrity but do not replace stage decisions.
+\begin{table*}[t]
+\caption{Frozen public-instance construction recipe (seed 20260803).}
+\label{tab:recipe}
+\centering
+\scriptsize
+\begin{tabular}{@{}lp{0.70\textwidth}@{}}
+\toprule
+Component & Frozen rule \\
+\midrule
+Networks & MATPOWER 8.1 at commit
+\texttt{1a828c7af590714499284e36ee9c81273388c594}; three case blobs and SHA-256
+values are recorded in the configuration. \\
+Load & Flat profile; active withdrawal is MATPOWER $P_d+G_s$ each hour. \\
+Generators & Retain every row; originally offline rows are fixed to zero
+output and reserve; ramp limit is $0.1P_{\max}$/h. \\
+Renewables & Cycle through generator buses in generator-row order; aggregate
+nameplate is 10\% of base load, equally divided; availability 1; minimum 0. \\
+Storage & Every second renewable location, cycling as needed; aggregate power
+1\% of base load, equal division; 4-h duration; initial state 50\%;
+$\eta^{ch}=\eta^{dc}=0.95$. \\
+Reserve & Up and down requirements are each 1\% of base load. \\
+Costs & MATPOWER linear and constant polynomial terms; reject nonzero
+higher-order terms; renewable and storage-loss penalties are \$1/MWh. \\
+Branches & Preserve positive rateA; zero rateA receives an outward-rounded
+finite bound proven redundant over the variable box; inactive rows are kept
+as zero-flow count rows but excluded from topology. \\
+PTDF & Public type-3 reference bus; RHS chunks of 128; zero tolerance
+$10^{-12}$; phase-shift affine offsets retained; angle limits omitted because
+they are absent from the source model. \\
+Time & One-hour intervals; no timing-driven tuning after the contract freeze. \\
+\bottomrule
+\end{tabular}
+\end{table*}
 
-\section{Structural Reconciliation}
+The three canonical case-file SHA-256 values are
+\texttt{1b08b25a...b89} (1354),
+\texttt{2b30e894...861} (2868), and
+\texttt{593a58ec...5f3} (9241); complete values are in
+\pathcode{configs/benchmarks/stage_7_small_medium.json}.
 
-The complete 18-row ledger is
-\pathcode{results/tables/stage_9_structural_reconciliation.csv}. Every row has
-matching published/reproduced $m$ and $n$; zero rows have matching nnz; and
-zero rows are paper-time-comparable. Unallocated large-row counts are symbolic
-or count-only evidence, not materialized LPs.
+\section{Preprocessing, Restart, Penalty, and Timing Definitions}
+\label{app:controls}
 
-\section{Missing Source Information}
+The sGS multiplier metric for $\Delta y=(\Delta y_1,\Delta y_2)$ is
+\begin{align}
+v&=A_1^{\mathsf T}\Delta y_1+A_2^{\mathsf T}\Delta y_2,\\
+Q_y(\Delta y)&=(A_1v)^{\mathsf T}
+(A_1A_1^{\mathsf T})^{-1}(A_1v)
++\lambda\norm{\Delta y_2}^2.
+\end{align}
+The restart merit is
+\begin{equation}
+\widetilde R^2=
+\norm{\Delta x}^2/\sigma+
+2(A\Delta x)^{\mathsf T}\Delta y+
+\sigma Q_y(\Delta y).
+\end{equation}
+Policy checks occur every 100 iterations; the first checkpoint forces a
+restart. Later checkpoints restart for sufficient decay
+$\widetilde R\le0.2\widetilde R_{ref}$, necessary decay with no local
+progress
+$\widetilde R\le0.6\widetilde R_{ref}$ and
+$\widetilde R>\widetilde R_{prev}$, or a long inner loop
+$k_{inner}\ge0.2k_{total}$. An accepted restart copies the proximal point to
+anchor and current state and resets the inner counter.
 
-Exact numerical reproduction would require:
-\begin{itemize}
-  \item exact base-case files, versions, and hashes;
-  \item renewable and storage bus locations;
-  \item load/renewable/reserve time series, ramps, storage parameters, and
-  cost modifications;
-  \item PTDF slack/reference choice, transformer/island handling, and sparse
-  zero threshold;
-  \item exact adaptive-penalty, restart, spectral-estimation, safety, and
-  precision rules;
-  \item author CUDA/source revisions and build flags; and
-  \item exact timer inclusion boundary, repeat protocol, and variance data.
-\end{itemize}
+With reference and candidate states,
+\begin{align}
+\Delta_x&=\norm{x_c-x_r}, &
+\Delta_y&=\sqrt{Q_y(y_c-y_r)}, \label{eq:policy-moves}\\
+\sigma_{new}&=\Delta_x/\Delta_y. \label{eq:policy-sigma}
+\end{align}
+Both movements must lie strictly in $(10^{-16},10^{12})$, and the normalized
+dual/primal infeasibility ratio in $(10^{-8},10^8)$. Guard failure resets
+$\sigma$ to 1. The policy source is HPR-LP commit
+\texttt{1941fbcfbf2dae14e4a439b22f0ea1e1c05f4a29}
+\cite{chen2026}.
 
-\section{Reproducibility Checklist}
+HiGHS core time is the SciPy \texttt{linprog} call, including interface/model
+setup and solve. CPU/GPU \sgshpr{} times begin after their solver-specific
+model/preconditioner/workspace preparation and include the iterative solve and
+scheduled residual work. CUDA initialization, model construction,
+preprocessing, first-run compilation, allocation, transfers, solver
+initialization, iteration, nested residuals, recovery, and complete runner
+wall time are separately named in
+\pathcode{results/tables/stage_9_timing_decomposition.csv}. Nested residual
+time is part of loop time and must not be added again.
 
-The durable checklist is \pathcode{docs/reproducibility_checklist.md}. It
-covers source identity, mathematical derivation, physical validation,
-CPU/GPU parity, benchmark protocol, report QA, and the Stage 10 lock.
+\section{Algebraic Stability and Conditioning}
+\label{app:algebra}
 
-\section{Regeneration and Test Commands}
+The positive-sum implementation of the reduced eigenvalue is
+\begin{equation}
+\gamma=G+R+\sum_s
+\frac{(\eta_s^{ch}-1/\eta_s^{dc})^2}
+{(\eta_s^{ch})^2+1/(\eta_s^{dc})^2},
+\end{equation}
+which avoids subtracting nearly equal $a$ and $T\alpha$. Nonpositive or
+scale-small $\gamma$ is rejected.
 
-Run from the repository root:
+\begin{table*}[t]
+\caption{Structural-solve conditioning against the direct FP64 oracle.}
+\label{tab:conditioning}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+Fixture & Rows & $\kappa_2$ & Max relative error & Max normalized residual &
+Max component error \\
+\midrule
+No storage, T1 & 1 & 1.00 & $2.22\mathrm{e}{-16}$ & $1.67\mathrm{e}{-16}$ &
+$2.91\mathrm{e}{-11}$ \\
+No storage, T17 & 17 & 1.00 & 0 & 0 & 0 \\
+Ideal storage, T1 & 2 & 86.01 & $2.18\mathrm{e}{-16}$ &
+$6.66\mathrm{e}{-16}$ & $3.73\mathrm{e}{-9}$ \\
+One storage, T2 & 3 & 3.58 & $3.03\mathrm{e}{-16}$ &
+$3.21\mathrm{e}{-16}$ & $1.16\mathrm{e}{-10}$ \\
+Extreme efficiency, T32 & 33 & 25,616.42 & $3.00\mathrm{e}{-15}$ &
+$2.93\mathrm{e}{-14}$ & $1.14\mathrm{e}{-9}$ \\
+Heterogeneous storage, T5 & 9 & 548.59 & $1.15\mathrm{e}{-15}$ &
+$1.05\mathrm{e}{-15}$ & $3.11\mathrm{e}{-10}$ \\
+Many ideal devices, T16 & 48 & 292.03 & $1.53\mathrm{e}{-14}$ &
+$6.44\mathrm{e}{-15}$ & $4.42\mathrm{e}{-9}$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Timing Dispersion}
+\label{app:timing}
+
+\begin{table*}[t]
+\caption{Median [minimum, maximum] seconds; parenthesis gives IQR. T6 CPU is
+one censored correctness attempt and is not summarized as a distribution.}
+\label{tab:dispersion}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Reconstruction & HiGHS & CPU FP64 \sgshpr{} & GPU FP64 \sgshpr{} \\
+\midrule
+1354/T4 & 1.463 [1.453,1.480] (0.015) & 13.190 [11.836,16.879] (1.571) &
+1.013 [0.995,1.092] (0.010) \\
+1354/T16 & 7.265 [7.258,7.283] (0.005) & 47.399 [46.635,127.424] (3.906) &
+2.924 [2.885,2.996] (0.097) \\
+1354/T48 & 32.095 [31.249,39.290] (1.651) & 153.046 [152.641,155.015] (1.680) &
+9.481 [9.476,9.531] (0.048) \\
+1354/T96 & 101.242 [100.940,101.613] (0.176) &
+336.657 [330.488,537.835] (7.599) & 21.084 [20.947,21.380] (0.274) \\
+2868/T4 & 5.366 [5.340,5.375] (0.026) & 60.350 [60.018,60.807] (0.253) &
+3.939 [3.846,3.959] (0.098) \\
+2868/T16 & 22.138 [22.082,22.421] (0.219) & 250.601 [249.273,255.187] (1.645) &
+15.408 [15.394,15.413] (0.006) \\
+2868/T48 & 76.239 [70.892,77.949] (4.411) & 804.863 [801.569,808.401] (3.749) &
+49.968 [49.927,49.998] (0.027) \\
+2868/T64 & 108.232 [107.335,108.458] (0.598) &
+1,078.892 [1,077.122,1,135.954] (38.376) &
+68.383 [68.292,68.392] (0.008) \\
+2868/T96 & 163.593 [158.374,164.829] (1.394) &
+1,621.905 [1,594.076,1,634.230] (19.300) &
+105.022 [105.001,105.174] (0.032) \\
+9241/T4 & 142.479 [141.937,142.810] (0.376) &
+3,087.218 [3,070.085,3,096.832] (13.350) &
+193.632 [193.603,193.741] (0.120) \\
+9241/T6 & 963.957 [960.497,966.056] (1.420) &
+3,600.093 censored correctness attempt &
+357.544 [357.462,357.751] (0.206) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The CSV retains standard deviations and repeat counts in addition to the
+statistics shown here. Five repeats were planned; high-variability tracks were
+escalated to nine without deleting earlier samples.
+
+\section{Reproducibility, Code, and Data Availability}
+\label{app:repro}
+
+\textbf{Code and data availability.} Source, public case snapshots,
+configurations, immutable raw evidence, generated tables/figures, the
+machine-readable index, and this PDF are available at
+\url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}. The report
+release is the Git tag \texttt{stage9-report-v2}; the benchmark-evidence
+source base is
+\texttt{c08c53b7ef5d2bde006728c76fb43fe621685e20}, and the first complete
+Stage 9 synthesis is
+\texttt{85007e9e752ea5e082bd0266cf43393fc8f3e7e2}. The public network source is
+MATPOWER 8.1, DOI 10.5281/zenodo.15871662 \cite{matpower}.
+
+\textbf{Missing source information.} Exact reproduction would require the
+authors' modified cases, placements, profiles, reserve and ramp data, storage
+parameters, matrix construction, PTDF policy, precision, control code, source
+revision, and timer definition. Unknown values were not guessed or fitted to
+published timings.
+
+\textbf{Machine-readable evidence.}
+\pathcode{results/stage_9_result_index.json} records paper identity,
+classification, stage decisions, environment, thresholds, evidence hashes,
+table/figure hashes, timing semantics, resource interpretations, and the
+Stage 10 lock. The complete structural ledger is
+\pathcode{results/tables/stage_9_structural_reconciliation.csv}; the benchmark
+and dispersion fields are in
+\pathcode{results/tables/stage_9_benchmarks.csv}.
+
+\textbf{Regeneration.} From the repository root:
 \begin{lstlisting}
 python scripts/generate_stage_9_artifacts.py
 python scripts/generate_stage_9_artifacts.py --check
@@ -698,59 +878,80 @@ python scripts/check_stage_9.py --output results/raw/stage_9/stage_9_checks.json
 python -m pytest -q
 python -m ruff check .
 python -m ruff format --check .
-cd dashboard
-npm test
-npm run lint
-cd ..
 \end{lstlisting}
-The complete per-table, PDF-rendering, and earlier-checker command inventory is
-\pathcode{docs/regeneration_commands.md}. Accepted Stage 7--8 benchmark
-evidence is immutable; rebuilding this report does not rerun benchmark
-allocations.
+The full command inventory is
+\pathcode{docs/regeneration_commands.md}. Report regeneration does not rerun
+accepted or failed DGX benchmark allocations.
 
-\section{Machine-Readable Result Index}
-
-\pathcode{results/stage_9_result_index.json} records paper identity, final
-classification, stage/checker decisions, Stage 8 failure and continuation
-semantics, coverage totals, environment, frozen gates, evidence hashes, table
-and figure hashes, and the explicit Stage 10 lock.
-
-\section{Final Git-State Boundary}
-
-A commit cannot embed its own identifier without changing that identifier.
-The report records the tested source HEAD and verifies the final repository
-externally:
-\begin{lstlisting}
-git diff --check
-git status --short
-git rev-parse HEAD
-git log -1 --format=fuller
-\end{lstlisting}
-The final handoff requires no output from \texttt{git status --short}; the
-actual final commit and push result accompany the completion notice.
-
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 
 \bibitem{wang2026}
 Q. Wang, G. Zhang, Y. Yang, C. Ren, W. Wu, X. Zhao, M. Skoglund, and D. Sun,
-``An efficient GPU-based Halpern accelerating algorithm for large-scale DC
-optimal power flow,'' \emph{IEEE Trans. Power Syst.}, vol. 41, no. 3,
+\textquotedblleft{}An efficient GPU-based Halpern accelerating algorithm for large-scale DC
+optimal power flow,\textquotedblright{} \emph{IEEE Trans. Power Syst.}, vol. 41, no. 3,
 pp. 2187--2204, May 2026, doi: 10.1109/TPWRS.2025.3635652.
 
+\bibitem{chen2026}
+K. Chen, D. Sun, Y. Yuan, G. Zhang, and X. Zhao,
+\textquotedblleft{}HPR-LP: An implementation of an HPR method for solving linear programming,\textquotedblright{}
+\emph{Math. Program. Comput.}, vol. 18, pp. 183--210, 2026,
+doi: 10.1007/s12532-025-00292-0.
+
 \bibitem{matpower}
-R. D. Zimmerman, C. E. Murillo-Sanchez, and R. J. Thomas, ``MATPOWER:
-Steady-state operations, planning, and analysis tools for power systems
-research and education,'' \emph{IEEE Trans. Power Syst.}, vol. 26, no. 1,
-pp. 12--19, Feb. 2011.
+R. D. Zimmerman and C. E. Murillo-S\'anchez, \emph{MATPOWER}, version 8.1,
+2025, doi: 10.5281/zenodo.15871662; and R. D. Zimmerman,
+C. E. Murillo-S\'anchez, and R. J. Thomas, \textquotedblleft{}MATPOWER: Steady-state
+operations, planning, and analysis tools for power systems research and
+education,\textquotedblright{} \emph{IEEE Trans. Power Syst.}, vol. 26, no. 1, pp. 12--19,
+2011.
 
-\bibitem{highs}
-Q. Huangfu and J. A. J. Hall, ``Parallelizing the dual revised simplex
-method,'' \emph{Math. Program. Comput.}, vol. 10, pp. 119--142, 2018.
+\bibitem{josz2016}
+C. Josz, S. Fliscounakis, J. Maeght, and P. Panciatici,
+\textquotedblleft{}AC power flow data in MATPOWER and QCQP format: iTesla, RTE snapshots, and
+PEGASE,\textquotedblright{} arXiv:1603.01533, 2016.
 
-\bibitem{pockchambolle}
-T. Pock and A. Chambolle, ``Diagonal preconditioning for first order primal-dual
-algorithms in convex optimization,'' in \emph{Proc. IEEE ICCV}, 2011,
-pp. 1762--1769.
+\bibitem{fliscounakis2013}
+S. Fliscounakis, P. Panciatici, F. Capitanescu, and L. Wehenkel,
+\textquotedblleft{}Contingency ranking with respect to overloads in very large power systems
+taking into account uncertainty, preventive, and corrective actions,\textquotedblright{}
+\emph{IEEE Trans. Power Syst.}, vol. 28, no. 4, pp. 4909--4917, 2013,
+doi: 10.1109/TPWRS.2013.2251015.
+
+\bibitem{ruiz2001}
+D. Ruiz, \textquotedblleft{}A scaling algorithm to equilibrate both rows and columns norms in
+matrices,\textquotedblright{} Rutherford Appleton Laboratory, Tech. Rep. RAL-TR-2001-034, 2001.
+
+\bibitem{pock2011}
+T. Pock and A. Chambolle, \textquotedblleft{}Diagonal preconditioning for first order
+primal-dual algorithms in convex optimization,\textquotedblright{} in \emph{Proc. IEEE ICCV},
+2011, pp. 1762--1769, doi: 10.1109/ICCV.2011.6126441.
+
+\bibitem{scipy2020}
+P. Virtanen \emph{et al.}, \textquotedblleft{}SciPy 1.0: Fundamental algorithms for
+scientific computing in Python,\textquotedblright{} \emph{Nature Methods}, vol. 17,
+pp. 261--272, 2020, doi: 10.1038/s41592-019-0686-2.
+
+\bibitem{highs2018}
+Q. Huangfu and J. A. J. Hall, \textquotedblleft{}Parallelizing the dual revised simplex
+method,\textquotedblright{} \emph{Math. Program. Comput.}, vol. 10, pp. 119--142, 2018.
+
+\bibitem{okuta2017}
+R. Okuta, Y. Unno, D. Nishino, S. Hido, and C. Loomis,
+\textquotedblleft{}CuPy: A NumPy-compatible library for NVIDIA GPU calculations,\textquotedblright{} in
+\emph{Proc. Workshop on Machine Learning Systems, NeurIPS}, 2017.
+
+\bibitem{cusparse}
+NVIDIA Corp., \textquotedblleft{}cuSPARSE library,\textquotedblright{} CUDA Toolkit Documentation, 2026.
+[Online]. Available: \url{https://docs.nvidia.com/cuda/cusparse/}
+
+\bibitem{dgxspark}
+NVIDIA Corp., \textquotedblleft{}DGX Spark User Guide: Hardware overview,\textquotedblright{} 2026.
+[Online]. Available: \url{https://docs.nvidia.com/dgx/dgx-spark/hardware.html}
+
+\bibitem{acm2020}
+Association for Computing Machinery, \textquotedblleft{}Artifact review and badging---current,\textquotedblright{}
+version 1.1, 2020. [Online]. Available:
+\url{https://www.acm.org/publications/policies/artifact-review-and-badging-current}
 
 \end{thebibliography}
 

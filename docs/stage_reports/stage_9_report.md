@@ -2,7 +2,7 @@
 
 > **Status:** PASS
 >
-> **Date:** August 5, 2026
+> **Date:** August 7, 2026
 >
 > **Final classification:** D - structural reproduction
 >
@@ -17,6 +17,12 @@ LaTeX scientific paper with detailed appendices. The archival Markdown report
 contains all 16 workflow-required subjects. Deterministic scripts generate the
 supporting CSV tables, SVG figures, evidence hashes, and machine-readable
 result index directly from preserved Stage 0--8 JSON.
+
+The revised release `stage9-report-v2` adds a self-contained stage map and
+instance recipe, exact solver and timing definitions, a formal equality-solve
+lemma with conditioning evidence, solver-faceted uncertainty displays,
+scholarly references, authorship/contact, and a code/data availability
+statement.
 
 The report concludes that the project is a **structural reproduction**. The
 mathematics, corrected structural linear algebra, CPU oracle, resident FP64 GPU
@@ -45,6 +51,12 @@ not complete its required CPU FP64 correctness track within 3,600 seconds.
 The later continuation preserves that failure and records T16 as memory-blocked
 and T24/T32 as signed-int32 index-blocked before allocation.
 
+The resource labels retain their exact semantics. T16's 94.435 GiB projection
+exceeded the sampled 65.784/65.496 GiB live budgets but not the 97.352 GiB
+nominal 80% reference. T24's conservative 2,531,600,260 planning count exceeds
+signed int32 while its exact 2,057,650,132 reconstruction does not. T32 exceeds
+the limit under both its planning and exact reconstructed counts.
+
 ## Created artifacts
 
 - `docs/final_reproduction_report.tex`
@@ -69,7 +81,7 @@ and T24/T32 as signed-int32 index-blocked before allocation.
 - High-impact counts, timings, timeouts, memory budgets, and index limits are
   independently reconciled against immutable JSON.
 - All Stage 9 generated outputs reproduce byte-for-byte.
-- Python tests pass 307/307, with one expected local CuPy-version skip; Ruff
+- Python tests pass 308/308, with one expected local CuPy-version skip; Ruff
   check and format validation pass across 112 files; dashboard build, two
   rendered-HTML tests, and lint pass.
 - The dashboard marks Stage 9 complete and Stage 10 locked.

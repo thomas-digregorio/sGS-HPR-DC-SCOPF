@@ -8,7 +8,7 @@
       "passed": true
     },
     {
-      "detail": "{\"code\": \"D\", \"decision_rule\": \"docs/stage_9_contract.md\", \"exact_reproduction\": false, \"label\": \"structural reproduction\", \"local_speedup_claimed\": false, \"paper_timing_reproduced\": false}",
+      "detail": "{\"code\": \"D\", \"decision_rule\": \"docs/stage_9_contract.md\", \"exact_reproduction\": false, \"label\": \"structural reproduction\", \"local_speedup_claimed\": false, \"paper_timing_reproduced\": false, \"taxonomy\": \"preregistered project-specific A--E decision framework\"}",
       "name": "classification_D",
       "passed": true
     },
@@ -43,7 +43,7 @@
       "passed": true
     },
     {
-      "detail": "T16 memory-blocked; T24/T32 signed-int32-blocked before allocation",
+      "detail": "T16 live-budget-blocked below nominal 80%; T24 policy-envelope-blocked with exact count below int32; T32 exact and envelope counts above int32",
       "name": "resource_boundaries",
       "passed": true
     },
@@ -73,7 +73,7 @@
       "passed": true
     },
     {
-      "detail": "bytes=599725, page_objects=6, sha256=a39410d4084e006d3433be8a4a990500452a82091b93257535b6e706b4d12860",
+      "detail": "bytes=650450, page_objects=7, sha256=bd6a3f756e856816ae42cf10cab7d0a471497fe5a9bd25334fb368b1005da8f9",
       "name": "compiled_pdf",
       "passed": true
     },
@@ -83,7 +83,7 @@
       "passed": true
     },
     {
-      "detail": "{\n  \"classification\": {\n    \"code\": \"D\",\n    \"label\": \"structural reproduction\",\n    \"decision_rule\": \"docs/stage_9_contract.md\",\n    \"exact_reproduction\": false,\n    \"paper_timing_reproduced\": false,\n    \"local_speedup_claimed\": false\n  },\n  \"generated\": [\n    \"results/stage_9_result_index.json\",\n    \"results/tables/stage_9_stage_checks.csv\",\n    \"results/tables/stage_9_benchmarks.csv\",\n    \"results/tables/stage_9_structural_reconciliation.csv\",\n    \"results/tables/stage_9_resource_boundaries.csv\",\n    \"results/tables/stage_9_timing_decomposition.csv\",\n    \"results/plots/stage_9_solver_timings.svg\",\n    \"results/plots/stage_9_resource_boundaries.svg\"\n  ]\n}",
+      "detail": "{\n  \"classification\": {\n    \"code\": \"D\",\n    \"label\": \"structural reproduction\",\n    \"decision_rule\": \"docs/stage_9_contract.md\",\n    \"exact_reproduction\": false,\n    \"paper_timing_reproduced\": false,\n    \"local_speedup_claimed\": false,\n    \"taxonomy\": \"preregistered project-specific A--E decision framework\"\n  },\n  \"generated\": [\n    \"results/stage_9_result_index.json\",\n    \"results/tables/stage_9_stage_checks.csv\",\n    \"results/tables/stage_9_benchmarks.csv\",\n    \"results/tables/stage_9_structural_reconciliation.csv\",\n    \"results/tables/stage_9_resource_boundaries.csv\",\n    \"results/tables/stage_9_timing_decomposition.csv\",\n    \"results/plots/stage_9_solver_timings.svg\",\n    \"results/plots/stage_9_resource_boundaries.svg\"\n  ]\n}",
       "name": "generated_outputs_current",
       "passed": true
     }

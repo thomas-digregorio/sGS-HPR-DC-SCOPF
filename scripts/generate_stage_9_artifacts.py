@@ -40,7 +40,11 @@ PAPER_METADATA_PATH = PROJECT_ROOT / "results/raw/stage_0/paper_metadata.json"
 
 INT32_MAX = 2_147_483_647
 GIB = 1024**3
+NOMINAL_UNIFIED_MEMORY_BYTES = 130_663_165_952
+MEMORY_SAFETY_FRACTION = 0.8
 REPORT_BASE_COMMIT = "c08c53b7ef5d2bde006728c76fb43fe621685e20"
+REPORT_EVIDENCE_COMMIT = "85007e9e752ea5e082bd0266cf43393fc8f3e7e2"
+REPORT_RELEASE_TAG = "stage9-report-v2"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -80,6 +84,12 @@ def _track_summary(track: dict[str, Any] | None) -> dict[str, Any]:
         return {
             "status": "NOT_RUN",
             "median_seconds": None,
+            "minimum_seconds": None,
+            "maximum_seconds": None,
+            "interquartile_range_seconds": None,
+            "standard_deviation_seconds": None,
+            "measured_repetitions": None,
+            "timeout_seconds": None,
             "iterations": None,
             "restart_count": None,
             "objective": None,
@@ -92,9 +102,18 @@ def _track_summary(track: dict[str, Any] | None) -> dict[str, Any]:
     residuals = candidate.get("residuals") or {}
     physical = candidate.get("physical_validation") or {}
     statistics = track.get("statistics") or {}
+    timeout_seconds = None
+    if correctness.get("status") == "TIME_LIMIT":
+        timeout_seconds = correctness.get("wall_seconds")
     return {
         "status": correctness.get("status", track.get("timing_status", "UNKNOWN")),
         "median_seconds": statistics.get("median_seconds"),
+        "minimum_seconds": statistics.get("minimum_seconds"),
+        "maximum_seconds": statistics.get("maximum_seconds"),
+        "interquartile_range_seconds": statistics.get("interquartile_range_seconds"),
+        "standard_deviation_seconds": statistics.get("standard_deviation_seconds"),
+        "measured_repetitions": statistics.get("count"),
+        "timeout_seconds": timeout_seconds,
         "iterations": correctness.get("iterations"),
         "restart_count": correctness.get("restart_count"),
         "objective": candidate.get("objective"),
@@ -129,10 +148,26 @@ def _benchmark_row(stage: int, case: dict[str, Any]) -> dict[str, Any]:
         "row_status": case.get("status"),
         "highs_status": highs["status"],
         "highs_median_seconds": highs["median_seconds"],
+        "highs_minimum_seconds": highs["minimum_seconds"],
+        "highs_maximum_seconds": highs["maximum_seconds"],
+        "highs_iqr_seconds": highs["interquartile_range_seconds"],
+        "highs_standard_deviation_seconds": highs["standard_deviation_seconds"],
+        "highs_measured_repetitions": highs["measured_repetitions"],
         "cpu_status": cpu["status"],
         "cpu_median_seconds": cpu["median_seconds"],
+        "cpu_minimum_seconds": cpu["minimum_seconds"],
+        "cpu_maximum_seconds": cpu["maximum_seconds"],
+        "cpu_iqr_seconds": cpu["interquartile_range_seconds"],
+        "cpu_standard_deviation_seconds": cpu["standard_deviation_seconds"],
+        "cpu_measured_repetitions": cpu["measured_repetitions"],
+        "cpu_timeout_seconds": cpu["timeout_seconds"],
         "gpu_status": gpu["status"],
         "gpu_median_seconds": gpu["median_seconds"],
+        "gpu_minimum_seconds": gpu["minimum_seconds"],
+        "gpu_maximum_seconds": gpu["maximum_seconds"],
+        "gpu_iqr_seconds": gpu["interquartile_range_seconds"],
+        "gpu_standard_deviation_seconds": gpu["standard_deviation_seconds"],
+        "gpu_measured_repetitions": gpu["measured_repetitions"],
         "gpu_iterations": gpu["iterations"],
         "gpu_restart_count": gpu["restart_count"],
         "gpu_objective": gpu["objective"],
@@ -163,10 +198,26 @@ def _continuation_row(case: dict[str, Any]) -> dict[str, Any]:
         "row_status": case.get("status"),
         "highs_status": "NOT_RUN",
         "highs_median_seconds": None,
+        "highs_minimum_seconds": None,
+        "highs_maximum_seconds": None,
+        "highs_iqr_seconds": None,
+        "highs_standard_deviation_seconds": None,
+        "highs_measured_repetitions": None,
         "cpu_status": "SKIPPED_BY_APPROVED_SCOPE",
         "cpu_median_seconds": None,
+        "cpu_minimum_seconds": None,
+        "cpu_maximum_seconds": None,
+        "cpu_iqr_seconds": None,
+        "cpu_standard_deviation_seconds": None,
+        "cpu_measured_repetitions": None,
+        "cpu_timeout_seconds": None,
         "gpu_status": "NOT_RUN",
         "gpu_median_seconds": None,
+        "gpu_minimum_seconds": None,
+        "gpu_maximum_seconds": None,
+        "gpu_iqr_seconds": None,
+        "gpu_standard_deviation_seconds": None,
+        "gpu_measured_repetitions": None,
         "gpu_iterations": None,
         "gpu_restart_count": None,
         "gpu_objective": None,
@@ -233,9 +284,25 @@ def _structural_rows(stage7: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _resource_rows(stage8: dict[str, Any], continuation: dict[str, Any]) -> list[dict[str, Any]]:
+    def block_reasons(gate: dict[str, Any]) -> str:
+        checks = gate.get("checks") or {}
+        failure_order = {
+            "within_host_safety_budget": 0,
+            "within_device_safety_budget": 1,
+            "signed_int32_csr_nnz_limit": 2,
+        }
+        failed_names = [name for name, passed in checks.items() if passed is False]
+        failed_names.sort(key=lambda name: (failure_order.get(name, 99), name))
+        failed_checks = [f"failed:{name}" for name in failed_names]
+        if failed_checks:
+            return ";".join(failed_checks)
+        return ";".join(f"failed:{reason}" for reason in gate.get("block_reasons") or [])
+
     rows: list[dict[str, Any]] = []
     for case in stage8["cases"]:
         gate = case.get("stage8_resource_gate") or {}
+        dimensions = (case.get("construction") or {}).get("dimensions") or {}
+        structural = case.get("structural_reconciliation") or {}
         rows.append(
             {
                 "sequence": next(
@@ -253,8 +320,12 @@ def _resource_rows(stage8: dict[str, Any], continuation: dict[str, Any]) -> list
                 "host_budget_gib": gate.get("host_safety_budget_bytes", 0) / GIB,
                 "device_budget_gib": gate.get("device_safety_budget_bytes", 0) / GIB,
                 "planning_nnz": None,
+                "paper_nnz": structural.get("published_nnz"),
+                "exact_reconstructed_nnz": dimensions.get("nnz_A"),
                 "int32_limit": INT32_MAX,
-                "block_reasons": ";".join(gate.get("block_reasons") or []),
+                "nominal_unified_gib": NOMINAL_UNIFIED_MEMORY_BYTES / GIB,
+                "nominal_80pct_gib": (MEMORY_SAFETY_FRACTION * NOMINAL_UNIFIED_MEMORY_BYTES / GIB),
+                "block_reasons": block_reasons(gate),
             }
         )
     for case in continuation["cases"]:
@@ -282,8 +353,12 @@ def _resource_rows(stage8: dict[str, Any], continuation: dict[str, Any]) -> list
                     else None
                 ),
                 "planning_nnz": estimate.get("conservative_planning_nnz"),
+                "paper_nnz": estimate.get("paper_nnz"),
+                "exact_reconstructed_nnz": estimate.get("exact_reconstructed_nnz"),
                 "int32_limit": INT32_MAX,
-                "block_reasons": ";".join(gate.get("block_reasons") or []),
+                "nominal_unified_gib": NOMINAL_UNIFIED_MEMORY_BYTES / GIB,
+                "nominal_80pct_gib": (MEMORY_SAFETY_FRACTION * NOMINAL_UNIFIED_MEMORY_BYTES / GIB),
+                "block_reasons": block_reasons(gate),
             }
         )
     return rows
@@ -320,27 +395,52 @@ class Series:
     color: str
     marker: str
     values: list[float | None]
+    minimums: list[float | None]
+    maximums: list[float | None]
 
 
 def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
     executed = [row for row in rows if row["stage"] in (7, 8) and row["sequence"] == ""]
     labels = [row["case_key"].replace("case", "").replace("pegase", "") for row in executed]
     series = [
-        Series("HiGHS", "#2A6FBB", "circle", [row["highs_median_seconds"] for row in executed]),
-        Series("CPU FP64", "#4B5563", "square", [row["cpu_median_seconds"] for row in executed]),
-        Series("GPU FP64", "#E67E22", "triangle", [row["gpu_median_seconds"] for row in executed]),
+        Series(
+            "HiGHS dual simplex",
+            "#2A6FBB",
+            "circle",
+            [row["highs_median_seconds"] for row in executed],
+            [row["highs_minimum_seconds"] for row in executed],
+            [row["highs_maximum_seconds"] for row in executed],
+        ),
+        Series(
+            "CPU FP64 sGS-HPR",
+            "#4B5563",
+            "square",
+            [row["cpu_median_seconds"] for row in executed],
+            [row["cpu_minimum_seconds"] for row in executed],
+            [row["cpu_maximum_seconds"] for row in executed],
+        ),
+        Series(
+            "GPU FP64 sGS-HPR",
+            "#E67E22",
+            "triangle",
+            [row["gpu_median_seconds"] for row in executed],
+            [row["gpu_minimum_seconds"] for row in executed],
+            [row["gpu_maximum_seconds"] for row in executed],
+        ),
     ]
-    width, height = 1280, 720
-    left, right, top, bottom = 108, 42, 70, 142
-    plot_w, plot_h = width - left - right, height - top - bottom
+    width, height = 1280, 960
+    left, right, top, bottom = 108, 42, 82, 138
+    panel_gap = 24
+    plot_w = width - left - right
+    panel_h = (height - top - bottom - 2 * panel_gap) / 3
     y_min, y_max = 0.8, 4200.0
 
     def x_pos(index: int) -> float:
         return left + (index + 0.5) * plot_w / len(labels)
 
-    def y_pos(value: float) -> float:
+    def y_pos(value: float, panel_top: float) -> float:
         fraction = (math.log10(value) - math.log10(y_min)) / (math.log10(y_max) - math.log10(y_min))
-        return top + plot_h * (1.0 - fraction)
+        return panel_top + panel_h * (1.0 - fraction)
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -351,45 +451,63 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
         ".title{font-size:24px;font-weight:700}.note{font-size:14px;fill:#4B5563}</style>",
         (
             '<text x="640" y="33" text-anchor="middle" class="title">'
-            "Local validated solver-core time</text>"
+            "Local solver-core timing by solver boundary</text>"
         ),
     ]
-    for tick in [1, 10, 100, 1000, 3600]:
-        y = y_pos(float(tick))
-        parts.append(
-            f'<line x1="{left}" y1="{y:.2f}" x2="{width - right}" y2="{y:.2f}" class="grid"/>'
-        )
-        parts.append(
-            f'<text x="{left - 14}" y="{y + 5:.2f}" text-anchor="end" class="small">{tick:g}</text>'
-        )
-    parts.extend(
-        [
-            f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_h}" class="axis"/>',
-            (
-                f'<line x1="{left}" y1="{top + plot_h}" x2="{width - right}" '
-                f'y2="{top + plot_h}" class="axis"/>'
-            ),
-            f'<text x="28" y="{top + plot_h / 2}" transform="rotate(-90 28 {top + plot_h / 2})" '
-            'text-anchor="middle" class="small">Median seconds (log scale)</text>',
-        ]
-    )
-    offsets = [-10, 0, 10]
     for s_index, item in enumerate(series):
+        panel_top = top + s_index * (panel_h + panel_gap)
+        panel_bottom = panel_top + panel_h
+        parts.append(
+            f'<text x="{left + 8}" y="{panel_top + 22:.2f}" class="small" '
+            f'font-weight="700">{item.name}</text>'
+        )
+        for tick in [1, 10, 100, 1000, 3600]:
+            y = y_pos(float(tick), panel_top)
+            parts.append(
+                f'<line x1="{left}" y1="{y:.2f}" x2="{width - right}" y2="{y:.2f}" class="grid"/>'
+            )
+            parts.append(
+                f'<text x="{left - 14}" y="{y + 5:.2f}" text-anchor="end" '
+                f'class="small">{tick:g}</text>'
+            )
+        parts.append(
+            f'<line x1="{left}" y1="{panel_top:.2f}" x2="{left}" '
+            f'y2="{panel_bottom:.2f}" class="axis"/>'
+        )
+        parts.append(
+            f'<line x1="{left}" y1="{panel_bottom:.2f}" x2="{width - right}" '
+            f'y2="{panel_bottom:.2f}" class="axis"/>'
+        )
         for index, value in enumerate(item.values):
-            x = x_pos(index) + offsets[s_index]
+            x = x_pos(index)
             if value is None:
-                if item.name == "CPU FP64" and labels[index].endswith("T6"):
-                    y = y_pos(3600.0)
+                if item.name.startswith("CPU") and labels[index].endswith("T6"):
+                    y = y_pos(3600.0, panel_top)
                     parts.append(
                         f'<path d="M{x - 6:.2f},{y - 6:.2f} L{x + 6:.2f},{y + 6:.2f} '
                         f'M{x + 6:.2f},{y - 6:.2f} L{x - 6:.2f},{y + 6:.2f}" '
                         f'stroke="{item.color}" stroke-width="3"/>'
                     )
                     parts.append(
-                        f'<text x="{x + 10:.2f}" y="{y - 9:.2f}" class="note">timeout</text>'
+                        f'<text x="{x - 10:.2f}" y="{y - 9:.2f}" text-anchor="end" class="note">'
+                        "one censored correctness attempt</text>"
                     )
                 continue
-            y = y_pos(float(value))
+            minimum = item.minimums[index]
+            maximum = item.maximums[index]
+            y = y_pos(float(value), panel_top)
+            if minimum is not None and maximum is not None:
+                y_minimum = y_pos(float(minimum), panel_top)
+                y_maximum = y_pos(float(maximum), panel_top)
+                parts.append(
+                    f'<line x1="{x:.2f}" y1="{y_maximum:.2f}" x2="{x:.2f}" '
+                    f'y2="{y_minimum:.2f}" stroke="{item.color}" stroke-width="2"/>'
+                )
+                for cap_y in (y_minimum, y_maximum):
+                    parts.append(
+                        f'<line x1="{x - 5:.2f}" y1="{cap_y:.2f}" x2="{x + 5:.2f}" '
+                        f'y2="{cap_y:.2f}" stroke="{item.color}" stroke-width="2"/>'
+                    )
             if item.marker == "circle":
                 parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="6" fill="{item.color}"/>')
             elif item.marker == "square":
@@ -402,23 +520,22 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
                     f'<path d="M{x:.2f},{y - 7:.2f} L{x + 7:.2f},{y + 6:.2f} '
                     f'L{x - 7:.2f},{y + 6:.2f} Z" fill="{item.color}"/>'
                 )
+    bottom_axis = top + 2 * (panel_h + panel_gap) + panel_h
     for index, label in enumerate(labels):
         x = x_pos(index)
         escaped = html.escape(label)
         parts.append(
-            f'<text x="{x:.2f}" y="{top + plot_h + 25}" '
-            f'transform="rotate(38 {x:.2f} {top + plot_h + 25})" '
+            f'<text x="{x:.2f}" y="{bottom_axis + 24:.2f}" '
+            f'transform="rotate(38 {x:.2f} {bottom_axis + 24:.2f})" '
             f'text-anchor="start" class="small">{escaped}</text>'
         )
-    legend_x = 420
-    for index, item in enumerate(series):
-        x = legend_x + index * 170
-        parts.append(f'<rect x="{x}" y="52" width="13" height="13" fill="{item.color}"/>')
-        parts.append(f'<text x="{x + 20}" y="64" class="small">{item.name}</text>')
     parts.append(
-        '<text x="640" y="700" text-anchor="middle" class="note">'
-        "Timing boundaries differ by solver; the figure is descriptive and is not a "
-        "controlled speedup claim.</text>"
+        '<text x="28" y="445" transform="rotate(-90 28 445)" text-anchor="middle" class="small">'
+        "Seconds (log scale); median marker and measured min--max whisker</text>"
+    )
+    parts.append(
+        '<text x="640" y="946" text-anchor="middle" class="note">'
+        "Facets have distinct solver definitions. No cross-solver ratio or speedup is valid.</text>"
     )
     parts.append("</svg>")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -430,7 +547,7 @@ def _resource_svg(resources: list[dict[str, Any]], path: Path) -> None:
     t16 = lookup["case9241pegase:T16"]
     t24 = lookup["case9241pegase:T24"]
     t32 = lookup["case9241pegase:T32"]
-    width, height = 1280, 630
+    width, height = 1280, 720
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
         f'viewBox="0 0 {width} {height}">',
@@ -442,7 +559,7 @@ def _resource_svg(resources: list[dict[str, Any]], path: Path) -> None:
             '<text x="640" y="34" text-anchor="middle" class="title">'
             "Stage 8 fail-closed resource boundaries</text>"
         ),
-        '<text x="315" y="74" text-anchor="middle" class="sub">T16 unified-memory gate</text>',
+        '<text x="315" y="74" text-anchor="middle" class="sub">T16 live-availability gate</text>',
         (
             '<text x="960" y="74" text-anchor="middle" class="sub">'
             "T24/T32 signed-int32 CSR gate</text>"
@@ -450,25 +567,28 @@ def _resource_svg(resources: list[dict[str, Any]], path: Path) -> None:
     ]
     memory_values = [
         ("Projected", t16["projected_unified_gib"], "#E67E22"),
-        ("Host budget", t16["host_budget_gib"], "#2A6FBB"),
-        ("CUDA budget", t16["device_budget_gib"], "#4B5563"),
+        ("Live host 80%", t16["host_budget_gib"], "#2A6FBB"),
+        ("Live CUDA 80%", t16["device_budget_gib"], "#4B5563"),
+        ("Nominal pool 80%", t16["nominal_80pct_gib"], "#6B7280"),
     ]
     max_memory = 105.0
     for index, (label, value, color) in enumerate(memory_values):
-        y = 125 + index * 90
+        y = 112 + index * 67
         bar = 430 * float(value) / max_memory
         parts.append(f'<text x="95" y="{y + 23}" text-anchor="end" class="label">{label}</text>')
         parts.append(f'<rect x="110" y="{y}" width="430" height="36" fill="#EEF2F7"/>')
         parts.append(f'<rect x="110" y="{y}" width="{bar:.2f}" height="36" fill="{color}"/>')
         parts.append(f'<text x="{120 + bar:.2f}" y="{y + 24}" class="label">{value:.3f} GiB</text>')
     index_values = [
-        ("T24 planning nnz", int(t24["planning_nnz"]), "#E67E22"),
-        ("T32 planning nnz", int(t32["planning_nnz"]), "#B45309"),
-        ("signed-int32 max", INT32_MAX, "#2A6FBB"),
+        ("T24 planning", int(t24["planning_nnz"]), "#E67E22"),
+        ("T24 exact count", int(t24["exact_reconstructed_nnz"]), "#2A6FBB"),
+        ("T32 planning", int(t32["planning_nnz"]), "#B45309"),
+        ("T32 exact count", int(t32["exact_reconstructed_nnz"]), "#1D4ED8"),
+        ("signed-int32 max", INT32_MAX, "#4B5563"),
     ]
     max_nnz = 3.6e9
     for index, (label, value, color) in enumerate(index_values):
-        y = 125 + index * 90
+        y = 100 + index * 58
         bar = 430 * value / max_nnz
         parts.append(f'<text x="750" y="{y + 23}" text-anchor="end" class="label">{label}</text>')
         parts.append(f'<rect x="765" y="{y}" width="430" height="36" fill="#EEF2F7"/>')
@@ -479,22 +599,40 @@ def _resource_svg(resources: list[dict[str, Any]], path: Path) -> None:
     parts.extend(
         [
             (
-                '<text x="315" y="454" text-anchor="middle" class="note">'
-                "94.435 GiB exceeded both unchanged 80% live budgets.</text>"
+                '<text x="315" y="430" text-anchor="middle" class="note">'
+                "94.435 GiB is below the 97.352-GiB nominal reference</text>"
             ),
             (
-                '<text x="960" y="454" text-anchor="middle" class="note">'
-                "Both planning envelopes exceed 2,147,483,647.</text>"
+                '<text x="315" y="453" text-anchor="middle" class="note">'
+                "but above both observed live budgets (65.784/65.496 GiB).</text>"
             ),
-            '<rect x="72" y="500" width="1136" height="82" rx="8" fill="#F3F4F6"/>',
             (
-                '<text x="640" y="531" text-anchor="middle" class="sub">'
+                '<text x="960" y="430" text-anchor="middle" class="note">'
+                "T24 exact count is below int32; its conservative envelope is not.</text>"
+            ),
+            (
+                '<text x="960" y="453" text-anchor="middle" class="note">'
+                "T32 exceeds int32 under both the exact count and envelope.</text>"
+            ),
+            '<rect x="72" y="510" width="1136" height="142" rx="8" fill="#F3F4F6"/>',
+            (
+                '<text x="640" y="543" text-anchor="middle" class="sub">'
                 "Scientific interpretation</text>"
             ),
             (
-                '<text x="640" y="558" text-anchor="middle" class="label">'
-                "The guards stopped before LP construction or solver allocation; these are "
-                "measured safety outcomes, not OOM crashes.</text>"
+                '<text x="640" y="574" text-anchor="middle" class="label">'
+                "T16 records a conservative live-availability safety decision, not a "
+                "128-GB hardware ceiling.</text>"
+            ),
+            (
+                '<text x="640" y="602" text-anchor="middle" class="label">'
+                "T24 records a policy-envelope block, not a demonstrated materialized-index "
+                "overflow.</text>"
+            ),
+            (
+                '<text x="640" y="630" text-anchor="middle" class="label">'
+                "All three guards stopped before LP construction or solver allocation; none "
+                "is an OOM crash.</text>"
             ),
             "</svg>",
         ]
@@ -558,16 +696,18 @@ def generate() -> dict[str, Any]:
     allocated_rows = [row for row in benchmark_rows if row["full_lp_allocated"]]
     validated_gpu = [row for row in allocated_rows if row["gpu_status"] == "SUCCESS"]
     index: dict[str, Any] = {
-        "schema_version": 1,
+        "schema_version": 2,
         "stage": 9,
-        "generated_utc": "2026-08-05T00:00:00Z",
+        "generated_utc": "2026-08-07T00:00:00Z",
         "generator": "scripts/generate_stage_9_artifacts.py",
         "source_git": {
             "stage_9_base_commit": REPORT_BASE_COMMIT,
+            "stage_9_evidence_report_commit": REPORT_EVIDENCE_COMMIT,
             "branch": "main",
-            "self_reference_note": (
-                "The final Stage 9 commit is reported after commit creation; it cannot be "
-                "embedded in its own tree without changing that commit."
+            "repository": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF",
+            "report_release_tag": REPORT_RELEASE_TAG,
+            "release_tree": (
+                "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/" + REPORT_RELEASE_TAG
             ),
         },
         "paper": {
@@ -590,6 +730,7 @@ def generate() -> dict[str, Any]:
             "exact_reproduction": False,
             "paper_timing_reproduced": False,
             "local_speedup_claimed": False,
+            "taxonomy": "preregistered project-specific A--E decision framework",
         },
         "stage_decisions": check_rows,
         "stage_8": {
@@ -641,9 +782,24 @@ def generate() -> dict[str, Any]:
             "correctness_runs": 1,
             "warmup_runs": 1,
             "measured_repetitions": 5,
-            "host_memory_safety_fraction": 0.8,
-            "device_memory_safety_fraction": 0.8,
+            "host_memory_safety_fraction": MEMORY_SAFETY_FRACTION,
+            "device_memory_safety_fraction": MEMORY_SAFETY_FRACTION,
             "csr_index_max": INT32_MAX,
+        },
+        "resource_interpretation": {
+            "nominal_unified_memory_bytes": NOMINAL_UNIFIED_MEMORY_BYTES,
+            "nominal_80pct_gib": MEMORY_SAFETY_FRACTION * NOMINAL_UNIFIED_MEMORY_BYTES / GIB,
+            "t16": "blocked by observed live-availability budgets, not nominal capacity",
+            "t24": (
+                "blocked by conservative planning nnz although count-only exact reconstructed "
+                "nnz is below signed-int32 maximum"
+            ),
+            "t32": "count-only exact reconstructed nnz and planning nnz both exceed int32",
+        },
+        "timing_interpretation": {
+            "uncertainty": "median with measured minimum--maximum and IQR retained per track",
+            "t6_cpu": "one censored correctness attempt at the frozen time limit; not a median",
+            "cross_solver_speedup_valid": False,
         },
         "tables": [
             {"path": _relative(path), "sha256": _sha256(path)} for path in generated_paths[:5]

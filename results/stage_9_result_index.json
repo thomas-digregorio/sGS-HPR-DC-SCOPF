@@ -116,11 +116,11 @@
   "figures": [
     {
       "path": "results/plots/stage_9_solver_timings.svg",
-      "sha256": "17cd2f7ea4d5d2cbdd2a5ae6c817d1a4dabdf51aa251c9fb290af27800ffe6e2"
+      "sha256": "d138e904e16dc3f68ea63465f4e96b0e99b91df902be2441b467b67463d36b56"
     },
     {
       "path": "results/plots/stage_9_resource_boundaries.svg",
-      "sha256": "3cfddac7c1f9fe015c65df22f5ec71628bb8ae4e148696b3096b0fff61900dfc"
+      "sha256": "15e810d5b274b81884d4c22c52d912a765723895a8e64aea34e505361c110183"
     }
   ],
   "final_classification": {
@@ -129,7 +129,8 @@
     "exact_reproduction": false,
     "label": "structural reproduction",
     "local_speedup_claimed": false,
-    "paper_timing_reproduced": false
+    "paper_timing_reproduced": false,
+    "taxonomy": "preregistered project-specific A--E decision framework"
   },
   "frozen_gates": {
     "correctness_runs": 1,
@@ -144,7 +145,7 @@
     "scaled_objective_gap_max": 0.0002,
     "warmup_runs": 1
   },
-  "generated_utc": "2026-08-05T00:00:00Z",
+  "generated_utc": "2026-08-07T00:00:00Z",
   "generator": "scripts/generate_stage_9_artifacts.py",
   "paper": {
     "doi": "10.1109/TPWRS.2025.3635652",
@@ -156,11 +157,21 @@
     },
     "title": "An Efficient GPU-based Halpern Accelerating Algorithm for Large-scale DC Optimal Power Flow"
   },
-  "schema_version": 1,
+  "resource_interpretation": {
+    "nominal_80pct_gib": 97.35164489746094,
+    "nominal_unified_memory_bytes": 130663165952,
+    "t16": "blocked by observed live-availability budgets, not nominal capacity",
+    "t24": "blocked by conservative planning nnz although count-only exact reconstructed nnz is below signed-int32 maximum",
+    "t32": "count-only exact reconstructed nnz and planning nnz both exceed int32"
+  },
+  "schema_version": 2,
   "source_git": {
     "branch": "main",
-    "self_reference_note": "The final Stage 9 commit is reported after commit creation; it cannot be embedded in its own tree without changing that commit.",
-    "stage_9_base_commit": "c08c53b7ef5d2bde006728c76fb43fe621685e20"
+    "release_tree": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/stage9-report-v2",
+    "report_release_tag": "stage9-report-v2",
+    "repository": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF",
+    "stage_9_base_commit": "c08c53b7ef5d2bde006728c76fb43fe621685e20",
+    "stage_9_evidence_report_commit": "85007e9e752ea5e082bd0266cf43393fc8f3e7e2"
   },
   "stage": 9,
   "stage_10": {
@@ -297,7 +308,7 @@
     },
     {
       "path": "results/tables/stage_9_benchmarks.csv",
-      "sha256": "959549a7e67db09fea2ab71a98149bc3bf4eeca90e91f40362487a177792fa65"
+      "sha256": "dabdadad97a7a830e22be9da82279a0dee0f2c0824bf4c3ff3584180a4477d92"
     },
     {
       "path": "results/tables/stage_9_structural_reconciliation.csv",
@@ -305,11 +316,16 @@
     },
     {
       "path": "results/tables/stage_9_resource_boundaries.csv",
-      "sha256": "18c7b11bde1709f01ec972625ccdf8d72936467874bf507f1708e5ed3aaaf0ed"
+      "sha256": "b87c18143b3168aea33c8a191d136ae6ef439645dde301e41808850238d9dcdc"
     },
     {
       "path": "results/tables/stage_9_timing_decomposition.csv",
       "sha256": "a1bbec2e8a786a0f4ce6fbc60359a417507accb599bba3b1849c62cce290da00"
     }
-  ]
+  ],
+  "timing_interpretation": {
+    "cross_solver_speedup_valid": false,
+    "t6_cpu": "one censored correctness attempt at the frozen time limit; not a median",
+    "uncertainty": "median with measured minimum--maximum and IQR retained per track"
+  }
 }

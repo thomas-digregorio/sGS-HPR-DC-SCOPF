@@ -258,15 +258,23 @@ def run_checks() -> dict[str, Any]:
         and t16_resource.get("status") == "MEMORY_BLOCKED"
         and float(t16_resource["projected_unified_gib"])
         > min(float(t16_resource["host_budget_gib"]), float(t16_resource["device_budget_gib"]))
+        and float(t16_resource["projected_unified_gib"]) < float(t16_resource["nominal_80pct_gib"])
+        and t16_resource.get("block_reasons")
+        == "failed:within_host_safety_budget;failed:within_device_safety_budget"
         and int(t24_resource["planning_nnz"]) > generator.INT32_MAX
+        and int(t24_resource["exact_reconstructed_nnz"]) < generator.INT32_MAX
         and int(t32_resource["planning_nnz"]) > generator.INT32_MAX
+        and int(t32_resource["exact_reconstructed_nnz"]) > generator.INT32_MAX
         and t24_resource["status"] == t32_resource["status"] == "INDEX_BLOCKED"
     )
     _add(
         checks,
         "resource_boundaries",
         resource_valid,
-        "T16 memory-blocked; T24/T32 signed-int32-blocked before allocation",
+        (
+            "T16 live-budget-blocked below nominal 80%; T24 policy-envelope-blocked with "
+            "exact count below int32; T32 exact and envelope counts above int32"
+        ),
     )
 
     markdown = MARKDOWN_PATH.read_text(encoding="utf-8") if MARKDOWN_PATH.exists() else ""
@@ -283,6 +291,11 @@ def run_checks() -> dict[str, Any]:
             "T16",
             "2,531,600,260",
             "3,375,704,460",
+            "2,057,650,132",
+            "2,743,770,956",
+            "preregistered project-specific A--E",
+            "Code and data availability",
+            "one censored correctness attempt",
         ]
     )
     _add(
@@ -300,9 +313,13 @@ def run_checks() -> dict[str, Any]:
             r"\begin{abstract}",
             r"\appendices",
             r"\classresult",
-            r"\begin{thebibliography}{9}",
+            r"\begin{thebibliography}{99}",
             "CPU timeout",
             "Stage 10 remains locked",
+            "Independent Researcher",
+            "stage9-report-v2",
+            "0.206",
+            r"3.03\times10^{-16}",
         ]
     )
     _add(
