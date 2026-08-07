@@ -3,13 +3,11 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage{amsmath,amssymb,bm}
-\usepackage{booktabs,array,multirow}
+\usepackage{booktabs,array}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{pgfplots}
-\usepgfplotslibrary{groupplots}
 \usepackage{microtype}
-\usepackage{listings}
 \usepackage{url}
 \usepackage[hidelinks]{hyperref}
 
@@ -17,30 +15,18 @@
 \definecolor{reportblue}{HTML}{2A6FBB}
 \definecolor{reportorange}{HTML}{E67E22}
 \definecolor{reportgray}{HTML}{4B5563}
-\definecolor{reportlight}{HTML}{EEF2F7}
 \definecolor{reportred}{HTML}{B42318}
 
 \hypersetup{
   pdftitle={Evidence-Bounded Structural Reproduction of a GPU sGS-HPR DCOPF Solver},
   pdfauthor={Thomas DiGregorio},
-  pdfsubject={Stage 9 structural reproduction study},
+  pdfsubject={Independent structural reproduction of a GPU sGS-HPR DCOPF solver},
   pdfkeywords={DCOPF, sGS-HPR, GPU, DGX Spark, reproducibility}
 }
 
-\newcommand{\classresult}{\textbf{D -- Structural Reproduction}}
 \newcommand{\sgshpr}{sGS-HPR}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\norm}[1]{\left\lVert #1\right\rVert}
-\newcommand{\pathcode}[1]{\begingroup\urlstyle{tt}\url{#1}\endgroup}
-
-\lstset{
-  basicstyle=\ttfamily\scriptsize,
-  breaklines=true,
-  columns=fullflexible,
-  frame=single,
-  rulecolor=\color{reportlight},
-  showstringspaces=false
-}
 
 \title{Evidence-Bounded Structural Reproduction of a GPU sGS-HPR Solver
 for Large-Scale Multi-Period DC Optimal Power Flow}
@@ -54,24 +40,17 @@ report release are available at
 \maketitle
 
 \begin{abstract}
-We assess whether the mathematical and computational route of a published
-GPU symmetric Gauss--Seidel Halpern-accelerated proximal-reflection
-(\sgshpr{}) method for multi-period DC optimal power flow can be reconstructed
-and validated without the authors' instances or code. The canonical LP,
-paper-order updates, stopping and KKT maps, structural equality solve, FP64 CPU
-oracle, and resident NVIDIA DGX Spark GPU path were implemented and checked.
-A sign inconsistency in the printed rank-one inverse is corrected; the
-corrected solve has maximum relative error $3.03\times10^{-16}$, whereas the
-printed sign has median relative error 0.206. Public MATPOWER reconstructions
-match all 18 published row and variable dimensions but none of the nonzero
-counts. Eleven rows were allocated and GPU-validated; ten also passed the
-required CPU track. The remaining CPU attempt reached the frozen 3,600-s
-limit. Three later rows stopped before allocation: T16 exceeded observed live
-memory budgets despite fitting the nominal 80\% reference, T24 exceeded a
-conservative int32 planning envelope while its count-only nnz did not, and T32
-exceeded int32 under both measures. Under a preregistered project-specific
-taxonomy, the result is \classresult{}. No paper-time reproduction or local
-speedup is claimed.
+We independently reconstruct a published GPU symmetric Gauss--Seidel
+Halpern-accelerated proximal-reflection method for multi-period DC optimal
+power flow without the authors' code or instances. The canonical LP,
+iteration, stopping maps, structural equality solve, CPU oracle, and resident
+DGX Spark GPU implementation are validated. A sign inconsistency in the
+printed rank-one inverse is corrected: maximum relative error falls to
+$3.03\times10^{-16}$ from median error 0.206. Public MATPOWER models reproduce
+all 18 reported dimensions but none of the nonzero counts. The GPU validates
+11 allocated cases and the CPU 10; larger cases meet time, memory, or
+sparse-index limits. These results establish structural---not exact or
+performance---reproduction; no A100-equivalent speedup is claimed.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -84,48 +63,36 @@ Spark.
 
 Wang \emph{et al.} propose a GPU \sgshpr{} method for large-scale
 multi-period DC optimal power flow (DCOPF) and report results on an
-A100-SXM4-80GB GPU \cite{wang2026}. Reproducing that work requires more than
-running a related optimizer: the mathematical map, instance identity,
-implementation path, validation criteria, timing boundary, and hardware
-conditions must be separated. This study asks which of those layers can be
-recovered from the paper and public artifacts, and which conclusions remain
-unsupported.
+A100-SXM4-80GB GPU \cite{wang2026}. Reproduction requires separating the
+mathematical map, numerical instance, implementation, validation criteria,
+timer boundary, and hardware. This study asks which layers can be recovered
+from the paper and public artifacts.
 
-The project froze an A--E decision framework before final synthesis:
-A exact, B near-exact, C mathematical, D structural, and E partial. This is a
-project-specific evidence-resolution taxonomy, not an ACM artifact badge or a
-replacement for the standard repeatability/reproducibility/replicability
-terminology \cite{acm2020}. Structural reproduction means that the
-mathematical path, implementation structure, public-network scaling,
-validation, and resource behavior are reproduced while author-instance
-identity and controlled paper timing are not.
-
-The principal result is \classresult{}. The mathematics and an FP64 GPU
-implementation are validated, but the author instances are unavailable, all
-18 reconstructed sparse supports differ, and the frozen large-run campaign
-contains a required CPU timeout. A separately implemented validation checker
-records that the protocol and evidence are internally consistent; it does not
-convert the Stage 8 scientific decision from FAIL to PASS.
+The mathematical path and an FP64 GPU implementation are independently
+validated, including a correction to the structural equality solve. Public
+models reproduce the published dimensions but not the sparse supports, and
+the local hardware and timers differ from the source study. We therefore use
+\emph{structural reproduction} to mean that the algorithm, implementation
+structure, public-network scaling, and validation behavior are reproduced
+without claiming author-instance identity or controlled paper timing.
 
 The contributions are:
 \begin{itemize}
   \item a self-contained canonical DCOPF and \sgshpr{} implementation
   contract;
-  \item independent projection, residual, physical, spectral, direct-solve,
-  and CPU/GPU trajectory checks;
+  \item independent residual, physical, direct-solve, and CPU/GPU trajectory
+  checks;
   \item a formal correction and stable implementation of the structural
   equality inverse;
-  \item an 18-row structural ledger, an 11-row allocated benchmark record,
-  and repeated timing distributions;
-  \item fail-closed live-memory and sparse-index evidence with the planning
-  and count-only interpretations kept distinct; and
-  \item a public, versioned code/data release with machine-readable
-  provenance and regeneration instructions.
+  \item an 18-case structural ledger, an 11-case benchmark record, and
+  repeated timing distributions; and
+  \item live-memory and sparse-index boundary evidence with a public,
+  versioned code/data release.
 \end{itemize}
 
 The displayed source model has no outage or contingency index. This report
-therefore studies base-case multi-period DCOPF. N-1 SCOPF is new work and
-Stage 10 remains locked.
+therefore studies base-case multi-period DCOPF; N-1 contingency analysis is
+outside the scope of this study.
 
 \section{Methods}
 
@@ -256,9 +223,9 @@ inside the iteration loop.
 Every accepted candidate must meet normalized stopping blocks
 $\le5\times10^{-5}$, raw KKT $\le10^{-2}$, physical violation
 $\le10^{-2}$ MW/MWh, and scaled objective gap to HiGHS
-$\le2\times10^{-4}$. Stage 7--8 requires HiGHS, CPU FP64, and GPU FP64 unless
-a later continuation explicitly skips CPU without rewriting the original
-decision.
+$\le2\times10^{-4}$. An allocated benchmark is accepted only when HiGHS,
+CPU FP64, and GPU FP64 all satisfy their checks. Resource-only probes stop
+before solver allocation and do not modify this criterion.
 
 Each successful timing track has one correctness solve, one warm-up, and at
 least five measured solves. Relative range above 0.2 escalates the track to
@@ -270,36 +237,6 @@ are not interchangeable. The T6 CPU event is one censored correctness
 attempt, not a timing median.
 
 \section{Verification}
-
-\subsection{Staged validation map}
-
-\begin{table*}[t]
-\caption{Stage map and irreversible acceptance boundary.}
-\label{tab:stages}
-\centering
-\scriptsize
-\begin{tabular}{@{}clp{0.62\textwidth}c@{}}
-\toprule
-Stage & Scope & Principal evidence & Decision \\
-\midrule
-0 & Paper audit & identity, equations, ambiguities, unavailable artifacts & Pass \\
-1 & Generic LP & projections, residuals, toy LP oracles & Pass \\
-2 & DCOPF build & MATPOWER parsing, PTDF, dimensions, physical checks & Pass \\
-3 & CPU \sgshpr{} & paper-order fixed-$\sigma$ solver and trajectories & Pass \\
-4 & Structural solve & direct oracle, sign resolution, conditioning & Pass \\
-5 & Controls & reversible scaling, restart, adaptive $\sigma$ & Pass \\
-6 & DGX backend & resident FP64 path, ALG2, CPU/GPU parity, timing ledger & Pass \\
-7 & Benchmarks & six allocated small/medium public reconstructions & Pass \\
-8 & Large campaign & four passes, T6 CPU timeout, three resource classifications & \textbf{Fail} \\
-9 & Synthesis & frozen taxonomy, report, index, PDF, separate checker & D \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-Table~\ref{tab:stages} prevents a later aggregate score from erasing an
-earlier failed gate. Checker totals were 120/120 for Stages 0--7, 12/12 for
-the strict Stage 8 protocol, and 13/13 for the approved GPU-only continuation.
-Those totals verify evidence handling; the Stage 8 decision remains FAIL.
 
 \subsection{Structural equality correction}
 
@@ -390,34 +327,35 @@ are considered.
 \subsection{Allocated benchmarks}
 
 \begin{table*}[t]
-\caption{Allocated Stage 7--8 reconstructions. Times are local solver-core
+\caption{Allocated public-network reconstructions. Times are local solver-core
 medians after correctness and warm-up; measured dispersion is in Appendix
 \ref{app:timing}. A dash denotes no accepted timing sample.}
 \label{tab:benchmarks}
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.6pt}
-\begin{tabular}{@{}clrrrrrrl@{}}
+\begin{tabular}{@{}lrrrrrrl@{}}
 \toprule
-Stage & Reconstruction & $m$ & $n$ & nnz$(A)$ & HiGHS (s) & CPU (s) & GPU (s) & Result \\
+Reconstruction & $m$ & $n$ & nnz$(A)$ & HiGHS (s) & CPU (s) & GPU (s) & Result \\
 \midrule
-7 & case1354 T4  & 20,192  & 4,208   & 4,799,808   & 1.463   & 13.190   & 1.013   & Pass \\
-7 & case1354 T16 & 82,124  & 16,832  & 19,228,464  & 7.265   & 47.399   & 2.924   & Pass \\
-7 & case1354 T48 & 247,276 & 50,496  & 57,896,368  & 32.095  & 153.046  & 9.481   & Pass \\
-7 & case1354 T96 & 495,004 & 100,992 & 116,420,464 & 101.242 & 336.657  & 21.084  & Pass \\
-7 & case2868 T4  & 40,163  & 9,488   & 19,073,056  & 5.366   & 60.350   & 3.939   & Pass \\
-7 & case2868 T16 & 163,823 & 37,952  & 76,354,336  & 22.138  & 250.601  & 15.408  & Pass \\
-8 & case2868 T48 & 493,583 & 113,856 & 229,507,104 & 76.239  & 804.863  & 49.968  & Pass \\
-8 & case2868 T64 & 658,463 & 151,808 & 306,303,136 & 108.232 & 1,078.892& 68.383  & Pass \\
-8 & case2868 T96 & 988,223 & 227,712 & 460,334,496 & 163.593 & 1,621.905& 105.022 & Pass \\
-8 & case9241 T4  & 152,774 & 24,700  & 342,863,272 & 142.479 & 3,087.218& 193.632 & Pass \\
-8 & case9241 T6  & 230,376 & 37,050  & 514,308,838 & 963.957 & --       & 357.544 & \textbf{Fail} \\
+case1354 T4  & 20,192  & 4,208   & 4,799,808   & 1.463   & 13.190   & 1.013   & Pass \\
+case1354 T16 & 82,124  & 16,832  & 19,228,464  & 7.265   & 47.399   & 2.924   & Pass \\
+case1354 T48 & 247,276 & 50,496  & 57,896,368  & 32.095  & 153.046  & 9.481   & Pass \\
+case1354 T96 & 495,004 & 100,992 & 116,420,464 & 101.242 & 336.657  & 21.084  & Pass \\
+case2868 T4  & 40,163  & 9,488   & 19,073,056  & 5.366   & 60.350   & 3.939   & Pass \\
+case2868 T16 & 163,823 & 37,952  & 76,354,336  & 22.138  & 250.601  & 15.408  & Pass \\
+case2868 T48 & 493,583 & 113,856 & 229,507,104 & 76.239  & 804.863  & 49.968  & Pass \\
+case2868 T64 & 658,463 & 151,808 & 306,303,136 & 108.232 & 1,078.892& 68.383  & Pass \\
+case2868 T96 & 988,223 & 227,712 & 460,334,496 & 163.593 & 1,621.905& 105.022 & Pass \\
+case9241 T4  & 152,774 & 24,700  & 342,863,272 & 142.479 & 3,087.218& 193.632 & Pass \\
+case9241 T6  & 230,376 & 37,050  & 514,308,838 & 963.957 & --       & 357.544 & \textbf{Fail} \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
-The GPU completed and validated all 11 allocated rows; CPU completed 10. The
-T6 GPU result does not override the preregistered all-track requirement.
+The GPU completed and validated all 11 allocated rows; CPU completed 10.
+Because acceptance requires all three solvers, T6 remains a failed row despite
+its valid HiGHS and GPU results.
 
 \begin{figure*}[t]
 \centering
@@ -525,13 +463,13 @@ comparison.
 \subsection{Resource boundaries}
 
 DGX Spark has 128 GB LPDDR5x unified memory \cite{dgxspark}. The run-time
-system reported 130,663,165,952 bytes (121.690 GiB). The preregistered guard
-did not allocate against that nominal total. It required the projected host
+system reported 130,663,165,952 bytes (121.690 GiB). The safety guard did not
+allocate against that nominal total. It required the projected host
 assembly plus device plan to fit within both 80\% of observed host-available
 pages and 80\% of observed CUDA-free bytes.
 
 \begin{table*}[t]
-\caption{Interpretation of final Stage 8 preallocation outcomes.}
+\caption{Preallocation outcomes for the largest reconstructed case.}
 \label{tab:resources}
 \centering
 \scriptsize
@@ -616,7 +554,7 @@ snapshots, not per-solve high-water marks.
 
 \section{Discussion}
 
-\subsection{What was and was not reproduced}
+\subsection{Reproduction boundary}
 
 The canonical signs, variables, constraint families, all 18 $(m,n)$ pairs,
 update order, Halpern weights, tolerance, Ruiz/Pock--Chambolle preprocessing,
@@ -631,19 +569,12 @@ missing. Equation (55) and Table II imply $m_1=T+N_{ESS}$ while Appendix A
 prose implies $T(1+N_{ESS})$; the rank-one sign is inconsistent with the Schur
 complement; and the security-constrained label lacks an explicit outage model.
 
-\subsection{Classification and uncertainty}
-
-Class A is rejected because author artifacts, hardware, and exact outputs are
-unavailable. B is rejected because every nnz differs and timing is
-uncontrolled. C is achieved mathematically but understates the executed
-public-network scaling. E understates the validated solver and complete
-structural ledger. Under the frozen internal taxonomy, D is the narrowest
-defensible label.
+\subsection{Limitations and next steps}
 
 The major uncertainties are instance construction and external performance,
 not whether the local code can execute. Timing cannot disentangle algorithm,
 support, implementation, hardware, runtime, or stopwatch effects. The T6 CPU
-track is censored and gives no median. T16/T24/T32 give safe classifications,
+track is censored and gives no median. T16/T24/T32 give safe boundary decisions,
 not solve times. Memory APIs limit peak attribution. The adaptive policy is a
 pinned HPR-LP transfer rather than unpublished DCOPF author code.
 
@@ -657,14 +588,13 @@ correction to this result.
 
 \section{Conclusion}
 
-This study reconstructs and validates the paper's path from canonical DCOPF
-to a resident FP64 GPU \sgshpr{} solver. It records a quantitatively material
-rank-one sign error, separates stopping from full KKT validation, verifies
-CPU/GPU trajectories, retains repeated timing dispersion, and distinguishes
-three different preallocation outcomes. The evidence also contains a genuine
-required-track timeout and complete sparse-support mismatch. The result is
-therefore \classresult{}---stronger than a component demonstration and
-narrower than an exact, near-exact, or controlled performance reproduction.
+This study reconstructs the path from canonical DCOPF to a resident FP64 GPU
+\sgshpr{} solver and corrects a quantitatively material rank-one sign error.
+CPU/GPU trajectories and original-unit constraints agree across the accepted
+public cases, but every reconstructed sparse support differs from the source
+paper and one required CPU solve is censored at its time limit. The evidence
+therefore establishes structural reproduction, not author-instance identity
+or controlled performance reproduction.
 
 \appendices
 
@@ -708,8 +638,8 @@ Time & One-hour intervals; no timing-driven tuning after the contract freeze. \\
 The three canonical case-file SHA-256 values are
 \texttt{1b08b25a...b89} (1354),
 \texttt{2b30e894...861} (2868), and
-\texttt{593a58ec...5f3} (9241); complete values are in
-\pathcode{configs/benchmarks/stage_7_small_medium.json}.
+\texttt{593a58ec...5f3} (9241); complete values are included in the tagged
+release.
 
 \section{Preprocessing, Restart, Penalty, and Timing Definitions}
 \label{app:controls}
@@ -755,9 +685,8 @@ model/preconditioner/workspace preparation and include the iterative solve and
 scheduled residual work. CUDA initialization, model construction,
 preprocessing, first-run compilation, allocation, transfers, solver
 initialization, iteration, nested residuals, recovery, and complete runner
-wall time are separately named in
-\pathcode{results/tables/stage_9_timing_decomposition.csv}. Nested residual
-time is part of loop time and must not be added again.
+wall time are separately named in the released timing ledger. Nested residual
+time is part of loop time and is not added again.
 
 \section{Algebraic Stability and Conditioning}
 \label{app:algebra}
@@ -853,12 +782,8 @@ escalated to nine without deleting earlier samples.
 configurations, immutable raw evidence, generated tables/figures, the
 machine-readable index, and this PDF are available at
 \url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}. The report
-release is the Git tag \texttt{stage9-report-v3}; the benchmark-evidence
-source base is
-\texttt{c08c53b7ef5d2bde006728c76fb43fe621685e20}, and the first complete
-Stage 9 synthesis is
-\texttt{85007e9e752ea5e082bd0266cf43393fc8f3e7e2}. The public network source is
-MATPOWER 8.1, DOI 10.5281/zenodo.15871662 \cite{matpower}.
+release is the Git tag \texttt{reproduction-paper-v4}. The public network
+source is MATPOWER 8.1, DOI 10.5281/zenodo.15871662 \cite{matpower}.
 
 \textbf{Missing source information.} Exact reproduction would require the
 authors' modified cases, placements, profiles, reserve and ramp data, storage
@@ -866,27 +791,10 @@ parameters, matrix construction, PTDF policy, precision, control code, source
 revision, and timer definition. Unknown values were not guessed or fitted to
 published timings.
 
-\textbf{Machine-readable evidence.}
-\pathcode{results/stage_9_result_index.json} records paper identity,
-classification, stage decisions, environment, thresholds, evidence hashes,
-table/figure hashes, timing semantics, resource interpretations, and the
-Stage 10 lock. The complete structural ledger is
-\pathcode{results/tables/stage_9_structural_reconciliation.csv}; the benchmark
-and dispersion fields are in
-\pathcode{results/tables/stage_9_benchmarks.csv}.
-
-\textbf{Regeneration.} From the repository root:
-\begin{lstlisting}
-python scripts/generate_stage_9_artifacts.py
-python scripts/generate_stage_9_artifacts.py --check
-python scripts/check_stage_9.py --output results/raw/stage_9/stage_9_checks.json
-python -m pytest -q
-python -m ruff check .
-python -m ruff format --check .
-\end{lstlisting}
-The full command inventory is
-\pathcode{docs/regeneration_commands.md}. Report regeneration does not rerun
-accepted or failed DGX benchmark allocations.
+\textbf{Machine-readable evidence and regeneration.} The tagged release
+includes a machine-readable evidence index, structural and benchmark ledgers,
+timing summaries, and SHA-256 hashes. Regeneration and validation commands are
+documented in the repository and do not rerun DGX allocations.
 
 \begin{thebibliography}{99}
 
@@ -952,11 +860,6 @@ NVIDIA Corp., \textquotedblleft{}cuSPARSE library,\textquotedblright{} CUDA Tool
 \bibitem{dgxspark}
 NVIDIA Corp., \textquotedblleft{}DGX Spark User Guide: Hardware overview,\textquotedblright{} 2026.
 [Online]. Available: \url{https://docs.nvidia.com/dgx/dgx-spark/hardware.html}
-
-\bibitem{acm2020}
-Association for Computing Machinery, \textquotedblleft{}Artifact review and badging---current,\textquotedblright{}
-version 1.1, 2020. [Online]. Available:
-\url{https://www.acm.org/publications/policies/artifact-review-and-badging-current}
 
 \end{thebibliography}
 

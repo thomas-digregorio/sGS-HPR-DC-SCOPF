@@ -167,8 +167,8 @@
   "schema_version": 2,
   "source_git": {
     "branch": "main",
-    "release_tree": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/stage9-report-v3",
-    "report_release_tag": "stage9-report-v3",
+    "release_tree": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/reproduction-paper-v4",
+    "report_release_tag": "reproduction-paper-v4",
     "repository": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF",
     "stage_9_base_commit": "c08c53b7ef5d2bde006728c76fb43fe621685e20",
     "stage_9_evidence_report_commit": "85007e9e752ea5e082bd0266cf43393fc8f3e7e2"

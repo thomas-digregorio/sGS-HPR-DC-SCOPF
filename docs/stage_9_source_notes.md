@@ -12,11 +12,11 @@ reproduced and independently checked. The authors' numerical instances,
 sparse supports, code, A100 hardware, and timing boundary were not available,
 and the frozen large-scale campaign retained an honest Stage 8 failure.
 
-The A--E classification is a preregistered project-specific vocabulary, not
-the ACM artifact-badging taxonomy. The revised paper identifies its author as
-an independent researcher, provides a code-and-data statement, cites the
-external numerical software and public-case sources, and is released as Git
-tag `stage9-report-v3`.
+The internal A--E decision history remains in supporting evidence but is not
+part of the concise reader-facing narrative. The revised paper identifies its
+author as an independent researcher, provides a code-and-data statement, cites
+the external numerical software and public-case sources, and is released as
+Git tag `reproduction-paper-v4`.
 
 ## Claim map
 

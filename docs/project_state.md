@@ -22,9 +22,9 @@ compiled PDF. Every quantitative report table is generated from preserved
 machine-readable evidence and indexed by SHA-256.
 
 The revised scientific-paper release is identified by Git tag
-`stage9-report-v3`. Its report text distinguishes the internal A--E evidence
-scale from standard artifact-badging taxonomies and includes full methods,
-uncertainty, source citations, authorship, and code/data availability.
+`reproduction-paper-v4`. Its concise reader-facing text states the
+structural-reproduction boundary directly, while internal stage and decision
+history remains in the supporting evidence.
 
 The Stage 9 dashboard source, rendered-output tests, and social preview pass
 locally. Production publication is pending recovery of the persisted private

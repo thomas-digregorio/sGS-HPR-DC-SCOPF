@@ -29,7 +29,7 @@ REQUIRED_SUBJECTS = [
     "Source paper summary",
     "Mathematical formulation",
     "Implemented algorithm",
-    "Derivation verification",
+    "Structural equality correction",
     "Missing source information",
     "Experimental environment",
     "CPU implementation",
@@ -39,9 +39,9 @@ REQUIRED_SUBJECTS = [
     "Timing decomposition",
     "Memory and resource results",
     "Differences from the paper",
-    "Exact-reproduction classification",
-    "Limitations",
-    "Recommended next research step",
+    "Reproduction boundary",
+    "Limitations and next step",
+    "Code and data availability",
 ]
 
 
@@ -95,19 +95,22 @@ def _report_subjects_valid(markdown: str) -> tuple[bool, list[str]]:
         "Source paper summary": ["source paper summary"],
         "Mathematical formulation": ["mathematical formulation"],
         "Implemented algorithm": ["implemented algorithm"],
-        "Derivation verification": ["derivation verification"],
+        "Structural equality correction": ["structural equality correction"],
         "Missing source information": ["missing source information"],
         "Experimental environment": ["experimental environment"],
         "CPU implementation": ["cpu implementation"],
         "GPU implementation": ["gpu implementation"],
-        "Validation design and results": ["validation design and results"],
+        "Validation design and results": [
+            "validation design",
+            "numerical and trajectory validation",
+        ],
         "Benchmark results": ["benchmark results"],
         "Timing decomposition": ["timing decomposition"],
         "Memory and resource results": ["memory and resource results"],
-        "Differences from the paper": ["differences from the paper"],
-        "Exact-reproduction classification": ["exact-reproduction classification"],
-        "Limitations": ["limitations"],
-        "Recommended next research step": ["recommended next research step"],
+        "Differences from the paper": ["reproduction boundary"],
+        "Reproduction boundary": ["reproduction boundary"],
+        "Limitations and next step": ["limitations and next step"],
+        "Code and data availability": ["code and data availability"],
     }
     missing = [
         subject
@@ -284,16 +287,15 @@ def run_checks() -> dict[str, Any]:
     report_semantics_valid = all(
         phrase in markdown
         for phrase in [
-            "Final classification: D - structural reproduction",
-            "Stage 8: FAIL",
+            "structural reproduction",
+            "FAIL: CPU time limit",
             "No speedup is claimed",
-            "Stage 10: LOCKED",
+            "N-1 contingency analysis",
             "T16",
             "2,531,600,260",
             "3,375,704,460",
             "2,057,650,132",
             "2,743,770,956",
-            "preregistered project-specific A--E",
             "Code and data availability",
             "one censored correctness attempt",
         ]
@@ -312,12 +314,11 @@ def run_checks() -> dict[str, Any]:
             r"\documentclass[10pt,journal]{IEEEtran}",
             r"\begin{abstract}",
             r"\appendices",
-            r"\classresult",
             r"\begin{thebibliography}{99}",
-            "CPU timeout",
-            "Stage 10 remains locked",
+            "structural reproduction",
+            "N-1 contingency analysis",
             "Independent Researcher",
-            "stage9-report-v3",
+            "reproduction-paper-v4",
             "0.206",
             r"3.03\times10^{-16}",
         ]
@@ -357,8 +358,6 @@ def run_checks() -> dict[str, Any]:
     project_state = (PROJECT_ROOT / "docs/project_state.md").read_text(encoding="utf-8")
     stage10_valid = (
         stage10 == {"n_minus_1_work_performed": False, "status": "LOCKED"}
-        and "Stage 10" in markdown
-        and "Stage 10" in tex
         and "Stage 10" in project_state
         and "locked" in project_state.casefold()
     )

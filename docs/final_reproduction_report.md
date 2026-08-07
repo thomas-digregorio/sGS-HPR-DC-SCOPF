@@ -8,35 +8,19 @@ Independent Researcher
 
 Revised August 7, 2026
 
-> **Final classification: D - structural reproduction**
->
-> The A--E classification is a preregistered project-specific A--E
-> evidence-resolution framework, not an ACM artifact badge. Stages 0--7:
-> PASS. Stage 8: FAIL under its frozen all-track acceptance contract. Stage 8
-> protocol checker: PASS, 12/12. GPU-only sequence 6--8 continuation:
-> COMPLETE_WITH_RESOURCE_LIMITS; checker PASS, 13/13. Stage 10: LOCKED.
-
 ## Abstract
 
-This study assesses whether the mathematical and computational route of a
-published GPU symmetric Gauss--Seidel Halpern-accelerated
-proximal-reflection (sGS-HPR) method for multi-period DC optimal power flow can
-be reconstructed and validated without the authors' instances or code. The
-canonical LP, paper-order updates, stopping and KKT maps, structural equality
-solve, FP64 CPU oracle, and resident NVIDIA DGX Spark GPU path were
-implemented and checked. A sign inconsistency in the printed rank-one inverse
-is corrected: the corrected solve has maximum relative error
-3.03e-16, while the printed sign has median relative error 0.206.
-
-Public MATPOWER reconstructions match all 18 published row and variable
-dimensions but none of the sparse nonzero counts. Eleven rows were allocated
-and GPU-validated; ten also passed the required CPU track. The remaining CPU
-attempt reached the frozen 3,600-second limit. Three later rows stopped before
-allocation. T16 exceeded observed live memory budgets despite fitting the
-nominal 80 percent reference. T24 exceeded a conservative int32 planning
-envelope while its count-only nnz did not. T32 exceeded int32 under both
-measures. The final result is **D - structural reproduction**. No paper-time
-reproduction or local speedup is claimed.
+We independently reconstruct a published GPU symmetric Gauss--Seidel
+Halpern-accelerated proximal-reflection method for multi-period DC optimal
+power flow without the authors' code or instances. The canonical LP,
+iteration, stopping maps, structural equality solve, CPU oracle, and resident
+DGX Spark GPU implementation are validated. A sign inconsistency in the
+printed rank-one inverse is corrected: maximum relative error falls to
+3.03e-16 from median error 0.206. Public MATPOWER models reproduce all 18
+reported dimensions but none of the nonzero counts. The GPU validates 11
+allocated cases and the CPU 10; larger cases meet time, memory, or
+sparse-index limits. These results establish structural---not exact or
+performance---reproduction; no A100-equivalent speedup is claimed.
 
 **Keywords:** DC optimal power flow, Halpern iteration, proximal reflection,
 symmetric Gauss--Seidel, GPU sparse linear algebra, reproducibility, DGX
@@ -46,29 +30,31 @@ Spark.
 
 The source paper proposes a GPU sGS-HPR method for large-scale multi-period
 DC optimal power flow and reports results on an A100-SXM4-80GB. Reproduction
-therefore requires more than running a related optimizer. Mathematical
-identity, instance identity, implementation path, validation criteria, timer
-boundary, and hardware conditions must be kept separate.
+requires separating the mathematical map, numerical instance,
+implementation, validation criteria, timer boundary, and hardware.
 
-The project froze five internal outcomes before final synthesis:
+The mathematical path and an FP64 GPU implementation are independently
+validated, including a correction to the structural equality solve. Public
+models reproduce the published dimensions but not the sparse supports, and
+the local hardware and timers differ from the source study. Here,
+**structural reproduction** means that the algorithm, implementation
+structure, public-network scaling, and validation behavior are reproduced
+without claiming author-instance identity or controlled paper timing.
 
-| Code | Meaning | Decision |
-|---|---|---|
-| A | Exact reproduction | Rejected: author artifacts, hardware, and exact outputs unavailable |
-| B | Near-exact reproduction | Rejected: every reconstructed nnz differs and timing is uncontrolled |
-| C | Mathematical reproduction | Achieved, but understates the executed public-network scaling |
-| D | Structural reproduction | Selected |
-| E | Partial reproduction | Rejected: understates the validated solver and complete structural ledger |
+The main contributions are:
 
-This internal scale complements, but does not replace, standard ACM
-repeatability, reproducibility, and replicability terminology. The principal
-result is D because the mathematical path, implementation structure,
-public-network scaling, validation, and resource behavior were reproduced,
-while author-instance identity and controlled paper timing were not.
+- a self-contained DCOPF and sGS-HPR implementation contract with independent
+  residual, physical, direct-solve, and CPU/GPU trajectory checks;
+- a formal correction and stable implementation of the structural equality
+  inverse;
+- an 18-case structural ledger, an 11-case benchmark record, and repeated
+  timing distributions; and
+- live-memory and sparse-index boundary evidence with a public, versioned
+  code/data release.
 
-The displayed source model has no outage or contingency index. This report
-therefore studies base-case multi-period DCOPF. N-1 SCOPF is new work and
-Stage 10 remains locked.
+The displayed source model has no outage or contingency index. The study is
+therefore limited to base-case multi-period DCOPF; N-1 contingency analysis is
+outside its scope.
 
 ## 2. Methods
 
@@ -154,7 +140,7 @@ The FP64 solver follows the paper order:
 1. Compute the box-projected primal point.
 2. Solve the first equality multiplier system using the old inequality
    multiplier.
-3. Project the inequality multiplier using the spectral proximal step.
+3. Apply the spectral proximal step to the inequality multiplier.
 4. Solve the second equality system using the new inequality multiplier.
 5. Reflect the proximal point.
 6. Apply the fixed-anchor Halpern update.
@@ -216,29 +202,7 @@ not a median.
 
 ## 3. Verification
 
-### 3.1 Staged validation map
-
-The workflow separated mathematical correctness from scale claims so that a
-late resource boundary could not retroactively erase an earlier successful
-check.
-
-| Stage | Question answered | Evidence outcome |
-|---:|---|---|
-| 0 | Is the source paper pinned and its scope explicit? | PASS |
-| 1 | Do the generic LP residuals, projections, and Halpern updates work? | PASS |
-| 2 | Does the public DCOPF construction pass independent physical checks? | PASS |
-| 3 | Does the readable CPU paper-order solver reproduce the reference path? | PASS |
-| 4 | Is the structured equality solve algebraically and numerically correct? | PASS after correcting the printed sign |
-| 5 | Are scaling, restart, and adaptive-penalty controls reproducible? | PASS |
-| 6 | Does the resident FP64 GPU implementation match the CPU trajectory? | PASS |
-| 7 | Do six public-network rows satisfy every frozen acceptance gate? | PASS |
-| 8 | Does the strict large-scale campaign reproduce the requested envelope? | **FAIL**; four rows passed, T6 CPU timed out, later rows stopped at resource gates |
-| 9 | Are the complete results auditable and correctly classified? | Checker PASS, scientific classification D |
-
-Stage 8: FAIL. The checker confirms protocol integrity; it does not convert
-that scientific result into a pass. Stage 10: LOCKED.
-
-### 3.2 Derivation verification
+### 3.1 Structural equality correction
 
 Let the structural equality block be
 
@@ -266,18 +230,14 @@ fixtures, direct-solve relative error remained at most $1.53\times10^{-14}$
 and equality residual at most $2.93\times10^{-14}$, including a condition
 number of 25,616.42.
 
-### 3.3 Validation design and results
+### 3.2 Numerical and trajectory validation
 
 Validation combined four independent views: normalized paper stopping blocks,
 the complete KKT map, original-unit power-system limits, and objective
 agreement with HiGHS. GPU trajectory parity was checked against the CPU oracle
-at iterations 1, 10, and 100 before any performance campaign. Every accepted
+at iterations 1, 10, and 100 before timing measurements. Every accepted
 row passed all frozen thresholds; no threshold was relaxed after observing a
 result.
-
-The Stage 9 independent checker verifies 17 artifact, provenance, semantic,
-and lock conditions. It is deliberately separate from the generator that
-produces the tables and figures.
 
 ## 4. Results
 
@@ -305,7 +265,7 @@ because its single CPU correctness solve reached the 3,600-second limit.
 The reconstructed support is systematically smaller than the dimensions
 reported in the paper: about 33.0--33.2% lower for case1354pegase,
 36.6--36.7% lower for case2868rte through T16, 22.4--22.5% lower for its
-larger Stage 8 rows, and 8.14% lower for case9241pegase. These are structural
+larger horizons, and 8.14% lower for case9241pegase. These are structural
 reconstructions, not replicas of the unavailable author matrices.
 
 ### 4.2 Timing decomposition and uncertainty
@@ -351,7 +311,7 @@ structurally present in the reconstruction. None of these rows was allocated.
 
 ## 5. Discussion
 
-### 5.1 Differences from the paper
+### 5.1 Reproduction boundary
 
 The source paper used private modified cases, unpublished sparse supports and
 profiles, an NVIDIA A100-SXM4-80GB system, and a timing boundary that cannot be
@@ -360,21 +320,7 @@ public MATPOWER 8.1 cases, explicit synthetic intertemporal fixtures, a DGX
 Spark GB10, and separately disclosed solver clocks. The local CPU oracle is a
 validation reference, not the paper's Gurobi workstation baseline.
 
-### 5.2 Exact-reproduction classification
-
-Final classification: D - structural reproduction. The preregistered
-project-specific A--E scale is an internal evidence vocabulary, not the ACM
-artifact-badging taxonomy. Category D means that the mathematical structure,
-algorithm order, independently checked implementation, and public-network
-scale behavior were reproduced while the exact author instances, source code,
-hardware, and timing protocol were not.
-
-The strongest positive result is a checked FP64 CPU/GPU implementation whose
-accepted public rows satisfy mathematical and physical gates. The strongest
-negative result is equally important: the strict Stage 8 campaign does not
-support an exact numerical or performance reproduction claim.
-
-### 5.3 Limitations
+### 5.2 Limitations and next step
 
 - Public cases do not reveal the authors' placements, profiles, ramp and
   reserve inputs, storage parameters, or matrix sparsity choices.
@@ -386,25 +332,21 @@ support an exact numerical or performance reproduction claim.
 - GPU parity and residual acceptance establish implementation consistency,
   not uniqueness of the optimizer or identity with the authors' trajectories.
 
-### 5.4 Recommended next research step
-
 The next scientific step is to obtain an authorized author-instance package
 or a fully specified equivalent fixture, freeze its exact sparse structure and
 timer boundary, and run a controlled A100-versus-GB10 study. That would test
 whether the remaining gap is attributable to inputs, implementation, hardware,
-or timing definitions. N-1 contingency work belongs to Stage 10 and remains
-outside this report.
+or timing definitions.
 
 ## 6. Conclusion
 
-This project reproduces the paper's core LP structure, paper-order
-Halpern-reflection method, corrected structural equality solve, preprocessing
-and control policy, and an independently validated resident FP64 GPU path. Ten
-allocated public-network rows passed all frozen gates. One larger allocated
-row failed only because the CPU correctness attempt reached its time limit;
-three subsequent rows were stopped before allocation by explicit safety
-policies. The evidence supports a transparent structural reproduction and no
-stronger claim.
+This study reconstructs the path from canonical DCOPF to a resident FP64 GPU
+sGS-HPR solver and corrects a quantitatively material rank-one sign error.
+CPU/GPU trajectories and original-unit constraints agree across the accepted
+public cases, but every reconstructed sparse support differs from the source
+paper and one required CPU solve is censored at its time limit. The evidence
+therefore establishes structural reproduction, not author-instance identity
+or controlled performance reproduction.
 
 ## Appendix A. Deterministic public-instance recipe
 
@@ -424,20 +366,18 @@ complete vectors b and c are normalized. The adaptive penalty uses the
 primal-to-dual movement ratio with bounded multiplicative updates; restart
 tests the normalized fixed-point progress and resets the Halpern anchor only
 when the sourced HPR-LP condition is met. Exact formulas, guards, and defaults
-are frozen in the Stage 5 configuration and machine-readable index.
+are included in the tagged release.
 
 ## Appendix C. Code and data availability
 
 Source, public case snapshots, configurations, immutable raw evidence,
 generated tables and figures, and the paper sources are available at
 https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF. The revised report is
-identified by release tag stage9-report-v3. The benchmark evidence source base
-is c08c53b7ef5d2bde006728c76fb43fe621685e20; the first complete Stage 9
-synthesis is 85007e9e752ea5e082bd0266cf43393fc8f3e7e2.
+identified by release tag reproduction-paper-v4.
 
-Regeneration is deterministic and does not rerun DGX allocations. The command
-inventory is in docs/regeneration_commands.md; the machine-readable claim and
-hash index is results/stage_9_result_index.json.
+Regeneration is deterministic and does not rerun DGX allocations. The tagged
+release includes the command inventory, machine-readable evidence index,
+structural and benchmark ledgers, timing summaries, and SHA-256 hashes.
 
 ## Appendix D. Missing source information
 
@@ -460,4 +400,3 @@ Unknown values were neither guessed nor fitted to published timings.
 10. R. Okuta et al., “CuPy: A NumPy-compatible library for NVIDIA GPU calculations,” NeurIPS Workshop on Machine Learning Systems, 2017.
 11. NVIDIA, cuSPARSE Library Documentation, 2026.
 12. NVIDIA, DGX Spark User Guide: Hardware Overview, 2026.
-13. ACM, Artifact Review and Badging, version 1.1, 2020.

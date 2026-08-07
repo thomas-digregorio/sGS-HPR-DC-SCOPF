@@ -61,9 +61,10 @@
 
 ## Reporting and audit
 
-- [x] Final classification uses the frozen A--E vocabulary.
-- [x] The A--E vocabulary is explicitly labeled preregistered and
-  project-specific rather than a standard ACM taxonomy.
+- [x] The reader-facing paper states the structural-reproduction boundary
+  directly without exposing internal stage or A--E workflow vocabulary.
+- [x] Internal decision history remains preserved in machine-readable
+  evidence rather than repeated in the scientific narrative.
 - [x] The paper includes author affiliation/contact, scholarly references,
   exact solver settings, deterministic instance construction, timing
   boundaries, limitations, and code/data availability.
@@ -76,9 +77,9 @@
 - [x] Stage 9 independent checker passes, 17/17.
 - [x] Full Python tests and Ruff pass: 308 tests passed, one local
   CuPy-version skip, and 112 files satisfy Ruff formatting.
-- [x] Revised seven-page PDF is rendered page-by-page and visually inspected with no
+- [x] Revised PDF is rendered page-by-page and visually inspected with no
   clipped or overfull content.
-- [x] Revised report is committed, pushed, and tagged `stage9-report-v3`; the
+- [x] Revised report is committed, pushed, and tagged `reproduction-paper-v4`; the
   completion handoff records the resulting commit because a commit cannot
   embed its own identifier.
 
