@@ -116,7 +116,7 @@
   "figures": [
     {
       "path": "results/plots/stage_9_solver_timings.svg",
-      "sha256": "d138e904e16dc3f68ea63465f4e96b0e99b91df902be2441b467b67463d36b56"
+      "sha256": "6379de71dd7f23403ac0e5efbc10f3e4b6dca2eaa4661e3a2fa325acd07b67cc"
     },
     {
       "path": "results/plots/stage_9_resource_boundaries.svg",
@@ -167,8 +167,8 @@
   "schema_version": 2,
   "source_git": {
     "branch": "main",
-    "release_tree": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/stage9-report-v2",
-    "report_release_tag": "stage9-report-v2",
+    "release_tree": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF/tree/stage9-report-v3",
+    "report_release_tag": "stage9-report-v3",
     "repository": "https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF",
     "stage_9_base_commit": "c08c53b7ef5d2bde006728c76fb43fe621685e20",
     "stage_9_evidence_report_commit": "85007e9e752ea5e082bd0266cf43393fc8f3e7e2"

@@ -73,7 +73,7 @@
       "passed": true
     },
     {
-      "detail": "bytes=650450, page_objects=7, sha256=bd6a3f756e856816ae42cf10cab7d0a471497fe5a9bd25334fb368b1005da8f9",
+      "detail": "bytes=642859, page_objects=7, sha256=30287a05b14905318491341c1089a6705f2f1dd3c3c9b84963e36d13489d197d",
       "name": "compiled_pdf",
       "passed": true
     },

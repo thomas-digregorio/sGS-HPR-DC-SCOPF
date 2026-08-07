@@ -44,7 +44,7 @@ NOMINAL_UNIFIED_MEMORY_BYTES = 130_663_165_952
 MEMORY_SAFETY_FRACTION = 0.8
 REPORT_BASE_COMMIT = "c08c53b7ef5d2bde006728c76fb43fe621685e20"
 REPORT_EVIDENCE_COMMIT = "85007e9e752ea5e082bd0266cf43393fc8f3e7e2"
-REPORT_RELEASE_TAG = "stage9-report-v2"
+REPORT_RELEASE_TAG = "stage9-report-v3"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -428,19 +428,38 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
             [row["gpu_maximum_seconds"] for row in executed],
         ),
     ]
-    width, height = 1280, 960
-    left, right, top, bottom = 108, 42, 82, 138
-    panel_gap = 24
+    width, height = 1280, 720
+    left, right, top, bottom = 108, 42, 112, 142
     plot_w = width - left - right
-    panel_h = (height - top - bottom - 2 * panel_gap) / 3
-    y_min, y_max = 0.8, 4200.0
+    plot_h = height - top - bottom
+    y_min, y_max = 0.8, 5000.0
+    method_offsets = [-13.0, 0.0, 13.0]
 
-    def x_pos(index: int) -> float:
-        return left + (index + 0.5) * plot_w / len(labels)
+    def x_pos(index: int, offset: float = 0.0) -> float:
+        return left + (index + 0.5) * plot_w / len(labels) + offset
 
-    def y_pos(value: float, panel_top: float) -> float:
+    def y_pos(value: float) -> float:
         fraction = (math.log10(value) - math.log10(y_min)) / (math.log10(y_max) - math.log10(y_min))
-        return panel_top + panel_h * (1.0 - fraction)
+        return top + plot_h * (1.0 - fraction)
+
+    def add_marker(
+        output: list[str], marker: str, x: float, y: float, color: str, *, legend: bool = False
+    ) -> None:
+        radius = 6.0 if not legend else 5.5
+        if marker == "circle":
+            output.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="{radius}" fill="{color}"/>')
+        elif marker == "square":
+            output.append(
+                f'<rect x="{x - radius:.2f}" y="{y - radius:.2f}" '
+                f'width="{2 * radius:.2f}" height="{2 * radius:.2f}" fill="#FFFFFF" '
+                f'stroke="{color}" stroke-width="2.5"/>'
+            )
+        else:
+            output.append(
+                f'<path d="M{x:.2f},{y - radius - 1:.2f} '
+                f"L{x + radius + 1:.2f},{y + radius:.2f} "
+                f'L{x - radius - 1:.2f},{y + radius:.2f} Z" fill="{color}"/>'
+            )
 
     parts = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
@@ -451,54 +470,55 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
         ".title{font-size:24px;font-weight:700}.note{font-size:14px;fill:#4B5563}</style>",
         (
             '<text x="640" y="33" text-anchor="middle" class="title">'
-            "Local solver-core timing by solver boundary</text>"
+            "Local solver-core time: three-method overlay</text>"
         ),
     ]
+    legend_x = [330.0, 610.0, 880.0]
+    for item, x in zip(series, legend_x, strict=True):
+        add_marker(parts, item.marker, x, 74.0, item.color, legend=True)
+        parts.append(f'<text x="{x + 15:.2f}" y="79" class="small">{html.escape(item.name)}</text>')
+    for tick in [1, 10, 100, 1000, 3600]:
+        y = y_pos(float(tick))
+        parts.append(
+            f'<line x1="{left}" y1="{y:.2f}" x2="{width - right}" y2="{y:.2f}" class="grid"/>'
+        )
+        parts.append(
+            f'<text x="{left - 14}" y="{y + 5:.2f}" text-anchor="end" class="small">{tick:g}</text>'
+        )
+    for split_after in (3, 8):
+        split_x = left + (split_after + 1) * plot_w / len(labels)
+        parts.append(
+            f'<line x1="{split_x:.2f}" y1="{top}" x2="{split_x:.2f}" '
+            f'y2="{top + plot_h:.2f}" stroke="#CBD5E1" stroke-width="1" '
+            'stroke-dasharray="5 5"/>'
+        )
+    parts.append(f'<line x1="{left}" y1="{top}" x2="{left}" y2="{top + plot_h:.2f}" class="axis"/>')
+    parts.append(
+        f'<line x1="{left}" y1="{top + plot_h:.2f}" x2="{width - right}" '
+        f'y2="{top + plot_h:.2f}" class="axis"/>'
+    )
     for s_index, item in enumerate(series):
-        panel_top = top + s_index * (panel_h + panel_gap)
-        panel_bottom = panel_top + panel_h
-        parts.append(
-            f'<text x="{left + 8}" y="{panel_top + 22:.2f}" class="small" '
-            f'font-weight="700">{item.name}</text>'
-        )
-        for tick in [1, 10, 100, 1000, 3600]:
-            y = y_pos(float(tick), panel_top)
-            parts.append(
-                f'<line x1="{left}" y1="{y:.2f}" x2="{width - right}" y2="{y:.2f}" class="grid"/>'
-            )
-            parts.append(
-                f'<text x="{left - 14}" y="{y + 5:.2f}" text-anchor="end" '
-                f'class="small">{tick:g}</text>'
-            )
-        parts.append(
-            f'<line x1="{left}" y1="{panel_top:.2f}" x2="{left}" '
-            f'y2="{panel_bottom:.2f}" class="axis"/>'
-        )
-        parts.append(
-            f'<line x1="{left}" y1="{panel_bottom:.2f}" x2="{width - right}" '
-            f'y2="{panel_bottom:.2f}" class="axis"/>'
-        )
         for index, value in enumerate(item.values):
-            x = x_pos(index)
+            x = x_pos(index, method_offsets[s_index])
             if value is None:
                 if item.name.startswith("CPU") and labels[index].endswith("T6"):
-                    y = y_pos(3600.0, panel_top)
+                    y = y_pos(3600.0)
                     parts.append(
                         f'<path d="M{x - 6:.2f},{y - 6:.2f} L{x + 6:.2f},{y + 6:.2f} '
                         f'M{x + 6:.2f},{y - 6:.2f} L{x - 6:.2f},{y + 6:.2f}" '
-                        f'stroke="{item.color}" stroke-width="3"/>'
+                        'stroke="#B42318" stroke-width="3"/>'
                     )
                     parts.append(
                         f'<text x="{x - 10:.2f}" y="{y - 9:.2f}" text-anchor="end" class="note">'
-                        "one censored correctness attempt</text>"
+                        "CPU T6 censored at limit</text>"
                     )
                 continue
             minimum = item.minimums[index]
             maximum = item.maximums[index]
-            y = y_pos(float(value), panel_top)
+            y = y_pos(float(value))
             if minimum is not None and maximum is not None:
-                y_minimum = y_pos(float(minimum), panel_top)
-                y_maximum = y_pos(float(maximum), panel_top)
+                y_minimum = y_pos(float(minimum))
+                y_maximum = y_pos(float(maximum))
                 parts.append(
                     f'<line x1="{x:.2f}" y1="{y_maximum:.2f}" x2="{x:.2f}" '
                     f'y2="{y_minimum:.2f}" stroke="{item.color}" stroke-width="2"/>'
@@ -508,19 +528,8 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
                         f'<line x1="{x - 5:.2f}" y1="{cap_y:.2f}" x2="{x + 5:.2f}" '
                         f'y2="{cap_y:.2f}" stroke="{item.color}" stroke-width="2"/>'
                     )
-            if item.marker == "circle":
-                parts.append(f'<circle cx="{x:.2f}" cy="{y:.2f}" r="6" fill="{item.color}"/>')
-            elif item.marker == "square":
-                parts.append(
-                    f'<rect x="{x - 6:.2f}" y="{y - 6:.2f}" width="12" '
-                    f'height="12" fill="{item.color}"/>'
-                )
-            else:
-                parts.append(
-                    f'<path d="M{x:.2f},{y - 7:.2f} L{x + 7:.2f},{y + 6:.2f} '
-                    f'L{x - 7:.2f},{y + 6:.2f} Z" fill="{item.color}"/>'
-                )
-    bottom_axis = top + 2 * (panel_h + panel_gap) + panel_h
+            add_marker(parts, item.marker, x, y, item.color)
+    bottom_axis = top + plot_h
     for index, label in enumerate(labels):
         x = x_pos(index)
         escaped = html.escape(label)
@@ -530,12 +539,13 @@ def _solver_timing_svg(rows: list[dict[str, Any]], path: Path) -> None:
             f'text-anchor="start" class="small">{escaped}</text>'
         )
     parts.append(
-        '<text x="28" y="445" transform="rotate(-90 28 445)" text-anchor="middle" class="small">'
+        '<text x="28" y="345" transform="rotate(-90 28 345)" text-anchor="middle" class="small">'
         "Seconds (log scale); median marker and measured min--max whisker</text>"
     )
     parts.append(
-        '<text x="640" y="946" text-anchor="middle" class="note">'
-        "Facets have distinct solver definitions. No cross-solver ratio or speedup is valid.</text>"
+        '<text x="640" y="705" text-anchor="middle" class="note">'
+        "Shared log scale; solver boundaries differ. "
+        "No cross-solver ratio or speedup is valid.</text>"
     )
     parts.append("</svg>")
     path.parent.mkdir(parents=True, exist_ok=True)

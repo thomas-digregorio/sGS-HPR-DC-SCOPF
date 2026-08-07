@@ -67,8 +67,9 @@
 - [x] The paper includes author affiliation/contact, scholarly references,
   exact solver settings, deterministic instance construction, timing
   boundaries, limitations, and code/data availability.
-- [x] Solver timing is faceted by boundary and reports median, minimum,
-  maximum, IQR, standard deviation, repeat count, and T6 censoring semantics.
+- [x] Solver timing uses one shared logarithmic axis with distinct marker
+  shapes and horizontal method offsets; it reports median, minimum, maximum,
+  IQR, standard deviation, repeat count, and T6 censoring semantics.
 - [x] Machine-readable result index includes evidence hashes.
 - [x] Every final table has a regeneration command.
 - [x] LaTeX source and archival Markdown report agree on material conclusions.
@@ -77,7 +78,7 @@
   CuPy-version skip, and 112 files satisfy Ruff formatting.
 - [x] Revised seven-page PDF is rendered page-by-page and visually inspected with no
   clipped or overfull content.
-- [x] Revised report is committed, pushed, and tagged `stage9-report-v2`; the
+- [x] Revised report is committed, pushed, and tagged `stage9-report-v3`; the
   completion handoff records the resulting commit because a commit cannot
   embed its own identifier.
 

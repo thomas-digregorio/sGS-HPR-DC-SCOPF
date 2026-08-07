@@ -16,7 +16,7 @@ The A--E classification is a preregistered project-specific vocabulary, not
 the ACM artifact-badging taxonomy. The revised paper identifies its author as
 an independent researcher, provides a code-and-data statement, cites the
 external numerical software and public-case sources, and is released as Git
-tag `stage9-report-v2`.
+tag `stage9-report-v3`.
 
 ## Claim map
 
@@ -44,9 +44,12 @@ tag `stage9-report-v2`.
   time vary across allocated Stage 7--8 reconstructions?
 - Data: medians after a correctness run and warm-up, with five measured
   repeats unless the frozen variability rule escalated the track to nine.
-- Encoding: three solver facets, case/horizon on x, seconds on logarithmic y,
-  median markers with observed minimum--maximum whiskers; T6 CPU is one
-  censored correctness attempt at 3,600 seconds rather than a median.
+- Encoding: one shared logarithmic y-axis, case/horizon on x, and a small
+  horizontal offset for each method within every reconstruction. Circles,
+  open squares, and triangles distinguish HiGHS, CPU FP64, and GPU FP64
+  without relying on color alone. Markers are medians with observed
+  minimum--maximum whiskers; T6 CPU is one censored correctness attempt at
+  3,600 seconds rather than a median.
 - Required caveat: boundaries differ by solver and are not a controlled
   paper-speedup comparison.
 

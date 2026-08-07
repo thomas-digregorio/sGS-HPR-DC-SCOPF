@@ -310,10 +310,13 @@ reconstructions, not replicas of the unavailable author matrices.
 
 ### 4.2 Timing decomposition and uncertainty
 
-The timing figure is faceted by solver because each clock covers a different
-boundary. Markers show medians; whiskers show the observed minimum and maximum.
-The CSV also retains IQR, standard deviation, and repeat count. Representative
-median [minimum, maximum] values in seconds are:
+The timing figure overlays all three methods on one shared logarithmic axis,
+using distinct marker shapes and small horizontal offsets within each
+reconstruction. The shared scale makes magnitude and scaling patterns visible,
+but each clock still covers a different solver boundary. Markers show medians;
+whiskers show the observed minimum and maximum. The CSV also retains IQR,
+standard deviation, and repeat count. Representative median [minimum, maximum]
+values in seconds are:
 
 | Network / horizon | HiGHS | CPU FP64 | GPU FP64 |
 |---|---:|---:|---:|
@@ -428,7 +431,7 @@ are frozen in the Stage 5 configuration and machine-readable index.
 Source, public case snapshots, configurations, immutable raw evidence,
 generated tables and figures, and the paper sources are available at
 https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF. The revised report is
-identified by release tag stage9-report-v2. The benchmark evidence source base
+identified by release tag stage9-report-v3. The benchmark evidence source base
 is c08c53b7ef5d2bde006728c76fb43fe621685e20; the first complete Stage 9
 synthesis is 85007e9e752ea5e082bd0266cf43393fc8f3e7e2.
 

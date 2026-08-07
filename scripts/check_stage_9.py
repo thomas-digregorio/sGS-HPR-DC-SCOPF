@@ -317,7 +317,7 @@ def run_checks() -> dict[str, Any]:
             "CPU timeout",
             "Stage 10 remains locked",
             "Independent Researcher",
-            "stage9-report-v2",
+            "stage9-report-v3",
             "0.206",
             r"3.03\times10^{-16}",
         ]

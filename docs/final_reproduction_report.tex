@@ -422,44 +422,48 @@ T6 GPU result does not override the preregistered all-track requirement.
 \begin{figure*}[t]
 \centering
 \begin{tikzpicture}
-\begin{groupplot}[
-  group style={group size=1 by 3,vertical sep=0.85cm},
-  width=0.96\textwidth,
-  height=0.14\textwidth,
+\begin{axis}[
+  width=0.97\textwidth,
+  height=0.37\textwidth,
   ymode=log,
   ymin=0.8,
   ymax=5000,
+  xmin=-0.5,
+  xmax=10.5,
   xtick={0,...,10},
+  xticklabels={1354/T4,1354/T16,1354/T48,1354/T96,2868/T4,2868/T16,
+  2868/T48,2868/T64,2868/T96,9241/T4,9241/T6},
+  xticklabel style={rotate=35,anchor=east,font=\scriptsize},
   ymajorgrids=true,
   grid style={draw=gray!25},
-  ylabel={s (log)},
-  title style={font=\small},
+  ylabel={Seconds (log scale)},
   tick label style={font=\scriptsize},
+  legend style={at={(0.5,1.02)},anchor=south,legend columns=3,
+    draw=none,font=\scriptsize,/tikz/every even column/.append style={column sep=0.65cm}},
+  clip=false,
 ]
-\nextgroupplot[title={HiGHS dual simplex: median with measured min--max},
-  xticklabels=\empty]
 \addplot+[only marks,mark=*,mark size=2.4pt,reportblue,fill=reportblue,
   error bars/.cd,y dir=both,y explicit]
 table[x=x,y=y,
   y error plus expr={\thisrow{max}-\thisrow{y}},
   y error minus expr={\thisrow{y}-\thisrow{min}}] {
 x y min max
-0 1.463376 1.453187 1.480123
-1 7.265354 7.257811 7.283389
-2 32.095478 31.248877 39.289736
-3 101.242296 100.939751 101.612720
-4 5.366418 5.340087 5.374710
-5 22.138002 22.081919 22.420685
-6 76.238645 70.891817 77.948837
-7 108.232479 107.335302 108.458428
-8 163.592526 158.374185 164.829042
-9 142.478889 141.936895 142.810381
-10 963.956952 960.496580 966.055722
+-0.16 1.463376 1.453187 1.480123
+0.84 7.265354 7.257811 7.283389
+1.84 32.095478 31.248877 39.289736
+2.84 101.242296 100.939751 101.612720
+3.84 5.366418 5.340087 5.374710
+4.84 22.138002 22.081919 22.420685
+5.84 76.238645 70.891817 77.948837
+6.84 108.232479 107.335302 108.458428
+7.84 163.592526 158.374185 164.829042
+8.84 142.478889 141.936895 142.810381
+9.84 963.956952 960.496580 966.055722
 };
+\addlegendentry{HiGHS dual simplex}
 
-\nextgroupplot[title={CPU FP64 \sgshpr{}: median with measured min--max;
-T6 is one censored correctness attempt},xticklabels=\empty]
-\addplot+[only marks,mark=square*,mark size=2.4pt,reportgray,fill=reportgray,
+\addplot+[only marks,mark=square*,mark size=2.4pt,reportgray,
+  mark options={fill=white,draw=reportgray},
   error bars/.cd,y dir=both,y explicit]
 table[x=x,y=y,
   y error plus expr={\thisrow{max}-\thisrow{y}},
@@ -476,46 +480,47 @@ x y min max
 8 1621.905045 1594.075813 1634.230247
 9 3087.217721 3070.084596 3096.832156
 };
+\addlegendentry{CPU FP64 \sgshpr{}}
 \addplot[only marks,mark=x,mark size=4pt,reportred,very thick]
 coordinates {(10,3600.092739)};
 \node[font=\scriptsize,anchor=east] at (axis cs:9.85,3600.092739)
-{censored at limit};
+{CPU T6 censored at limit};
 
-\nextgroupplot[title={GPU FP64 \sgshpr{}: median with measured min--max},
-  xticklabels={1354/T4,1354/T16,1354/T48,1354/T96,2868/T4,2868/T16,
-  2868/T48,2868/T64,2868/T96,9241/T4,9241/T6},
-  xticklabel style={rotate=35,anchor=east,font=\scriptsize}]
 \addplot+[only marks,mark=triangle*,mark size=2.4pt,reportorange,fill=reportorange,
   error bars/.cd,y dir=both,y explicit]
 table[x=x,y=y,
   y error plus expr={\thisrow{max}-\thisrow{y}},
   y error minus expr={\thisrow{y}-\thisrow{min}}] {
 x y min max
-0 1.013252 0.995221 1.091844
-1 2.924268 2.885473 2.996055
-2 9.480950 9.476246 9.531049
-3 21.084461 20.946986 21.380443
-4 3.938934 3.845813 3.959032
-5 15.408042 15.393926 15.413484
-6 49.968351 49.926691 49.998495
-7 68.383103 68.291624 68.391998
-8 105.022444 105.000819 105.174273
-9 193.631896 193.603076 193.741143
-10 357.543837 357.461910 357.751183
+0.16 1.013252 0.995221 1.091844
+1.16 2.924268 2.885473 2.996055
+2.16 9.480950 9.476246 9.531049
+3.16 21.084461 20.946986 21.380443
+4.16 3.938934 3.845813 3.959032
+5.16 15.408042 15.393926 15.413484
+6.16 49.968351 49.926691 49.998495
+7.16 68.383103 68.291624 68.391998
+8.16 105.022444 105.000819 105.174273
+9.16 193.631896 193.603076 193.741143
+10.16 357.543837 357.461910 357.751183
 };
-\end{groupplot}
+\addlegendentry{GPU FP64 \sgshpr{}}
+\end{axis}
 \end{tikzpicture}
-\caption{Faceted local timing evidence. Each panel has a distinct solver
-definition; whiskers span measured minima and maxima. The plot supports
-within-track repeatability inspection only. Cross-solver ratios and speedups
-are not valid because the solver boundaries and algorithms differ.}
+\caption{Combined local timing evidence on one shared logarithmic axis. Each
+method is horizontally offset within a reconstruction; markers are medians and
+whiskers span measured minima and maxima. CPU T6 is one censored correctness
+attempt. The overlay aids visual comparison but does not establish a speedup
+because solver boundaries and algorithms differ.}
 \label{fig:timings}
 \end{figure*}
 
-No speedup is claimed from Fig.~\ref{fig:timings}. The elevated CPU maxima on
-several nine-repeat tracks show why a median alone is insufficient. The five
-GPU samples are tightly clustered on the large rows, but this is local
-repeatability evidence, not an A100 comparison.
+No speedup is claimed from Fig.~\ref{fig:timings}. The shared-axis overlay makes
+the magnitude and scaling patterns visible without making the clocks
+commensurate. The elevated CPU maxima on several nine-repeat tracks show why a
+median alone is insufficient. The five GPU samples are tightly clustered on
+the large rows, but this is local repeatability evidence, not an A100
+comparison.
 
 \subsection{Resource boundaries}
 
@@ -848,7 +853,7 @@ escalated to nine without deleting earlier samples.
 configurations, immutable raw evidence, generated tables/figures, the
 machine-readable index, and this PDF are available at
 \url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}. The report
-release is the Git tag \texttt{stage9-report-v2}; the benchmark-evidence
+release is the Git tag \texttt{stage9-report-v3}; the benchmark-evidence
 source base is
 \texttt{c08c53b7ef5d2bde006728c76fb43fe621685e20}, and the first complete
 Stage 9 synthesis is

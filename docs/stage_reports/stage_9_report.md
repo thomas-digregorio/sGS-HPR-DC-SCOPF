@@ -18,9 +18,9 @@ contains all 16 workflow-required subjects. Deterministic scripts generate the
 supporting CSV tables, SVG figures, evidence hashes, and machine-readable
 result index directly from preserved Stage 0--8 JSON.
 
-The revised release `stage9-report-v2` adds a self-contained stage map and
+The revised release `stage9-report-v3` adds a self-contained stage map and
 instance recipe, exact solver and timing definitions, a formal equality-solve
-lemma with conditioning evidence, solver-faceted uncertainty displays,
+lemma with conditioning evidence, a shared-axis three-method timing display,
 scholarly references, authorship/contact, and a code/data availability
 statement.
 
