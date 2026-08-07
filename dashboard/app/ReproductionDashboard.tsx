@@ -127,6 +127,7 @@ export function ReproductionDashboard() {
           <span className="brand-name">HPR reproduction lab</span>
         </div>
         <nav className="topnav" aria-label="Dashboard sections">
+          <a href="/paper">Interactive paper</a>
           <a href="#roadmap">Roadmap</a>
           <a href="#evidence">Evidence</a>
           <a href="#learn">Learn</a>
@@ -152,6 +153,9 @@ export function ReproductionDashboard() {
               >
                 Why this workflow?
               </button>
+              <a className="secondary-action dashboard-paper-link" href="/paper">
+                Read and annotate the paper
+              </a>
             </div>
           </div>
           <aside className="hero-aside" aria-label="Current stage progress">

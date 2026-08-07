@@ -2,13 +2,15 @@ import assert from "node:assert/strict";
 import { access, readFile } from "node:fs/promises";
 import test from "node:test";
 
-async function render() {
+async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
 
   return worker.fetch(
-    new Request("http://localhost/", { headers: { accept: "text/html" } }),
+    new Request(new URL(pathname, "http://localhost/"), {
+      headers: { accept: "text/html" },
+    }),
     { ASSETS: { fetch: async () => new Response("Not found", { status: 404 }) } },
     { waitUntil() {}, passThroughOnException() {} },
   );
@@ -105,4 +107,41 @@ test("starter preview is removed and product metadata is present", async () => {
   assert.match(layout, /\/og-stage9\.png/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton|site-creator-vinext-starter/);
   assert.doesNotMatch(layout, /Starter Project|codex-preview/);
+});
+
+test("server-renders the interactive scientific paper", async () => {
+  const response = await render("/paper");
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") ?? "", /^text\/html\b/i);
+
+  const html = await response.text();
+  const renderedText = html.replaceAll("<!-- -->", "");
+  assert.match(html, /<title>Interactive paper/i);
+  assert.match(renderedText, /Read · highlight · revise/);
+  assert.match(html, /Select any passage/);
+  assert.match(html, /Copy for Codex/);
+  assert.match(html, /Download Markdown/);
+  assert.match(html, /Loading notes/);
+  assert.match(html, /Structural equality correction/);
+  assert.match(html, /No speedup is claimed/);
+  assert.match(html, /class="katex"/);
+  assert.match(html, /reproduction-paper-v4/);
+  assert.doesNotMatch(html, /APPROVE STAGE|Stage 10 LOCKED/);
+});
+
+test("annotation persistence is bound to D1 and ships a migration", async () => {
+  const [hosting, schema, route, migration] = await Promise.all([
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/annotations/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0000_brown_cassandra_nova.sql", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(hosting, /"d1"\s*:\s*"DB"/);
+  assert.match(schema, /paper_annotations/);
+  assert.match(route, /ownerKey/);
+  assert.match(route, /x-paper-session/);
+  assert.match(route, /export async function (GET|POST|PATCH|DELETE)/);
+  assert.match(migration, /CREATE TABLE `paper_annotations`/);
+  assert.match(migration, /idx_paper_annotations_owner_document_created/);
 });

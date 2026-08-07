@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 const title = "HPR Reproduction Control Room";
 const description =
-  "Stage 9 scientific report and evidence dashboard for the structural reproduction of the GPU-based sGS-HPR DCOPF paper on NVIDIA DGX Spark.";
+  "Evidence dashboard and interactive annotated paper for the structural reproduction of the GPU-based sGS-HPR DCOPF method on NVIDIA DGX Spark.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
