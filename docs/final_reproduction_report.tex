@@ -9,7 +9,6 @@
 \usepackage{pgfplots}
 \usepackage{microtype}
 \usepackage{url}
-\usepackage{placeins}
 \usepackage[hidelinks]{hyperref}
 
 \pgfplotsset{compat=1.18}
@@ -28,6 +27,18 @@
 \newcommand{\sgshpr}{sGS-HPR}
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+
+% Compact, still-readable IEEE spacing for the report's dense result set.
+\setlength{\textfloatsep}{7pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+\setlength{\dbltextfloatsep}{7pt plus 2pt minus 2pt}
+\setlength{\dblfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\abovedisplayskip}{5pt plus 1pt minus 2pt}
+\setlength{\belowdisplayskip}{5pt plus 1pt minus 2pt}
+\setlength{\abovedisplayshortskip}{3pt plus 1pt}
+\setlength{\belowdisplayshortskip}{3pt plus 1pt}
+\setlength{\jot}{2pt}
 
 \title{Evidence-Bounded Structural Reproduction of a GPU sGS-HPR Solver
 for Large-Scale Multi-Period DC Optimal Power Flow}
@@ -211,6 +222,7 @@ decision rules applied to all tracks.
 \label{tab:protocol}
 \centering
 \scriptsize
+\renewcommand{\arraystretch}{0.95}
 \begin{tabular}{@{}p{0.28\columnwidth}p{0.64\columnwidth}@{}}
 \toprule
 Element & Frozen design \\
@@ -311,6 +323,7 @@ objectives, and recovered physical states.
 \label{tab:gates}
 \centering
 \scriptsize
+\renewcommand{\arraystretch}{0.92}
 \begin{tabular}{@{}lrrc@{}}
 \toprule
 Gate & Threshold & Maximum & Result \\
@@ -336,45 +349,114 @@ public models reproduce the dimension algebra but not the author sparse
 supports. Paper/local timing ratios are invalid before hardware differences
 are considered.
 
-\subsection{Allocated benchmarks}
+\subsection{Structural-solve accuracy}
 
-\begin{table*}[t]
-\caption{Allocated public-network reconstructions. Times are local solver-core
-medians after correctness and warm-up; measured dispersion is in Appendix
-\ref{app:timing}. A dash denotes no accepted timing sample.}
+The corrected reduced inverse was compared with direct FP64 solves across
+seven fixtures spanning one to 48 equality rows and condition numbers up to
+25,616. Table~\ref{tab:conditioning} reports errors in the original
+coordinates. The largest normalized residual is $2.93\times10^{-14}$; the
+largest componentwise error is $4.42\times10^{-9}$.
+
+\begin{table}[!t]
+\caption{Structural-solve accuracy against the direct FP64 oracle; entries are
+maximum errors over tested right-hand sides.}
+\label{tab:conditioning}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Fixture & Rows & $\kappa_2$ & Rel. error & Norm. residual \\
+\midrule
+No storage, T1 & 1 & 1.00 & $2.22\mathrm{e}{-16}$ & $1.67\mathrm{e}{-16}$ \\
+No storage, T17 & 17 & 1.00 & 0 & 0 \\
+Ideal storage, T1 & 2 & 86.01 & $2.18\mathrm{e}{-16}$ &
+$6.66\mathrm{e}{-16}$ \\
+One storage, T2 & 3 & 3.58 & $3.03\mathrm{e}{-16}$ &
+$3.21\mathrm{e}{-16}$ \\
+Extreme efficiency, T32 & 33 & 25,616 & $3.00\mathrm{e}{-15}$ &
+$2.93\mathrm{e}{-14}$ \\
+Heterogeneous, T5 & 9 & 548.59 & $1.15\mathrm{e}{-15}$ &
+$1.05\mathrm{e}{-15}$ \\
+Many ideal, T16 & 48 & 292.03 & $1.53\mathrm{e}{-14}$ &
+$6.44\mathrm{e}{-15}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Benchmark results}
+
+\begin{table}[!t]
+\caption{Allocated public-network reconstructions.}
 \label{tab:benchmarks}
 \centering
 \scriptsize
-\setlength{\tabcolsep}{3.6pt}
-\begin{tabular}{@{}lrrrrrrl@{}}
+\setlength{\tabcolsep}{2.4pt}
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{@{}lrrrl@{}}
 \toprule
-Reconstruction & $m$ & $n$ & nnz$(A)$ & HiGHS (s) & CPU (s) & GPU (s) & Result \\
+Reconstruction & $m$ & $n$ & nnz$(A)$ & Result \\
 \midrule
-case1354 T4  & 20,192  & 4,208   & 4,799,808   & 1.463   & 13.190   & 1.013   & Pass \\
-case1354 T16 & 82,124  & 16,832  & 19,228,464  & 7.265   & 47.399   & 2.924   & Pass \\
-case1354 T48 & 247,276 & 50,496  & 57,896,368  & 32.095  & 153.046  & 9.481   & Pass \\
-case1354 T96 & 495,004 & 100,992 & 116,420,464 & 101.242 & 336.657  & 21.084  & Pass \\
-case2868 T4  & 40,163  & 9,488   & 19,073,056  & 5.366   & 60.350   & 3.939   & Pass \\
-case2868 T16 & 163,823 & 37,952  & 76,354,336  & 22.138  & 250.601  & 15.408  & Pass \\
-case2868 T48 & 493,583 & 113,856 & 229,507,104 & 76.239  & 804.863  & 49.968  & Pass \\
-case2868 T64 & 658,463 & 151,808 & 306,303,136 & 108.232 & 1,078.892& 68.383  & Pass \\
-case2868 T96 & 988,223 & 227,712 & 460,334,496 & 163.593 & 1,621.905& 105.022 & Pass \\
-case9241 T4  & 152,774 & 24,700  & 342,863,272 & 142.479 & 3,087.218& 193.632 & Pass \\
-case9241 T6  & 230,376 & 37,050  & 514,308,838 & 963.957 & --       & 357.544 & \textbf{Fail} \\
+case1354 T4  & 20,192  & 4,208   & 4,799,808   & Pass \\
+case1354 T16 & 82,124  & 16,832  & 19,228,464  & Pass \\
+case1354 T48 & 247,276 & 50,496  & 57,896,368  & Pass \\
+case1354 T96 & 495,004 & 100,992 & 116,420,464 & Pass \\
+case2868 T4  & 40,163  & 9,488   & 19,073,056  & Pass \\
+case2868 T16 & 163,823 & 37,952  & 76,354,336  & Pass \\
+case2868 T48 & 493,583 & 113,856 & 229,507,104 & Pass \\
+case2868 T64 & 658,463 & 151,808 & 306,303,136 & Pass \\
+case2868 T96 & 988,223 & 227,712 & 460,334,496 & Pass \\
+case9241 T4  & 152,774 & 24,700  & 342,863,272 & Pass \\
+case9241 T6  & 230,376 & 37,050  & 514,308,838 & \textbf{Fail} \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 The GPU completed and validated all 11 allocated rows; CPU completed 10.
 Because acceptance requires all three solvers, T6 remains a failed row despite
 its valid HiGHS and GPU results.
 
-\begin{figure*}[t]
+\subsection{Timing decomposition and dispersion}
+
+Five repeats were planned; high-variability tracks were escalated to nine
+without deleting earlier samples. Table~\ref{tab:dispersion} reports medians
+and IQRs, while Fig.~\ref{fig:timings} overlays medians and full measured
+ranges on one shared logarithmic axis.
+
+\begin{table}[!t]
+\caption{Median seconds (IQR). CPU T6 is one censored correctness attempt,
+not a median.}
+\label{tab:dispersion}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.1pt}
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Case & HiGHS & CPU FP64 & GPU FP64 \\
+\midrule
+1354/T4  & 1.463 (.015) & 13.190 (1.571) & 1.013 (.010) \\
+1354/T16 & 7.265 (.005) & 47.399 (3.906) & 2.924 (.097) \\
+1354/T48 & 32.095 (1.651) & 153.046 (1.680) & 9.481 (.048) \\
+1354/T96 & 101.242 (.176) & 336.657 (7.599) & 21.084 (.274) \\
+2868/T4  & 5.366 (.026) & 60.350 (.253) & 3.939 (.098) \\
+2868/T16 & 22.138 (.219) & 250.601 (1.645) & 15.408 (.006) \\
+2868/T48 & 76.239 (4.411) & 804.863 (3.749) & 49.968 (.027) \\
+2868/T64 & 108.232 (.598) & 1,078.892 (38.376) & 68.383 (.008) \\
+2868/T96 & 163.593 (1.394) & 1,621.905 (19.300) & 105.022 (.032) \\
+9241/T4  & 142.479 (.376) & 3,087.218 (13.350) & 193.632 (.120) \\
+9241/T6  & 963.957 (1.420) & 3,600.093$^\ast$ & 357.544 (.206) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure*}[!t]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
   width=0.97\textwidth,
-  height=0.37\textwidth,
+  height=0.33\textwidth,
   ymode=log,
   ymin=0.8,
   ymax=5000,
@@ -472,6 +554,9 @@ median alone is insufficient. The five GPU samples are tightly clustered on
 the large rows, but this is local repeatability evidence, not an A100
 comparison.
 
+The released CSV retains minima, maxima, standard deviations, repeat counts,
+and every underlying sample.
+
 \subsection{Resource boundaries}
 
 DGX Spark has 128 GB LPDDR5x unified memory \cite{dgxspark}. The run-time
@@ -480,34 +565,28 @@ allocate against that nominal total. It required the projected host
 assembly plus device plan to fit within both 80\% of observed host-available
 pages and 80\% of observed CUDA-free bytes.
 
-\begin{table*}[t]
+\begin{table}[!t]
 \caption{Preallocation outcomes for the largest reconstructed case.}
 \label{tab:resources}
 \centering
 \scriptsize
-\begin{tabular}{@{}llrrrrp{0.28\textwidth}@{}}
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.92}
+\begin{tabular}{@{}llrp{0.48\columnwidth}@{}}
 \toprule
-Row & Status & Projected GiB & Planning nnz & Exact count nnz & int32 max &
-Interpretation \\
+Row & Stop & Projected GiB & Boundary evidence \\
 \midrule
-T16 & memory blocked & 94.435 & 1,687,613,820 & 1,371,647,068 &
-2,147,483,647 & Above live budgets 65.784/65.496 GiB, but below the
-97.352-GiB nominal 80\% reference. \\
-T24 & index blocked & 141.663 & 2,531,600,260 & 2,057,650,132 &
-2,147,483,647 & Conservative planning envelope exceeds int32; count-only
-reconstructed nnz remains below it. \\
-T32 & index blocked & 188.897 & 3,375,704,460 & 2,743,770,956 &
-2,147,483,647 & Both planning envelope and count-only reconstructed nnz exceed
-int32. \\
+T16 & Memory & 94.435 & Live budgets are 65.784/65.496 GiB. \\
+T24 & Index & 141.663 & Plan 2.532B $>$ int32; exact 2.058B $<$ int32. \\
+T32 & Index & 188.897 & Plan 3.376B and exact 2.744B $>$ int32. \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
 
 The maximum cumulative process-lifetime host high-water mark was 95.375 GiB
 at T6; it is not an isolated solve peak. CUDA memory observations are
 snapshots, not per-solve high-water marks.
 
-\FloatBarrier
 \section{Discussion}
 
 \subsection{Reproduction boundary}
@@ -557,11 +636,12 @@ or controlled performance reproduction.
 \section{Deterministic Public-Instance Construction}
 \label{app:recipe}
 
-\begin{table*}[t]
+\begin{table*}[!t]
 \caption{Frozen public-instance construction recipe (seed 20260803).}
 \label{tab:recipe}
 \centering
 \scriptsize
+\renewcommand{\arraystretch}{0.92}
 \begin{tabular}{@{}lp{0.70\textwidth}@{}}
 \toprule
 Component & Frozen rule \\
@@ -666,82 +746,8 @@ The positive-sum implementation of the reduced eigenvalue is
 {(\eta_s^{ch})^2+1/(\eta_s^{dc})^2},
 \end{equation}
 which avoids subtracting nearly equal $a$ and $T\alpha$. Nonpositive or
-scale-small $\gamma$ is rejected.
-
-\begin{table*}[t]
-\caption{Structural-solve conditioning against the direct FP64 oracle.}
-\label{tab:conditioning}
-\centering
-\scriptsize
-\begin{tabular}{@{}lrrrrr@{}}
-\toprule
-Fixture & Rows & $\kappa_2$ & Max relative error & Max normalized residual &
-Max component error \\
-\midrule
-No storage, T1 & 1 & 1.00 & $2.22\mathrm{e}{-16}$ & $1.67\mathrm{e}{-16}$ &
-$2.91\mathrm{e}{-11}$ \\
-No storage, T17 & 17 & 1.00 & 0 & 0 & 0 \\
-Ideal storage, T1 & 2 & 86.01 & $2.18\mathrm{e}{-16}$ &
-$6.66\mathrm{e}{-16}$ & $3.73\mathrm{e}{-9}$ \\
-One storage, T2 & 3 & 3.58 & $3.03\mathrm{e}{-16}$ &
-$3.21\mathrm{e}{-16}$ & $1.16\mathrm{e}{-10}$ \\
-Extreme efficiency, T32 & 33 & 25,616.42 & $3.00\mathrm{e}{-15}$ &
-$2.93\mathrm{e}{-14}$ & $1.14\mathrm{e}{-9}$ \\
-Heterogeneous storage, T5 & 9 & 548.59 & $1.15\mathrm{e}{-15}$ &
-$1.05\mathrm{e}{-15}$ & $3.11\mathrm{e}{-10}$ \\
-Many ideal devices, T16 & 48 & 292.03 & $1.53\mathrm{e}{-14}$ &
-$6.44\mathrm{e}{-15}$ & $4.42\mathrm{e}{-9}$ \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-\section{Timing Dispersion}
-\label{app:timing}
-
-\begin{table*}[t]
-\caption{Median [minimum, maximum] seconds; parenthesis gives IQR. T6 CPU is
-one censored correctness attempt and is not summarized as a distribution.}
-\label{tab:dispersion}
-\centering
-\scriptsize
-\setlength{\tabcolsep}{3.0pt}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-Reconstruction & HiGHS & CPU FP64 \sgshpr{} & GPU FP64 \sgshpr{} \\
-\midrule
-1354/T4 & 1.463 [1.453,1.480] (0.015) & 13.190 [11.836,16.879] (1.571) &
-1.013 [0.995,1.092] (0.010) \\
-1354/T16 & 7.265 [7.258,7.283] (0.005) & 47.399 [46.635,127.424] (3.906) &
-2.924 [2.885,2.996] (0.097) \\
-1354/T48 & 32.095 [31.249,39.290] (1.651) & 153.046 [152.641,155.015] (1.680) &
-9.481 [9.476,9.531] (0.048) \\
-1354/T96 & 101.242 [100.940,101.613] (0.176) &
-336.657 [330.488,537.835] (7.599) & 21.084 [20.947,21.380] (0.274) \\
-2868/T4 & 5.366 [5.340,5.375] (0.026) & 60.350 [60.018,60.807] (0.253) &
-3.939 [3.846,3.959] (0.098) \\
-2868/T16 & 22.138 [22.082,22.421] (0.219) & 250.601 [249.273,255.187] (1.645) &
-15.408 [15.394,15.413] (0.006) \\
-2868/T48 & 76.239 [70.892,77.949] (4.411) & 804.863 [801.569,808.401] (3.749) &
-49.968 [49.927,49.998] (0.027) \\
-2868/T64 & 108.232 [107.335,108.458] (0.598) &
-1,078.892 [1,077.122,1,135.954] (38.376) &
-68.383 [68.292,68.392] (0.008) \\
-2868/T96 & 163.593 [158.374,164.829] (1.394) &
-1,621.905 [1,594.076,1,634.230] (19.300) &
-105.022 [105.001,105.174] (0.032) \\
-9241/T4 & 142.479 [141.937,142.810] (0.376) &
-3,087.218 [3,070.085,3,096.832] (13.350) &
-193.632 [193.603,193.741] (0.120) \\
-9241/T6 & 963.957 [960.497,966.056] (1.420) &
-3,600.093 censored correctness attempt &
-357.544 [357.462,357.751] (0.206) \\
-\bottomrule
-\end{tabular}
-\end{table*}
-
-The CSV retains standard deviations and repeat counts in addition to the
-statistics shown here. Five repeats were planned; high-variability tracks were
-escalated to nine without deleting earlier samples.
+scale-small $\gamma$ is rejected. The resulting direct-oracle accuracy is
+reported with the other empirical results in Table~\ref{tab:conditioning}.
 
 \section{Reproducibility, Code, and Data Availability}
 \label{app:repro}
@@ -750,7 +756,7 @@ escalated to nine without deleting earlier samples.
 configurations, immutable raw evidence, generated tables/figures, the
 machine-readable index, and this PDF are available at
 \url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}. The report
-release is the Git tag \texttt{reproduction-paper-v5}. The public network
+release is the Git tag \texttt{reproduction-paper-v6}. The public network
 source is MATPOWER 8.1, DOI 10.5281/zenodo.15871662 \cite{matpower}.
 
 \textbf{Missing source information.} Exact reproduction would require the
@@ -802,6 +808,7 @@ doi: 10.1109/TPWRS.2013.2251015.
 D. Ruiz, \textquotedblleft{}A scaling algorithm to equilibrate both rows and columns norms in
 matrices,\textquotedblright{} Rutherford Appleton Laboratory, Tech. Rep. RAL-TR-2001-034, 2001.
 
+\newpage
 \bibitem{pock2011}
 T. Pock and A. Chambolle, \textquotedblleft{}Diagonal preconditioning for first order
 primal-dual algorithms in convex optimization,\textquotedblright{} in \emph{Proc. IEEE ICCV},
@@ -816,6 +823,7 @@ pp. 261--272, 2020, doi: 10.1038/s41592-019-0686-2.
 Q. Huangfu and J. A. J. Hall, \textquotedblleft{}Parallelizing the dual revised simplex
 method,\textquotedblright{} \emph{Math. Program. Comput.}, vol. 10, pp. 119--142, 2018.
 
+\newpage
 \bibitem{okuta2017}
 R. Okuta, Y. Unno, D. Nishino, S. Hido, and C. Loomis,
 \textquotedblleft{}CuPy: A NumPy-compatible library for NVIDIA GPU calculations,\textquotedblright{} in

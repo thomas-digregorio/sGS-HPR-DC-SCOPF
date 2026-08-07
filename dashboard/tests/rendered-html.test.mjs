@@ -125,7 +125,7 @@ test("server-renders the interactive scientific paper", async () => {
   assert.match(html, /Structural equality correction/);
   assert.match(html, /No speedup is claimed/);
   assert.match(html, /class="katex"/);
-  assert.match(html, /reproduction-paper-v5/);
+  assert.match(html, /reproduction-paper-v6/);
   assert.doesNotMatch(html, /APPROVE STAGE|Stage 10 LOCKED/);
 });
 

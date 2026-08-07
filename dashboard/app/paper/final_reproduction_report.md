@@ -263,55 +263,78 @@ result.
 
 ## 4. Results
 
-### 4.1 Benchmark results
+### 4.1 Structural reconciliation
+
+All 18 published row/column dimension pairs match, but none of the reconstructed
+nonzero counts match. The reconstructed support is about 33.0--33.2% lower for
+case1354pegase, 36.6--36.7% lower for case2868rte through T16, 22.4--22.5%
+lower for its larger horizons, and 8.14% lower for case9241pegase. These are
+structural reconstructions, not replicas of the unavailable author matrices.
+
+### 4.2 Structural-solve accuracy
+
+The corrected reduced inverse was compared with direct FP64 solves across seven
+fixtures spanning one to 48 equality rows and condition numbers up to 25,616.
+
+| Fixture | Rows | $\kappa_2$ | Max relative error | Max normalized residual | Max component error |
+|---|---:|---:|---:|---:|---:|
+| No storage, T1 | 1 | 1.00 | 2.22e-16 | 1.67e-16 | 2.91e-11 |
+| No storage, T17 | 17 | 1.00 | 0 | 0 | 0 |
+| Ideal storage, T1 | 2 | 86.01 | 2.18e-16 | 6.66e-16 | 3.73e-9 |
+| One storage, T2 | 3 | 3.58 | 3.03e-16 | 3.21e-16 | 1.16e-10 |
+| Extreme efficiency, T32 | 33 | 25,616.42 | 3.00e-15 | 2.93e-14 | 1.14e-9 |
+| Heterogeneous storage, T5 | 9 | 548.59 | 1.15e-15 | 1.05e-15 | 3.11e-10 |
+| Many ideal devices, T16 | 48 | 292.03 | 1.53e-14 | 6.44e-15 | 4.42e-9 |
+
+### 4.3 Benchmark results
 
 Eleven public-network reconstructions were fully allocated. Ten passed every
-solver and validation requirement. The remaining allocated row,
-case9241pegase:T6, passed HiGHS and GPU validation but failed the strict row
-because its single CPU correctness solve reached the 3,600-second limit.
+solver and validation requirement. The remaining row passed HiGHS and GPU
+validation but failed because its CPU correctness solve reached the strict
+3,600-second limit.
 
-| Network / horizon | Rows $m$ | Variables $n$ | Reconstructed nnz | Row result | GPU iterations |
-|---|---:|---:|---:|---|---:|
-| case1354pegase / T4 | 20,192 | 4,208 | 4,799,808 | PASS | 302 |
-| case1354pegase / T16 | 82,124 | 16,832 | 19,228,464 | PASS | 304 |
-| case1354pegase / T48 | 247,276 | 50,496 | 57,896,368 | PASS | 359 |
-| case1354pegase / T96 | 495,004 | 100,992 | 116,420,464 | PASS | 404 |
-| case2868rte / T4 | 40,163 | 9,488 | 19,073,056 | PASS | 416 |
-| case2868rte / T16 | 163,823 | 37,952 | 76,354,336 | PASS | 454 |
-| case2868rte / T48 | 493,583 | 113,856 | 229,507,104 | PASS | 499 |
-| case2868rte / T64 | 658,463 | 151,808 | 306,303,136 | PASS | 503 |
-| case2868rte / T96 | 988,223 | 227,712 | 460,334,496 | PASS | 503 |
-| case9241pegase / T4 | 152,774 | 24,700 | 342,863,272 | PASS | 1,272 |
-| case9241pegase / T6 | 230,376 | 37,050 | 514,308,838 | FAIL: CPU time limit | 1,541 |
+| Network / horizon | Rows $m$ | Variables $n$ | Reconstructed nnz | Row result |
+|---|---:|---:|---:|---|
+| case1354pegase / T4 | 20,192 | 4,208 | 4,799,808 | PASS |
+| case1354pegase / T16 | 82,124 | 16,832 | 19,228,464 | PASS |
+| case1354pegase / T48 | 247,276 | 50,496 | 57,896,368 | PASS |
+| case1354pegase / T96 | 495,004 | 100,992 | 116,420,464 | PASS |
+| case2868rte / T4 | 40,163 | 9,488 | 19,073,056 | PASS |
+| case2868rte / T16 | 163,823 | 37,952 | 76,354,336 | PASS |
+| case2868rte / T48 | 493,583 | 113,856 | 229,507,104 | PASS |
+| case2868rte / T64 | 658,463 | 151,808 | 306,303,136 | PASS |
+| case2868rte / T96 | 988,223 | 227,712 | 460,334,496 | PASS |
+| case9241pegase / T4 | 152,774 | 24,700 | 342,863,272 | PASS |
+| case9241pegase / T6 | 230,376 | 37,050 | 514,308,838 | FAIL: CPU time limit |
 
-The reconstructed support is systematically smaller than the dimensions
-reported in the paper: about 33.0--33.2% lower for case1354pegase,
-36.6--36.7% lower for case2868rte through T16, 22.4--22.5% lower for its
-larger horizons, and 8.14% lower for case9241pegase. These are structural
-reconstructions, not replicas of the unavailable author matrices.
+### 4.4 Timing decomposition and dispersion
 
-### 4.2 Timing decomposition and uncertainty
-
-The timing figure overlays all three methods on one shared logarithmic axis,
-using distinct marker shapes and small horizontal offsets within each
-reconstruction. The shared scale makes magnitude and scaling patterns visible,
-but each clock still covers a different solver boundary. Markers show medians;
-whiskers show the observed minimum and maximum. The CSV also retains IQR,
-standard deviation, and repeat count. Representative median [minimum, maximum]
-values in seconds are:
+Five repeats were planned; high-variability tracks were escalated to nine
+without deleting earlier samples. The compact typeset table reports median
+seconds with IQR in parentheses; this interactive version also exposes the
+measured minimum and maximum. The CSV retains standard deviation, repeat
+count, and every underlying sample.
 
 | Network / horizon | HiGHS | CPU FP64 | GPU FP64 |
 |---|---:|---:|---:|
-| case1354pegase / T4 | 1.463 [1.453, 1.480] | 13.190 [11.836, 16.879] | 1.013 [0.995, 1.092] |
-| case2868rte / T48 | 76.239 [70.892, 77.949] | 804.863 [801.569, 808.401] | 49.968 [49.927, 49.998] |
-| case9241pegase / T4 | 142.479 [141.937, 142.810] | 3,087.218 [3,070.085, 3,096.832] | 193.632 [193.603, 193.741] |
-| case9241pegase / T6 | 963.957 [960.497, 966.056] | 3,600.093 censored | 357.544 [357.462, 357.751] |
+| 1354/T4 | 1.463 [1.453, 1.480] (0.015) | 13.190 [11.836, 16.879] (1.571) | 1.013 [0.995, 1.092] (0.010) |
+| 1354/T16 | 7.265 [7.258, 7.283] (0.005) | 47.399 [46.635, 127.424] (3.906) | 2.924 [2.885, 2.996] (0.097) |
+| 1354/T48 | 32.095 [31.249, 39.290] (1.651) | 153.046 [152.641, 155.015] (1.680) | 9.481 [9.476, 9.531] (0.048) |
+| 1354/T96 | 101.242 [100.940, 101.613] (0.176) | 336.657 [330.488, 537.835] (7.599) | 21.084 [20.947, 21.380] (0.274) |
+| 2868/T4 | 5.366 [5.340, 5.375] (0.026) | 60.350 [60.018, 60.807] (0.253) | 3.939 [3.846, 3.959] (0.098) |
+| 2868/T16 | 22.138 [22.082, 22.421] (0.219) | 250.601 [249.273, 255.187] (1.645) | 15.408 [15.394, 15.413] (0.006) |
+| 2868/T48 | 76.239 [70.892, 77.949] (4.411) | 804.863 [801.569, 808.401] (3.749) | 49.968 [49.927, 49.998] (0.027) |
+| 2868/T64 | 108.232 [107.335, 108.458] (0.598) | 1,078.892 [1,077.122, 1,135.954] (38.376) | 68.383 [68.292, 68.392] (0.008) |
+| 2868/T96 | 163.593 [158.374, 164.829] (1.394) | 1,621.905 [1,594.076, 1,634.230] (19.300) | 105.022 [105.001, 105.174] (0.032) |
+| 9241/T4 | 142.479 [141.937, 142.810] (0.376) | 3,087.218 [3,070.085, 3,096.832] (13.350) | 193.632 [193.603, 193.741] (0.120) |
+| 9241/T6 | 963.957 [960.497, 966.056] (1.420) | 3,600.093 censored correctness attempt | 357.544 [357.462, 357.751] (0.206) |
 
-No speedup is claimed. The values support local operational comparison only;
-they do not reproduce the paper's A100 boundary or establish a controlled
-CPU-to-GPU acceleration ratio.
+The timing figure overlays all three methods on one logarithmic axis. Markers
+show medians and whiskers show observed ranges. No speedup is claimed because
+the three clocks cover different solver boundaries and do not reproduce the
+paper's A100 experiment.
 
-### 4.3 Memory and resource results
+### 4.5 Memory and resource results
 
 The DGX Spark reports 130,663,165,952 bytes, or 121.690 GiB, of unified
 memory. The nominal 80% reference is therefore 97.352 GiB, but allocation was
@@ -417,7 +440,7 @@ are included in the tagged release.
 Source, public case snapshots, configurations, immutable raw evidence,
 generated tables and figures, and the paper sources are available at
 https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF. The revised report is
-identified by release tag reproduction-paper-v5.
+identified by release tag reproduction-paper-v6.
 
 Regeneration is deterministic and does not rerun DGX allocations. The tagged
 release includes the command inventory, machine-readable evidence index,

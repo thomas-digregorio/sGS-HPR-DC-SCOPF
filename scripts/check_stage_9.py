@@ -318,7 +318,7 @@ def run_checks() -> dict[str, Any]:
             "structural reproduction",
             "N-1 contingency analysis",
             "Independent Researcher",
-            "reproduction-paper-v5",
+            "reproduction-paper-v6",
             "0.206",
             r"3.03\times10^{-16}",
         ]

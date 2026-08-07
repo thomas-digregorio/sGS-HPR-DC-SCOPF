@@ -57,7 +57,7 @@ the distinction between protocol integrity and scientific acceptance. Stage
 The LaTeX paper, compiled PDF, archival Markdown report, reproducibility
 checklist, regeneration commands, deterministic tables/figures, and
 machine-readable result index are versioned in the repository. The revised
-scientific-paper release is tagged `reproduction-paper-v5`.
+scientific-paper release is tagged `reproduction-paper-v6`.
 
 Stages 0--7 passed. Stage 8 remains **FAIL** with campaign status
 `STOPPED_ON_FAILURE`: four large rows passed, while the required T6 CPU FP64
