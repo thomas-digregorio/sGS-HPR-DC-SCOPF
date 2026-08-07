@@ -18,10 +18,12 @@ contains all 16 workflow-required subjects. Deterministic scripts generate the
 supporting CSV tables, SVG figures, evidence hashes, and machine-readable
 result index directly from preserved Stage 0--8 JSON.
 
-The revised release `reproduction-paper-v4` removes internal stage and A--E
-workflow language from the reader-facing paper, shortens the abstract, and
-retains the instance recipe, solver definitions, equality-solve lemma,
-three-method timing display, scholarly references, and code/data statement.
+The revised release `reproduction-paper-v5` removes file-hash detail from the
+reader-facing narrative, moves the CPU, GPU, and reference-solver definitions to
+an appendix, presents the acceptance/timing design as a table, explains the
+equality-solve lemma in plain language, and places the benchmark results before
+the discussion. It retains the instance recipe, combined three-method timing
+display, scholarly references, and code/data statement.
 
 The report concludes that the project is a **structural reproduction**. The
 mathematics, corrected structural linear algebra, CPU oracle, resident FP64 GPU

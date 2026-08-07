@@ -79,7 +79,7 @@
   CuPy-version skip, and 112 files satisfy Ruff formatting.
 - [x] Revised PDF is rendered page-by-page and visually inspected with no
   clipped or overfull content.
-- [x] Revised report is committed, pushed, and tagged `reproduction-paper-v4`; the
+- [x] Revised report is committed, pushed, and tagged `reproduction-paper-v5`; the
   completion handoff records the resulting commit because a commit cannot
   embed its own identifier.
 

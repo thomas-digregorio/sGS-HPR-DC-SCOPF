@@ -366,7 +366,7 @@ export function InteractivePaper({
         <div className="paper-reader-meta">
           <span>Thomas DiGregorio</span>
           <span>{release}</span>
-          <span>6-page scientific paper</span>
+          <span>Scientific paper</span>
         </div>
       </section>
 

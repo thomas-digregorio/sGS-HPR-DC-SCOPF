@@ -62,8 +62,7 @@ outside its scope.
 
 The source is *An Efficient GPU-based Halpern Accelerating Algorithm for
 Large-scale DC Optimal Power Flow* by Wang and coauthors, DOI
-10.1109/TPWRS.2025.3635652. The supplied 17-page PDF has SHA-256
-7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4.
+10.1109/TPWRS.2025.3635652.
 
 The paper applies HPR to the dual of a box-constrained LP, splits equality and
 inequality multipliers with an sGS sweep, and uses CSR sparse products on an
@@ -75,7 +74,7 @@ released.
 ### 2.2 Public data and reconstruction boundary
 
 Public base networks are MATPOWER 8.1 case1354pegase, case2868rte, and
-case9241pegase, pinned by upstream commit, Git blob, and SHA-256. The missing
+case9241pegase. The missing
 author inputs are renewable and storage locations, time series, reserve
 profiles, modified ramps, storage data, matrix construction, exact control
 code, and timer boundary. Appendix A states every deterministic replacement.
@@ -160,23 +159,10 @@ $$
 Production preprocessing uses ten Ruiz passes, one simultaneous
 Pock--Chambolle diagonal step with alpha one, and complete-vector b/c
 normalization. The restart and adaptive-sigma rules are transferred from the
-pinned HPR-LP implementation and are disclosed in Appendix B.
+pinned HPR-LP implementation and are disclosed in Appendix C. Solver
+implementations and measurement boundaries are documented in Appendix B.
 
-### 2.5 CPU implementation, GPU implementation, and HiGHS
-
-The CPU implementation uses SciPy sparse operators in FP64, a zero initial
-state, both equality sweeps, original-coordinate recovery, and independent
-residual and physical checks.
-
-The GPU implementation uses CuPy 14.1.1 arrays, FP64 CSR matrices, resident
-state, and reused workspaces. A low-level descriptor records
-CUSPARSE_SPMV_CSR_ALG2, and normal/transpose probes verify the selected path.
-A transfer ledger rejects unexpected full-state copies inside the loop.
-
-HiGHS uses SciPy linprog with method highs-ds, presolve enabled, primal and
-dual feasibility tolerances 1e-9, and a 3,600-second limit.
-
-### 2.6 Experimental environment
+### 2.5 Experimental environment
 
 | Item | Reproduction | Paper |
 |---|---|---|
@@ -187,41 +173,77 @@ dual feasibility tolerances 1e-9, and a 3,600-second limit.
 | Sparse path | FP64 CSR, signed-int32 indices, observed CSR ALG2 | CSR ALG2; precision/index width unstated |
 | Gurobi | unavailable and optional locally | 12.0 on separate Intel workstation |
 
-### 2.7 Validation and timing design
+### 2.6 Acceptance and timing protocol
 
-Accepted candidates must satisfy normalized blocks at 5e-5, raw KKT at 0.01,
-physical violation at 0.01 MW/MWh, and scaled objective gap to HiGHS at
-2e-4.
+HiGHS supplies an objective reference, the CPU implementation is an
+algorithmic oracle, and the GPU implementation is the target path. The frozen
+decision rules are:
 
-Each successful timing track has one correctness solve, one warm-up, and at
-least five measured solves. Relative range above 0.2 escalates the track to
-nine repetitions. The report retains median, minimum, maximum, standard
-deviation, and IQR. HiGHS, CPU, and GPU boundaries are solver-specific and
-cannot be divided into speedups. The T6 CPU event is one censored correctness attempt,
-not a median.
+| Element | Frozen design |
+|---|---|
+| Numerical acceptance | Normalized stopping blocks no greater than 5e-5; raw KKT no greater than 0.01; scaled objective gap to HiGHS no greater than 2e-4. |
+| Physical acceptance | Maximum original-unit violation no greater than 0.01 MW/MWh. |
+| Row acceptance | HiGHS, CPU FP64, and GPU FP64 must each pass; a preallocation resource stop cannot be reclassified as a solve. |
+| Correctness and warm-up | One untimed correctness solve followed by one warm-up. |
+| Measured repeats | Five measured solves; relative range above 0.2 triggers four additional repeats without deleting earlier samples. |
+| Reported statistics | Median, minimum, maximum, standard deviation, and IQR. |
+| Time limit | 3,600 seconds per solve; a limit event is censored and has no median. |
+| Clock interpretation | Solver-specific boundaries are reported separately and are not divided into cross-solver speedups. |
 
 ## 3. Verification
 
 ### 3.1 Structural equality correction
 
-Let the structural equality block be
+Each sGS-HPR iteration solves a system involving $A_1A_1^\mathsf{T}$. Its first
+$T$ rows are hourly power balances; its remaining rows enforce terminal
+storage energy. The repeated temporal structure makes the Gram matrix diagonal
+except for one direction shared by every period. Lemma 1 uses that fact to
+avoid forming or factorizing a dense matrix.
+
+**Lemma 1 (stable inverse of the reduced equality block).** Let $D_2$ be a
+positive diagonal matrix, $a>0$, $d$ a vector,
+$\alpha=d^\mathsf{T}D_2^{-1}d$, and
 
 $$
-A_1A_1^\mathsf{T}=I+\rho uu^\mathsf{T}, \qquad \rho>0.
+\begin{bmatrix}
+aI_T & \mathbf{1}d^\mathsf{T}\\
+d\mathbf{1}^\mathsf{T} & D_2
+\end{bmatrix}
+\begin{bmatrix}y_{11}\\y_{12}\end{bmatrix}
+=
+\begin{bmatrix}r_{11}\\r_{12}\end{bmatrix}.
 $$
 
-For any right-hand side $r$, Sherman--Morrison gives the verified solve
+Define
 
 $$
-(I+\rho uu^\mathsf{T})^{-1}r
-=r-\frac{\rho u(u^\mathsf{T}r)}{1+\rho u^\mathsf{T}u}.
+\widehat r=r_{11}-\mathbf{1}d^\mathsf{T}D_2^{-1}r_{12},
+\qquad
+\gamma=a-T\alpha,
+\qquad
+\mu=T^{-1}\mathbf{1}^\mathsf{T}\widehat r.
 $$
 
-The minus sign is essential. In the common all-ones case, decompose $r$ into
-its mean component and zero-mean component. The zero-mean component is
-unchanged and the mean component is divided by $1+\rho q$, where $q$ is the
-length of $u$. This yields a stable linear-time formula without materializing
-or factorizing the dense Gram matrix.
+If $\gamma>0$, the solution is
+
+$$
+y_{11}=\frac{\widehat r-\mu\mathbf{1}}{a}
++\frac{\mu}{\gamma}\mathbf{1},
+\qquad
+y_{12}=D_2^{-1}\left(r_{12}-d\mathbf{1}^\mathsf{T}y_{11}\right).
+$$
+
+In plain language, $\mathbf{1}$ is the common-across-time direction.
+$\widehat r$ splits into an average and hour-to-hour deviations. The storage
+coupling does not act on the deviations, so they are divided by $a$. It acts
+only on the average, which is divided by $\gamma$. The storage multipliers then
+follow from a diagonal back-substitution. The dense-looking solve therefore
+reduces to vector sums, diagonal divisions, and scalar operations.
+
+Eliminating $y_{12}$ gives the minus rank-one system
+$(aI_T-\alpha\mathbf{1}\mathbf{1}^\mathsf{T})y_{11}=\widehat r$. The source
+paper prints the inverse pattern for a plus rank-one update, which gives the
+wrong sign for the shared average component.
 
 The sign printed in the source paper produced a median relative error of
 0.206 on the analytic test family. The corrected expression reduced the
@@ -326,7 +348,7 @@ validation reference, not the paper's Gurobi workstation baseline.
   reserve inputs, storage parameters, or matrix sparsity choices.
 - The local timing tracks have different inclusion boundaries and cannot be
   divided into defensible speedups.
-- T6 CPU supplies only a censored correctness attempt.
+- T6 CPU supplies one censored correctness attempt rather than a timing median.
 - Resource stops are preallocation safety decisions; T16 and T24 must not be
   paraphrased as physical hardware failures.
 - GPU parity and residual acceptance establish implementation consistency,
@@ -356,9 +378,31 @@ horizon; the deterministic temporal perturbation is zero-mean over the
 horizon; storage fixtures use explicitly versioned placement, efficiency,
 power, and energy parameters; offline equipment and zero thermal ratings are
 handled before the canonical row assembly. Variable and row order are frozen
-and hashed in the evidence manifest.
+in the versioned configuration.
 
-## Appendix B. Preprocessing and controls
+## Appendix B. Solver implementations and measurement boundaries
+
+**HiGHS reference.** SciPy/HiGHS supplies the independent objective through
+`linprog(method="highs-ds")` with presolve, 1e-9 primal and dual feasibility
+tolerances, and a 3,600-second limit. Its clock includes interface/model setup
+and the solve.
+
+**CPU oracle.** The CPU sGS-HPR implementation uses SciPy sparse operators in
+FP64, a zero initial state, both equality sweeps, original-coordinate recovery,
+and independent residual and physical checks. Its clock begins after model,
+preconditioner, and workspace preparation and includes the iterative solve and
+scheduled residual work.
+
+**GPU implementation.** The target path uses CuPy 14.1.1 arrays, FP64 CSR
+matrices, resident state, and reused workspaces. The selected
+`CUSPARSE_SPMV_CSR_ALG2` path is verified by normal and transpose probes, and a
+transfer ledger rejects unexpected full-state copies inside the loop. Its clock
+uses the same post-preparation iterative/residual boundary as the CPU path.
+
+Initialization, construction, preprocessing, compilation, allocation,
+transfers, recovery, and complete runner wall time are separately recorded.
+
+## Appendix C. Preprocessing and controls
 
 Ten Ruiz passes alternate row and column infinity-norm equilibration. One
 simultaneous Pock--Chambolle diagonal step with alpha one follows, then the
@@ -368,18 +412,18 @@ tests the normalized fixed-point progress and resets the Halpern anchor only
 when the sourced HPR-LP condition is met. Exact formulas, guards, and defaults
 are included in the tagged release.
 
-## Appendix C. Code and data availability
+## Appendix D. Code and data availability
 
 Source, public case snapshots, configurations, immutable raw evidence,
 generated tables and figures, and the paper sources are available at
 https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF. The revised report is
-identified by release tag reproduction-paper-v4.
+identified by release tag reproduction-paper-v5.
 
 Regeneration is deterministic and does not rerun DGX allocations. The tagged
 release includes the command inventory, machine-readable evidence index,
-structural and benchmark ledgers, timing summaries, and SHA-256 hashes.
+structural and benchmark ledgers, and timing summaries.
 
-## Appendix D. Missing source information
+## Appendix E. Missing source information
 
 Exact reproduction requires the authors' modified cases, placements, temporal
 profiles, reserve and ramp inputs, storage parameters, sparse matrix assembly,

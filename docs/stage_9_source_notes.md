@@ -16,7 +16,7 @@ The internal A--E decision history remains in supporting evidence but is not
 part of the concise reader-facing narrative. The revised paper identifies its
 author as an independent researcher, provides a code-and-data statement, cites
 the external numerical software and public-case sources, and is released as
-Git tag `reproduction-paper-v4`.
+Git tag `reproduction-paper-v5`.
 
 ## Claim map
 

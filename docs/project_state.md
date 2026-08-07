@@ -22,7 +22,7 @@ compiled PDF. Every quantitative report table is generated from preserved
 machine-readable evidence and indexed by SHA-256.
 
 The revised scientific-paper release is identified by Git tag
-`reproduction-paper-v4`. Its concise reader-facing text states the
+`reproduction-paper-v5`. Its concise reader-facing text states the
 structural-reproduction boundary directly, while internal stage and decision
 history remains in the supporting evidence.
 

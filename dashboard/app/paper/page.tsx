@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
 };
 
-const documentId = "structural-reproduction-paper-v4";
+const documentId = "structural-reproduction-paper-v5";
 
 function renderMath(source: string) {
   const withBlocks = source.replace(/\$\$([\s\S]*?)\$\$/g, (_match, expression: string) => {
@@ -91,7 +91,7 @@ export default function PaperPage() {
     <InteractivePaper
       documentId={documentId}
       html={html}
-      release="reproduction-paper-v4"
+      release="reproduction-paper-v5"
       sections={sections}
     />
   );

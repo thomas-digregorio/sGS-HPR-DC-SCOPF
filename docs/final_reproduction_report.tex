@@ -9,6 +9,7 @@
 \usepackage{pgfplots}
 \usepackage{microtype}
 \usepackage{url}
+\usepackage{placeins}
 \usepackage[hidelinks]{hyperref}
 
 \pgfplotsset{compat=1.18}
@@ -99,20 +100,14 @@ outside the scope of this study.
 \subsection{Source paper, scope, and public data}
 
 The source paper is the 17-page article by Wang \emph{et al.}
-\cite{wang2026}; the supplied PDF has SHA-256
-\begin{center}
-\scriptsize
-\url{7e9791646401e11bfddf9ebed6bd94491ed0b592744581edd851ddbf5e20dba4}.
-\end{center}
-The paper applies HPR to the dual of a box-constrained LP, splits equality and
+\cite{wang2026}. It applies HPR to the dual of a box-constrained LP, splits equality and
 inequality multipliers with an sGS sweep, and uses CSR sparse products on an
 A100. Its $O(1/k)$ KKT residual result follows the HPR framework
 \cite{chen2026}.
 
 Public base networks are MATPOWER 8.1
 \texttt{case1354pegase}, \texttt{case2868rte}, and
-\texttt{case9241pegase}, pinned by upstream commit, Git blob, and SHA-256
-\cite{matpower,josz2016}. The PEGASE/RTE provenance is described in
+\texttt{case9241pegase} \cite{matpower,josz2016}. The PEGASE/RTE provenance is described in
 \cite{fliscounakis2013,josz2016}. The authors' renewable/storage placements,
 time series, reserve profiles, modified ramps, storage data, matrix
 construction, exact control code, and timer boundary were unavailable.
@@ -203,42 +198,50 @@ adaptive-penalty code; Appendix~\ref{app:controls} states the transferred
 HPR-LP rules, formulas, guards, and source pin explicitly
 \cite{chen2026}. This is a sourced reconstruction, not author-code identity.
 
-\subsection{CPU, GPU, and reference solvers}
+\subsection{Acceptance and timing protocol}
 
-The CPU oracle uses SciPy sparse operators in FP64, zero initial state, both
-equality sweeps, original-coordinate recovery, and independent residual and
-physical checks. SciPy/HiGHS supplies the reference objective via
-\texttt{linprog(method='highs-ds')} with presolve, $10^{-9}$ primal and dual
-feasibility tolerances, and a 3,600-s limit \cite{scipy2020,highs2018}.
+Three independent tracks are used: HiGHS supplies an objective reference, the
+CPU implementation is an algorithmic oracle, and the GPU implementation is the
+target path. Their implementations and exact clock boundaries are documented
+in Appendix~\ref{app:solvers}; Table~\ref{tab:protocol} states the frozen
+decision rules applied to all tracks.
 
-The GPU path uses CuPy 14.1.1 arrays, FP64 CSR matrices, resident state, and
-reused workspaces \cite{okuta2017}. A low-level descriptor records
-\texttt{CUSPARSE\_SPMV\_CSR\_ALG2}; normal and transpose probes verify the
-selected path. NVIDIA documents CSR ALG2 as deterministic for non-transpose
-SpMV \cite{cusparse}. Transfer ledgers reject unexpected full-state copies
-inside the iteration loop.
-
-\subsection{Acceptance and timing design}
-
-Every accepted candidate must meet normalized stopping blocks
-$\le5\times10^{-5}$, raw KKT $\le10^{-2}$, physical violation
-$\le10^{-2}$ MW/MWh, and scaled objective gap to HiGHS
-$\le2\times10^{-4}$. An allocated benchmark is accepted only when HiGHS,
-CPU FP64, and GPU FP64 all satisfy their checks. Resource-only probes stop
-before solver allocation and do not modify this criterion.
-
-Each successful timing track has one correctness solve, one warm-up, and at
-least five measured solves. Relative range above 0.2 escalates the track to
-nine repeats. The report retains median, minimum, maximum, standard deviation,
-and interquartile range (IQR). HiGHS time includes the SciPy interface/model
-setup and solve; CPU/GPU times use separately prepared solver workspaces and
-include their solver-specific iteration/residual boundary. These definitions
-are not interchangeable. The T6 CPU event is one censored correctness
-attempt, not a timing median.
+\begin{table}[t]
+\caption{Frozen acceptance and timing protocol.}
+\label{tab:protocol}
+\centering
+\scriptsize
+\begin{tabular}{@{}p{0.28\columnwidth}p{0.64\columnwidth}@{}}
+\toprule
+Element & Frozen design \\
+\midrule
+Numerical acceptance & Normalized stopping blocks $\le5\mathrm{e}{-5}$;
+raw KKT $\le0.01$; scaled objective gap to HiGHS $\le2\mathrm{e}{-4}$. \\
+Physical acceptance & Maximum original-unit violation $\le0.01$ MW/MWh. \\
+Row acceptance & HiGHS, CPU FP64, and GPU FP64 must each pass; a preallocation
+resource stop cannot be reclassified as a solve. \\
+Correctness/warm-up & One untimed correctness solve, followed by one warm-up. \\
+Measured repeats & Five measured solves; relative range above 0.2 triggers four
+additional repeats without deleting earlier samples. \\
+Reported statistics & Median, minimum, maximum, standard deviation, and IQR. \\
+Time limit & 3,600 s per solve; a limit event is censored and has no median. \\
+Clock interpretation & Solver-specific boundaries are reported separately and
+are not divided into cross-solver speedups. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Verification}
 
 \subsection{Structural equality correction}
+
+Each \sgshpr{} iteration solves an equality system involving
+$A_1A_1^{\mathsf T}$. Its first $T$ rows are hourly power balances and its
+remaining rows enforce terminal storage energy. Every balance row has the same
+structural weight, while each terminal-energy row couples to every period in
+the same way. The resulting Gram matrix is diagonal except for one direction
+shared by all periods. Lemma~1 exploits that structure instead of forming or
+factorizing a dense matrix.
 
 \textbf{Lemma 1 (stable inverse of the reduced equality block).}
 Let $D_2\succ0$ be diagonal, $a>0$, $d$ a vector, and
@@ -266,6 +269,15 @@ y_{11}&=\frac{\widehat r-\mu\bm{1}}{a}
 y_{12}&=D_2^{-1}\!\left(r_{12}-d\bm{1}^{\mathsf T}y_{11}\right).
 \label{eq:stable-y12}
 \end{align}
+
+\emph{Interpretation.} The vector $\bm{1}$ is the common-across-time direction.
+The adjusted right-hand side $\widehat r$ separates into its average
+$\mu\bm{1}$ and a zero-mean deviation $\widehat r-\mu\bm{1}$. The rank-one
+storage coupling does not act on the zero-mean part, so that part is divided by
+$a$. It acts only on the average, which is divided by the corrected scalar
+$\gamma$. The storage multipliers then follow from a diagonal back-substitution.
+Thus an apparently dense $(T+N_{ESS})$-row solve requires only vector sums,
+diagonal divisions, and scalar operations.
 
 \emph{Proof.} Eliminating $y_{12}$ yields
 $(aI_T-\alpha\bm{1}\bm{1}^{\mathsf T})y_{11}=\widehat r$.
@@ -491,67 +503,11 @@ int32. \\
 \end{tabular}
 \end{table*}
 
-\begin{figure*}[t]
-\centering
-\begin{minipage}{0.45\textwidth}
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.88\linewidth,height=5.1cm,
-  xbar,xmin=0,xmax=105,
-  xlabel={GiB},
-  symbolic y coords={Nominal 80\%,Live CUDA 80\%,Live host 80\%,Projected},
-  ytick=data,
-  xmajorgrids=true,grid style={draw=gray!20},
-  nodes near coords,nodes near coords align={horizontal},
-  title={T16 live-availability decision},
-  title style={font=\small\bfseries},
-]
-\addplot[fill=reportorange,draw=none] coordinates {(94.435,Projected)};
-\addplot[fill=reportblue,draw=none] coordinates {(65.784,Live host 80\%)};
-\addplot[fill=reportgray,draw=none] coordinates {(65.496,Live CUDA 80\%)};
-\addplot[fill=gray!55,draw=none] coordinates {(97.352,Nominal 80\%)};
-\end{axis}
-\end{tikzpicture}
-}%
-\end{minipage}\hfill
-\begin{minipage}{0.48\textwidth}
-\centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}
-\begin{axis}[
-  width=0.90\linewidth,height=5.1cm,
-  xbar,xmin=0,xmax=3.6,
-  xlabel={nnz (billions)},
-  symbolic y coords={int32 max,T32 exact,T32 plan,T24 exact,T24 plan},
-  ytick=data,
-  xmajorgrids=true,grid style={draw=gray!20},
-  nodes near coords,nodes near coords align={horizontal},
-  title={Planning envelope versus count-only nnz},
-  title style={font=\small\bfseries},
-]
-\addplot[fill=reportorange,draw=none] coordinates {(2.532,T24 plan)};
-\addplot[fill=reportblue,draw=none] coordinates {(2.058,T24 exact)};
-\addplot[fill=reportorange!75!black,draw=none] coordinates {(3.376,T32 plan)};
-\addplot[fill=reportblue!75!black,draw=none] coordinates {(2.744,T32 exact)};
-\addplot[fill=reportgray,draw=none] coordinates {(2.147,int32 max)};
-\end{axis}
-\end{tikzpicture}
-}%
-\end{minipage}
-\caption{Fail-closed resource evidence. T16 is a live-availability safety
-block, not a nominal 128-GB ceiling. T24 is a conservative policy-envelope
-block, not a demonstrated materialized overflow. T32 exceeds signed-int32
-under both the envelope and count-only reconstruction. No row reached LP
-construction, solver allocation, or an OOM crash.}
-\label{fig:resources}
-\end{figure*}
-
 The maximum cumulative process-lifetime host high-water mark was 95.375 GiB
 at T6; it is not an isolated solve peak. CUDA memory observations are
 snapshots, not per-solve high-water marks.
 
+\FloatBarrier
 \section{Discussion}
 
 \subsection{Reproduction boundary}
@@ -610,9 +566,8 @@ or controlled performance reproduction.
 \toprule
 Component & Frozen rule \\
 \midrule
-Networks & MATPOWER 8.1 at commit
-\texttt{1a828c7af590714499284e36ee9c81273388c594}; three case blobs and SHA-256
-values are recorded in the configuration. \\
+Networks & Versioned MATPOWER 8.1 snapshots of \texttt{case1354pegase},
+\texttt{case2868rte}, and \texttt{case9241pegase}. \\
 Load & Flat profile; active withdrawal is MATPOWER $P_d+G_s$ each hour. \\
 Generators & Retain every row; originally offline rows are fixed to zero
 output and reserve; ramp limit is $0.1P_{\max}$/h. \\
@@ -635,13 +590,35 @@ Time & One-hour intervals; no timing-driven tuning after the contract freeze. \\
 \end{tabular}
 \end{table*}
 
-The three canonical case-file SHA-256 values are
-\texttt{1b08b25a...b89} (1354),
-\texttt{2b30e894...861} (2868), and
-\texttt{593a58ec...5f3} (9241); complete values are included in the tagged
-release.
+\section{Solver Implementations and Measurement Boundaries}
+\label{app:solvers}
 
-\section{Preprocessing, Restart, Penalty, and Timing Definitions}
+\textbf{HiGHS reference.} SciPy/HiGHS supplies the independent objective via
+\texttt{linprog(method='highs-ds')} with presolve, $10^{-9}$ primal and dual
+feasibility tolerances, and a 3,600-s limit \cite{scipy2020,highs2018}. Its
+reported core time is the \texttt{linprog} call, including interface/model
+setup and the solve.
+
+\textbf{CPU oracle.} The CPU \sgshpr{} implementation uses SciPy sparse
+operators in FP64, a zero initial state, both equality sweeps,
+original-coordinate recovery, and independent residual and physical checks.
+Its measured time begins after model, preconditioner, and workspace preparation
+and includes the iterative solve and scheduled residual work.
+
+\textbf{GPU implementation.} The target path uses CuPy 14.1.1 arrays, FP64 CSR
+matrices, resident state, and reused workspaces \cite{okuta2017}. A low-level
+descriptor records \texttt{CUSPARSE\_SPMV\_CSR\_ALG2}; normal and transpose
+probes verify the selected path. NVIDIA documents CSR ALG2 as deterministic for
+non-transpose SpMV \cite{cusparse}. Transfer ledgers reject unexpected
+full-state copies inside the iteration loop. The GPU clock uses the same
+post-preparation iterative/residual boundary as the CPU path.
+
+CUDA initialization, model construction, preprocessing, first-run compilation,
+allocation, transfers, solver initialization, nested residuals, recovery, and
+complete runner wall time are separately named in the released timing ledger.
+Nested residual time is already part of loop time and is not added again.
+
+\section{Preprocessing, Restart, and Penalty Controls}
 \label{app:controls}
 
 The sGS multiplier metric for $\Delta y=(\Delta y_1,\Delta y_2)$ is
@@ -678,15 +655,6 @@ dual/primal infeasibility ratio in $(10^{-8},10^8)$. Guard failure resets
 $\sigma$ to 1. The policy source is HPR-LP commit
 \texttt{1941fbcfbf2dae14e4a439b22f0ea1e1c05f4a29}
 \cite{chen2026}.
-
-HiGHS core time is the SciPy \texttt{linprog} call, including interface/model
-setup and solve. CPU/GPU \sgshpr{} times begin after their solver-specific
-model/preconditioner/workspace preparation and include the iterative solve and
-scheduled residual work. CUDA initialization, model construction,
-preprocessing, first-run compilation, allocation, transfers, solver
-initialization, iteration, nested residuals, recovery, and complete runner
-wall time are separately named in the released timing ledger. Nested residual
-time is part of loop time and is not added again.
 
 \section{Algebraic Stability and Conditioning}
 \label{app:algebra}
@@ -782,7 +750,7 @@ escalated to nine without deleting earlier samples.
 configurations, immutable raw evidence, generated tables/figures, the
 machine-readable index, and this PDF are available at
 \url{https://github.com/thomas-digregorio/sGS-HPR-DC-SCOPF}. The report
-release is the Git tag \texttt{reproduction-paper-v4}. The public network
+release is the Git tag \texttt{reproduction-paper-v5}. The public network
 source is MATPOWER 8.1, DOI 10.5281/zenodo.15871662 \cite{matpower}.
 
 \textbf{Missing source information.} Exact reproduction would require the
@@ -793,7 +761,7 @@ published timings.
 
 \textbf{Machine-readable evidence and regeneration.} The tagged release
 includes a machine-readable evidence index, structural and benchmark ledgers,
-timing summaries, and SHA-256 hashes. Regeneration and validation commands are
+and timing summaries. Regeneration and validation commands are
 documented in the repository and do not rerun DGX allocations.
 
 \begin{thebibliography}{99}
